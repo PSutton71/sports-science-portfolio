@@ -1,0 +1,1 @@
+# Daily Training Report
