@@ -98,8 +98,7 @@ avg_data <- gps_week %>%
 TD_plot <- ggplot(avg_data, aes(x = Name, y = AvgTD)) +
   geom_col(fill = "black", alpha = 0.9) +
   geom_text(aes(label = paste0(round(AvgTD / 1000, 1))), vjust = -0.3, size = 3) +
-  labs(title = "Average Weekly Distance", x = NULL, y = "Total Distance (km)") +
-  theme_minimal(base_family = "Helvetica") +
+  labs(title = "Average Weekly Distance", x = NULL, y = "Average Distance (km)") +
   theme(
     axis.text.x = element_text(angle = 45, hjust = 0.5, size = 7),
     axis.text.y = element_blank(),

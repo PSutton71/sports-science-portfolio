@@ -17,13 +17,11 @@ if (!dir.exists(OUTPUT_DIR)) dir.create(OUTPUT_DIR)
 
 # ---- 1. Load data ----
 # GPS Sheet
-gps_data_raw <- read_excel(DATAFILE, sheet = "GPS") |>
+gps_data <- read_excel(DATAFILE, sheet = "GPS") |>
   mutate(
     Date = as.Date(Date),          
     Name = as.character(Name)
-  )
-
-gps_data <- gps_data_raw |>
+  ) |>
   mutate(
     across(
       c(
@@ -56,10 +54,12 @@ wellness <- read_excel(DATAFILE, sheet = "Wellness") %>%
 
 # ---- 2. Filter to the selected week ----
 week_data <- gps_data %>%
-  filter(Date >= report_start, Date <= report_end)
-
-week_data <- week_data %>%
-  filter(!is.na(Name), !is.na(Type))
+  filter(
+    Date >= report_start,
+    Date <= report_end,
+    !is.na(Name),
+    !is.na(Type)
+  )
 
 # ---- 3. Render R Markdown to PDF ----
 output_file <- paste0(

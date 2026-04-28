@@ -66,14 +66,6 @@ day_well_data <- wellness |>
 
 # ---- 3. Create summary tables ----
 
-team_daily <- day_gps_data %>%
-  summarise(
-    mean_TD    = mean(TD, na.rm = TRUE),
-    mean_HSR   = mean(HSR, na.rm = TRUE),
-    mean_sRPE  = mean(sRPE, na.rm = TRUE),
-    .groups = "drop"
-  ) 
-
 # Weekly distance vs goal 
 
 report_week_start <- floor_date(report_date, unit = "week", week_start = 1)  
