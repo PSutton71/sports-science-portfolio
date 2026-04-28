@@ -32,8 +32,8 @@ col_accent    <- "#F56312"
 col_background <- "#FFFFFF"
 
 # Logos (based on team logos). Store in 'www' folder within wd.
-logo_left_path  <- "www/Grip_Logo.jpg"   
-logo_right_path <- "www/Pistol_Pete.png"
+logo_left_path  <- "www/Logo1.jpg"   
+logo_right_path <- "www/Image1.png"
 
 # Encode logos as base64 only if files exist
 img_left  <- if (file.exists(logo_left_path))  dataURI(file = logo_left_path)  else NULL
@@ -61,6 +61,10 @@ get_numeric_metrics <- function(df) {
   setdiff(metrics, exclude_cols)
 }
 
+get_sheet_dates <- function(sheet_name) {
+  dates <- data_list[[sheet_name]]$Date
+  sort(unique(na.omit(dates)), decreasing = TRUE)
+}
 
 # ---- 2. Load & Prepare Data (Global) ----------------------------------
 
@@ -342,7 +346,7 @@ server <- function(input, output, session) {
       choices  = metrics_list[[input$team_sheet1]],
       selected = metrics_list[[input$team_sheet1]][1]
     )
-    sheet_dates <- sort(unique(na.omit(data_list[[input$team_sheet1]]$Date)), decreasing = TRUE)
+    sheet_dates <- get_sheet_dates(input$team_sheet1)
     updateSelectInput(
       session, "date1",
       choices  = sheet_dates,
@@ -356,7 +360,7 @@ server <- function(input, output, session) {
       choices  = metrics_list[[input$team_sheet2]],
       selected = metrics_list[[input$team_sheet2]][1]
     )
-    sheet_dates <- sort(unique(na.omit(data_list[[input$team_sheet2]]$Date)), decreasing = TRUE)
+    sheet_dates <- get_sheet_dates(input$team_sheet2)
     updateSelectInput(
       session, "date2",
       choices  = sheet_dates,
@@ -377,7 +381,6 @@ server <- function(input, output, session) {
   output$avg_plot <- renderPlot({
     req(input$avg_sheet, input$avg_metric, input$avg_daterange)
     df <- data_list[[input$avg_sheet]]
-    df <- normalize_names_dates(df)
     
     # If no Type column, default to "Practice"
     if (!"Type" %in% names(df)) {
@@ -399,7 +402,7 @@ server <- function(input, output, session) {
         vjust = -0.3, color = col_primary, size = 3, family = "Arial"
       ) +
       scale_fill_manual(values = c("Practice" = col_primary, "Game" = col_accent)) +
-      theme_minimal(base_family = "Arial") +
+      theme_minimal() +
       labs(
         title = NULL,
         x     = NULL,
@@ -419,7 +422,7 @@ server <- function(input, output, session) {
   
   observeEvent(input$ta_sheet, {
     updateSelectInput(session, "ta_metric", choices = metrics_list[[input$ta_sheet]])
-    sheet_dates <- sort(unique(na.omit(data_list[[input$ta_sheet]]$Date)))
+    sheet_dates <- get_sheet_dates(input$ta_sheet)
     updateSelectInput(session, "ta_date", choices = sheet_dates)
   })
   
@@ -436,7 +439,6 @@ server <- function(input, output, session) {
     df   <- data_list[[input$ta_sheet]]
     demo <- data_list[["Demographics"]]
     
-    df   <- normalize_names_dates(df)
     demo <- normalize_names_dates(demo)
     demo$Position <- trimws(as.character(demo$Position))
     
@@ -469,7 +471,7 @@ server <- function(input, output, session) {
           vjust = -0.3, color = col_primary, size = 4, family = "Arial"
         ) +
         scale_fill_gradient(low = col_primary, high = col_accent) +
-        theme_minimal(base_family = "Arial") +
+        theme_minimal() +
         labs(
           title = paste(input$ta_position, "on", input$ta_date, "-", input$ta_metric),
           x     = "Athlete",
@@ -541,7 +543,7 @@ server <- function(input, output, session) {
         y        = "Workload Ratio",
         x        = NULL
       ) +
-      theme_minimal(base_family = "Arial") +
+      theme_minimal() +
       theme(
         axis.text.x  = element_text(angle = 60, hjust = 1, size = 10, color = col_primary),
         plot.title   = element_text(size = 22, hjust = 0.5),
@@ -667,7 +669,7 @@ server <- function(input, output, session) {
         ),
         name = "Monotony zone"
       ) +
-      theme_minimal(base_family = "Arial") +
+      theme_minimal() +
       labs(
         title = paste0("Distance + Monotony: ", unique(df_mono$Name)),
         x     = NULL
@@ -750,7 +752,7 @@ server <- function(input, output, session) {
         labels = unique(df$Name)
       ) +
       scale_y_continuous(expand = expansion(mult = c(0.2, 0.2))) +
-      theme_minimal(base_family = "Arial") +
+      theme_minimal() +
       theme(
         panel.border       = element_rect(color = "grey", fill = NA, size = 1),
         axis.text.x        = element_text(angle = 45, hjust = 1, size = 13),
@@ -853,7 +855,7 @@ server <- function(input, output, session) {
         geom_line(color = col_accent, size = 1) +
         geom_point(color = col_primary, size = 2) +
         geom_smooth(method = "lm", color = col_primary, se = FALSE, linetype = "dashed") +
-        theme_minimal(base_family = "Arial") +
+        theme_minimal() +
         labs(title = NULL, y = metrics_sel[1], x = NULL)
     } else {
       vals1 <- df[[metrics_sel[1]]]
@@ -906,7 +908,7 @@ server <- function(input, output, session) {
           name     = metrics_sel[1],
           sec.axis = sec_axis(~ . / ratio, name = metrics_sel[2])
         ) +
-        theme_minimal(base_family = "Arial") +
+        theme_minimal() +
         theme(
           legend.position      = "top",
           axis.title.y.left    = element_text(size = 14, color = col_primary, margin = margin(r = 15)),
@@ -976,7 +978,7 @@ server <- function(input, output, session) {
       geom_hline(yintercept = 1.3, color = "#e3b506", linetype = "dashed", size = 1) +
       geom_hline(yintercept = 1.5, color = "#b71c1c", linetype = "dashed", size = 1) +
       geom_hline(yintercept = 0.8, color = "#b71c1c", linetype = "dashed", size = 1) +
-      theme_minimal(base_family = "Arial") +
+      theme_minimal() +
       labs(
         title = "Acute:Chronic Workload Ratio",
         x     = NULL,
