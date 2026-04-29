@@ -9,7 +9,7 @@ library(stringr)
 
 # ===== USER SETTINGS =====
 datafile   <- "Example Data.xlsx"
-gps_sheet  <- "GPS Polar Data"
+gps_sheet  <- "GPS Data"
 demo_sheet <- "Demographics"
 
 # ===== LOAD GPS DATA =====
@@ -107,7 +107,8 @@ ui <- fluidPage(
       h4("Game Day High-Speed Running"),
       plotOutput("hsr_plot", height = "650px")
     )
-  )
+  ),
+  br(),
 )
 
 # ===== SERVER =====

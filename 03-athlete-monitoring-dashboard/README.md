@@ -7,7 +7,7 @@ This project is an interactive Shiny dashboard designed to provide coaching staf
 Coaching staff needed an interactive and easy-to-access view of team, positional, and individual athlete data that could be updated rapidly and used to support day-to-day and longer-term decision-making.
 
 ## Data
-- Polar GPS metrics
+- GPS metrics
 - Jump testing data
 - Athlete wellness questionnaire data
 - Additional performance testing data

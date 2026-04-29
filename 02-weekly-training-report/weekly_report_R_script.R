@@ -6,18 +6,18 @@ library(lubridate)
 library(rmarkdown)
 
 # ==== USER SETTINGS ====
-DATAFILE  <- "Polar_Excel.xlsx"
-OUTPUT_DIR <- "reports"
+datafile  <- "GPS_Excel.xlsx"
+output_dir <- "reports"
 
 # Define the week to report 
 report_start <- as.Date("2025-02-03")  # Monday 
 report_end   <- report_start + 6       # Sunday
 
-if (!dir.exists(OUTPUT_DIR)) dir.create(OUTPUT_DIR)
+if (!dir.exists(output_dir)) dir.create(output_dir)
 
 # ---- 1. Load data ----
 # GPS Sheet
-gps_data <- read_excel(DATAFILE, sheet = "GPS") |>
+gps_data <- read_excel(datafile, sheet = "GPS") |>
   mutate(
     Date = as.Date(Date),          
     Name = as.character(Name)
@@ -46,7 +46,7 @@ gps_data <- read_excel(DATAFILE, sheet = "GPS") |>
   )
 
 # Wellness sheet
-wellness <- read_excel(DATAFILE, sheet = "Wellness") %>%
+wellness <- read_excel(datafile, sheet = "Wellness") %>%
   mutate(
     Date = as.Date(Date),
     Name = as.character(Name)
@@ -73,7 +73,7 @@ output_file <- paste0(
 render(
   input        = "weekly_report.Rmd",
   output_file  = output_file,
-  output_dir   = OUTPUT_DIR,
+  output_dir   = output_dir,
   output_format = "pdf_document",
   params       = list(
     report_start  = report_start,

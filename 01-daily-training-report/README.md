@@ -7,7 +7,7 @@ This project automates the creation of a daily athlete monitoring report using G
 Coaching staff needed a daily snapshot of GPS load and wellness data to quickly identify athletes who may be at increased risk, rather than manually reviewing raw data sheets.
 
 ## Data
-- Polar GPS data, including total distance, high-speed running, and acute to chronic workload ratio
+- GPS data, including total distance, high-speed running, and acute to chronic workload ratio
 - Athlete wellness questionnaire data
 
 ## Tools

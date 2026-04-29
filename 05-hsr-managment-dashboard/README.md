@@ -33,7 +33,7 @@ This project is especially useful in return-to-play and return-to-performance se
 
 The dashboard uses two Excel sheets:
 
-### GPS Polar Data
+### GPS Data
 Required columns:
 - Date
 - Name

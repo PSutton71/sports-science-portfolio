@@ -23,8 +23,8 @@ invisible(lapply(pkgs, library, character.only = TRUE))
 # ---- 1. Global Settings & Helper Functions ----------------------------
 
 # Data file & sheet names (template parameters)
-DATA_FILE   <- "Example Polar Data.xlsx"  # <-- replace file as needed, keep sheet names the same
-SHEETS_USED <- c("GPS Polar Data", "Survey Data", "Demographics")
+DATA_FILE   <- "Example GPS Data.xlsx"  # <-- replace file as needed, keep sheet names the same
+SHEETS_USED <- c("GPS GPS Data", "Survey Data", "Demographics")
 
 # Colors Selection (based on team colors)
 col_primary   <- "#000000"

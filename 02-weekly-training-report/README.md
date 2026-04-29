@@ -7,7 +7,7 @@ This project automates the creation of a weekly athlete monitoring report using 
 Coaching staff needed a weekly overview of team workload and practice demands to support periodization decisions, including planning deload weeks and avoiding unwanted spikes in training load.
 
 ## Data
-- Polar GPS data, including total distance, acute to chronic workload ratio, and monotony
+- GPS data, including total distance, acute to chronic workload ratio, and monotony
 - Athlete wellness questionnaire data
 
 ## Tools
