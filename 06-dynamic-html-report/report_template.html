@@ -1,0 +1,1957 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title><<REPORT_TITLE>></title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --primary:#006A52;
+  --primary-dark:#0f2d52;
+  --accent:#FBD872;
+  --light:#00965E;
+  --bg:#edf1f7;
+  --panel:#ffffff;
+  --track:#e9eef2;
+  --border:#dde3ed;
+  --text:#1a1a2e;
+  --muted:#6b7694;
+  --green:#1e7d40;
+  --red:#c0392b;
+  --amber:#c97000;
+  --gray:#8a8f98;
+  --black:#111111;
+}
+
+body {
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  padding:2rem 1rem;
+}
+
+.page {
+  max-width:1180px;
+  margin:0 auto;
+  background:var(--panel);
+  border-radius:12px;
+  overflow:hidden;
+  box-shadow:0 4px 24px rgba(0,0,0,.10);
+}
+
+.header {
+  background:linear-gradient(135deg,var(--primary) 0%,var(--primary-dark) 100%);
+  color:white;
+  padding:2rem 2.5rem;
+  display:flex;
+  align-items:center;
+  gap:2rem;
+}
+
+.header-badge {
+  width:110px;
+  height:110px;
+  background:rgba(255,255,255,.12);
+  border:2px solid rgba(255,255,255,.35);
+  border-radius:12px;
+  padding:6px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-shrink:0;
+  overflow:hidden;
+}
+
+.header-badge-img {
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  display:block;
+}
+
+.header h1 {
+  font-size:1.5rem;
+  font-weight:700;
+  margin-bottom:4px;
+}
+
+.header p {
+  font-size:.88rem;
+  opacity:.85;
+  margin-bottom:10px;
+}
+
+.header-chips {
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+}
+
+.chip {
+  background:rgba(255,255,255,.18);
+  border-radius:20px;
+  padding:3px 12px;
+  font-size:.78rem;
+  font-weight:600;
+}
+
+.section-divider {
+  background:var(--primary);
+  color:white;
+  padding:.6rem 2.5rem;
+  font-size:.8rem;
+  font-weight:700;
+  letter-spacing:.06em;
+  text-transform:uppercase;
+}
+
+.controls {
+  background:var(--light);
+  border-bottom:1px solid var(--border);
+  padding:1rem 2.5rem;
+  display:flex;
+  gap:16px;
+  flex-wrap:wrap;
+  align-items:center;
+}
+
+.controls label {
+  font-size:.8rem;
+  font-weight:600;
+  color:#000000;
+  margin-right:6px;
+}
+
+.controls select {
+  font-size:.85rem;
+  padding:6px 12px;
+  border:1px solid var(--border);
+  border-radius:6px;
+  background:white;
+  color:#000000;
+  cursor:pointer;
+}
+
+.body {
+  padding:2rem 2.5rem;
+}
+
+.section {
+  margin-bottom:2.5rem;
+}
+
+.section-title {
+  font-size:.95rem;
+  font-weight:700;
+  color:var(--text);
+  border-left:4px solid var(--accent);
+  padding-left:12px;
+  margin-bottom:1.2rem;
+}
+
+.section-title small {
+  font-size:.75rem;
+  font-weight:400;
+  color:var(--muted);
+  margin-left:8px;
+}
+
+.chart-wrap {
+  position:relative;
+  width:100%;
+}
+
+.note {
+  font-size:.76rem;
+  color:var(--muted);
+  margin-top:8px;
+  line-height:1.5;
+}
+
+.arc-grid {
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(190px,1fr));
+  gap:12px;
+  margin-bottom:1rem;
+}
+
+.arc-card {
+  background:#ffffff;
+  border:1.5px solid #006A52;
+  border-radius:10px;
+  padding:14px;
+  text-align:center;
+}
+
+.arc-card-name {
+  font-size:.75rem;
+  font-weight:700;
+  color:#006A52;
+  margin-bottom:8px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+.arc-bars {
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+
+.arc-row {
+  display:flex;
+  align-items:center;
+  gap:6px;
+  font-size:.72rem;
+}
+
+.arc-label {
+  width:22px;
+  font-weight:600;
+  color:var(--muted);
+  flex-shrink:0;
+  font-size:.68rem;
+}
+
+.arc-bar-track {
+  flex:1;
+  background:var(--track);
+  border-radius:4px;
+  height:14px;
+  overflow:hidden;
+}
+
+.arc-bar-fill {
+  height:100%;
+  border-radius:4px;
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  padding-right:4px;
+}
+
+.arc-bar-fill span {
+  font-size:.65rem;
+  font-weight:700;
+  color:#1A1A1A;
+  white-space:nowrap;
+}
+
+.arc-diff {
+  font-size:.7rem;
+  font-weight:700;
+  width:44px;
+  text-align:right;
+  flex-shrink:0;
+}
+
+.diff-ok { color:var(--green); }
+.diff-warn { color:var(--amber); }
+.diff-bad { color:var(--red); }
+
+.strength-grid {
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(230px,1fr));
+  gap:12px;
+  margin-bottom:1rem;
+}
+
+.strength-card {
+  background:#ffffff;
+  border:1.5px solid #006A52;
+  border-radius:10px;
+  padding:14px;
+}
+
+.strength-card-name {
+  font-size:.78rem;
+  font-weight:700;
+  color:#006A52;
+  margin-bottom:10px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+.strength-metric {
+  font-size:.72rem;
+  color:var(--muted);
+  margin-bottom:4px;
+  font-weight:600;
+}
+
+.strength-bars {
+  display:flex;
+  flex-direction:column;
+  gap:5px;
+  margin-bottom:8px;
+}
+
+.s-row {
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+
+.s-lbl {
+  width:34px;
+  font-size:.68rem;
+  font-weight:700;
+  flex-shrink:0;
+  color:#000000;
+}
+
+.s-track {
+  flex:1;
+  background:#e0e7ef;
+  border-radius:4px;
+  height:12px;
+  overflow:hidden;
+}
+
+.s-fill {
+  height:100%;
+  border-radius:4px;
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  padding-right:3px;
+}
+
+.s-fill span {
+  font-size:.6rem;
+  font-weight:700;
+  color:#1A1A1A;
+  white-space:nowrap;
+}
+
+.table-wrap {
+  overflow-x:auto;
+}
+
+table {
+  width:100%;
+  border-collapse:collapse;
+  font-size:.78rem;
+  min-width:700px;
+}
+
+thead tr {
+  background:var(--primary);
+}
+
+thead th {
+  color:white;
+  padding:9px 10px;
+  text-align:center;
+  font-weight:600;
+  font-size:.74rem;
+  white-space:nowrap;
+}
+
+thead th:first-child {
+  text-align:left;
+}
+
+tbody td {
+  padding:7px 10px;
+  border-bottom:1px solid var(--border);
+  text-align:center;
+}
+
+tbody td:first-child {
+  text-align:left;
+  font-weight:700;
+  color:var(--primary);
+}
+
+tbody tr:nth-child(even) td {
+  background:rgba(0,106,82,0.08);
+}
+
+.cell-bad { color:var(--red); font-weight:700; }
+.cell-warn { color:var(--amber); font-weight:700; }
+.cell-good { color:var(--green); font-weight:700; }
+
+.tab-bar {
+  display:flex;
+  gap:6px;
+  flex-wrap:wrap;
+  margin-bottom:12px;
+}
+
+.tab {
+  padding:5px 14px;
+  border-radius:20px;
+  font-size:.78rem;
+  font-weight:600;
+  cursor:pointer;
+  border:1.5px solid var(--border);
+  background:white;
+  color:var(--muted);
+  transition:all .15s;
+}
+
+.tab.active,
+.tab:hover {
+  background:var(--primary);
+  color:white;
+  border-color:var(--primary);
+}
+
+.thresh-legend {
+  display:flex;
+  gap:14px;
+  flex-wrap:wrap;
+  font-size:.75rem;
+  margin-bottom:10px;
+}
+
+.thresh-badge {
+  display:flex;
+  align-items:center;
+  gap:5px;
+}
+
+.thresh-dot {
+  width:10px;
+  height:10px;
+  border-radius:50%;
+  flex-shrink:0;
+}
+
+.footer {
+  background:var(--light);
+  border-top:1px solid var(--border);
+  padding:.9rem 2.5rem;
+  font-size:.73rem;
+  color:var(--muted);
+  display:flex;
+  justify-content:space-between;
+  flex-wrap:wrap;
+  gap:4px;
+}
+
+@media(max-width:640px) {
+  .body { padding:1.2rem; }
+  .header { padding:1.2rem; flex-direction:column; gap:1rem; }
+  .controls { padding:.8rem 1.2rem; }
+  .arc-grid, .strength-grid { grid-template-columns:repeat(1,1fr); }
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+<div class="header">
+  <div class="header-badge">
+    <img src="./logo.png" alt="Fill with logo" class="header-badge-img">
+  </div>
+  <div>
+    <h1><<REPORT_TITLE>></h1>
+    <p><<TEAM_LABEL>></p>
+    <div class="header-chips">
+      <span class="chip">Dominant = solid green</span>
+      <span class="chip">Non-dominant = dotted gold</span>
+    </div>
+  </div>
+</div>
+
+<div class="section-divider">Weekly Assessment</div>
+
+<div class="controls">
+  <div><label for="sel-athlete-str">Athlete</label><select id="sel-athlete-str"></select></div>
+</div>
+
+<div class="body">
+
+  <div class="section">
+    <div class="section-title">IR &amp; ER Strength Timeline
+      <small>Left vs. right arm &middot; selected athlete</small>
+    </div>
+    <div class="tab-bar" id="strTabs">
+      <button class="tab active" data-metric="er">ER</button>
+      <button class="tab" data-metric="ir">IR</button>
+    </div>
+    <div class="chart-wrap" style="height:300px;"><canvas id="strTimelineChart"></canvas></div>
+    <p class="note" id="strTimelineNote"></p>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Grip / Jump Timeline
+      <small>Selected athlete</small>
+    </div>
+    <div class="tab-bar" id="gripJumpTabs">
+      <button class="tab active" data-metric="grip">Grip</button>
+      <button class="tab" data-metric="jump">Jump / RSI</button>
+    </div>
+    <div class="chart-wrap" style="height:320px;"><canvas id="gripTimelineChart"></canvas></div>
+    <p class="note" id="gripTimelineNote"></p>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Pitching Velocity Timeline
+      <small>Average velo, max velo, and Disp &middot; selected athlete</small>
+    </div>
+    <div class="chart-wrap" style="height:320px;"><canvas id="veloTimelineChart"></canvas></div>
+    <p class="note" id="veloTimelineNote"></p>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Shoulder Mobility Timeline
+      <small>Selected athlete</small>
+    </div>
+    <div class="tab-bar" id="shoulderTabs">
+      <button class="tab active" data-metric="flexext">Flexion / Extension</button>
+      <button class="tab" data-metric="irer">IR / ER</button>
+      <button class="tab" data-metric="arc_ratio">Arc / ER:IR Ratio</button>
+    </div>
+    <div class="chart-wrap" style="height:340px;"><canvas id="shoulderMobilityChart"></canvas></div>
+    <p class="note" id="shoulderMobilityNote"></p>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Cervical Timeline
+      <small>Selected athlete</small>
+    </div>
+    <div class="tab-bar" id="cervicalTabs">
+      <button class="tab active" data-metric="flexext">Flexion / Extension</button>
+      <button class="tab" data-metric="rotation">Left / Right Rotation</button>
+    </div>
+    <div class="chart-wrap" style="height:320px;"><canvas id="cervicalChart"></canvas></div>
+    <p class="note" id="cervicalNote"></p>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Balance and Mobility Timeline
+      <small>Selected athlete</small>
+    </div>
+    <div class="tab-bar" id="balanceTabs">
+      <button class="tab active" data-metric="balance">R / L Variability</button>
+      <button class="tab" data-metric="mobility">Toe Touch / Reach Back / Dorsiflexion</button>
+    </div>
+    <div class="chart-wrap" style="height:340px;"><canvas id="balanceMobilityChart"></canvas></div>
+    <p class="note" id="balanceMobilityNote"></p>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Apley and Torso Rotation Timeline
+      <small>Selected athlete</small>
+    </div>
+    <div class="tab-bar" id="apleyTabs">
+      <button class="tab active" data-metric="apley">Apley</button>
+      <button class="tab" data-metric="torso">Torso Rotation</button>
+    </div>
+    <div class="chart-wrap" style="height:340px;"><canvas id="apleyTorsoChart"></canvas></div>
+    <p class="note" id="apleyTorsoNote"></p>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Strength Leaderboard
+      <small>Peak value per athlete</small>
+    </div>
+    <div class="tab-bar" id="snapTabs">
+      <button class="tab active" data-metric="left_er">Left ER</button>
+      <button class="tab" data-metric="right_er">Right ER</button>
+      <button class="tab" data-metric="left_ir">Left IR</button>
+      <button class="tab" data-metric="right_ir">Right IR</button>
+      <button class="tab" data-metric="left_grip">Left Grip</button>
+      <button class="tab" data-metric="right_grip">Right Grip</button>
+      <button class="tab" data-metric="jump_height">Jump Height</button>
+      <button class="tab" data-metric="rsi">RSI</button>
+    </div>
+    <div class="chart-wrap" style="height:360px;"><canvas id="snapBarChart"></canvas></div>
+    <p class="note">Values reflect each athlete’s highest recorded value across all testing dates for the selected metric.</p>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Peak Strength Cards
+      <small>Peak weekly values across all recorded dates</small>
+    </div>
+    <div class="strength-grid" id="strengthCards"></div>
+  </div>
+
+</div>
+
+<div class="section-divider">Monthly ROM Assessment</div>
+
+<div class="controls" id="monthly-controls">
+  <div><label for="sel-date">Assessment Date</label><select id="sel-date"></select></div>
+  <div><label for="sel-athlete-rom-inline">Athlete</label><select id="sel-athlete-rom-inline"></select></div>
+</div>
+
+<div class="body">
+
+  <div class="section">
+    <div class="section-title">Total Motion Arc — Throw vs. Non-Throw
+      <small>IR + ER &middot; all athletes &middot; selected date</small>
+    </div>
+    <div class="chart-wrap" style="height:320px;"><canvas id="arcBarChart"></canvas></div>
+    <p class="note">Bars turn red when arc difference &gt; <<THRESH_WARN>>&deg;.</p>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Internal &amp; External Rotation — All Athletes
+      <small>Grouped by motion &middot; selected date</small>
+    </div>
+    <div class="chart-wrap" style="height:320px;"><canvas id="irErChart"></canvas></div>
+    <p class="note">Watch for throwing-arm IR &lt; 40&deg; and IR loss that exceeds ER gain.</p>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Individual Arc Breakdown
+      <small>Diff = Non-Throw &minus; Throw &middot; positive = non-throw arm larger</small>
+    </div>
+    <div class="thresh-legend">
+      <span class="thresh-badge"><span class="thresh-dot" style="background:#1e7d40"></span>&lt;<<THRESH_OK>>&deg; Symmetric</span>
+      <span class="thresh-badge"><span class="thresh-dot" style="background:#c97000"></span><<THRESH_OK>>&ndash;<<THRESH_WARN>>&deg; Monitor</span>
+      <span class="thresh-badge"><span class="thresh-dot" style="background:#c0392b"></span>&gt;<<THRESH_WARN>>&deg; Concern</span>
+    </div>
+    <div class="arc-grid" id="arcCards"></div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Athlete ROM Timeline
+      <small>Select athlete below &middot; toggle metric below</small>
+    </div>
+    <div class="tab-bar" id="romTabs">
+      <button class="tab active" data-metric="arc">Total Arc</button>
+      <button class="tab" data-metric="ir">IR</button>
+      <button class="tab" data-metric="er">ER</button>
+    </div>
+    <div class="chart-wrap" style="height:300px;"><canvas id="romTimelineChart"></canvas></div>
+    <p class="note" id="romTimelineNote"></p>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Monthly Data Table
+      <small>Selected date &middot; IR / ER / Arc</small>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Athlete</th>
+            <th>IR Throw</th>
+            <th>IR Non-Throw</th>
+            <th>IR Diff</th>
+            <th>ER Throw</th>
+            <th>ER Non-Throw</th>
+            <th>ER Diff</th>
+            <th>Arc Throw</th>
+            <th>Arc Non-Throw</th>
+            <th>Arc Diff</th>
+          </tr>
+        </thead>
+        <tbody id="monthlyTableBody"></tbody>
+      </table>
+    </div>
+    <p class="note">
+      <span class="cell-bad">Red &gt;<<THRESH_WARN>>&deg;</span> &nbsp;&middot;&nbsp;
+      <span class="cell-warn">Amber <<THRESH_OK>>&ndash;<<THRESH_WARN>>&deg;</span> &nbsp;&middot;&nbsp;
+      <span class="cell-good">Green &lt;<<THRESH_OK>>&deg;</span>
+    </p>
+  </div>
+
+</div>
+
+<div class="footer">
+  <span>Shoulder ROM &amp; Weekly Assessment &nbsp;&middot;&nbsp; <<TEAM_LABEL>></span>
+  <span>Arc diff target &lt;<<THRESH_OK>>&deg; &nbsp;&middot;&nbsp; Dominant side = solid green</span>
+</div>
+</div>
+
+<script>
+const MONTHLY = <<JSON_MONTHLY>>;
+const WEEKLY = <<JSON_WEEKLY>>;
+const SCHEDULE = <<JSON_SCHEDULE>>;
+const THRESH_OK = <<THRESH_OK>>;
+const THRESH_WARN = <<THRESH_WARN>>;
+
+const C_GREEN = "#006A52";
+const C_GOLD = "#FBD872";
+const C_GREEN_DARK = "#1e7d40";
+const C_GOLD_DARK = "#c97000";
+const C_BLUE = "#0f2d52";
+const C_RED = "#C0392B";
+const C_AMBER = "#C97000";
+const C_GRAY = "#8A8F98";
+const C_BLACK = "#111111";
+const C_GRID = "rgba(0,0,0,0.07)";
+
+const ATHLETE_HANDEDNESS = {
+  "Athlete 1": "L",
+  "Athlete 5": "L",
+  "Athlete 10": "L"
+};
+
+Chart.defaults.font.family = "-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif";
+Chart.defaults.font.size = 12;
+Chart.defaults.color = "#000000";
+
+let activeMonthDate = null;
+let activeAthRom = null;
+let activeRomMetric = "arc";
+let activeStrAth = null;
+let activeStrMetric = "er";
+let activeSnapMetric = "left_er";
+let activeGripJumpMetric = "grip";
+let activeShoulderMetric = "flexext";
+let activeCervicalMetric = "flexext";
+let activeBalanceMetric = "balance";
+let activeApleyMetric = "apley";
+
+let arcChart, irErChart, romTlChart, strTlChart, gripTlChart, veloTlChart;
+let shoulderMobilityChart, cervicalChart, balanceMobilityChart, apleyTorsoChart, snapChart;
+
+const monthDates = [...new Set((MONTHLY || []).map(r => r.Date))].sort();
+const monthAths = [...new Set((MONTHLY || []).map(r => r.Name))].sort();
+const weekAths = [...new Set((WEEKLY || []).map(r => r.Name))].sort();
+const scheduleAths = [...new Set((SCHEDULE || []).map(r => r.Name))].sort();
+
+function byMonthDate(d) { return (MONTHLY || []).filter(r => r.Date === d); }
+function byMonthAth(n) { return (MONTHLY || []).filter(r => r.Name === n).sort((a,b) => a.Date.localeCompare(b.Date)); }
+function byWeekAth(n) { return (WEEKLY || []).filter(r => r.Name === n).sort((a,b) => a.Date.localeCompare(b.Date)); }
+function byScheduleAth(n) { return (SCHEDULE || []).filter(r => r.Name === n).sort((a,b) => a.Date.localeCompare(b.Date)); }
+
+function getHandedness(name) {
+  return ATHLETE_HANDEDNESS[name] || "R";
+}
+
+function getDominantSide(name) {
+  return getHandedness(name) === "L" ? "L" : "R";
+}
+
+function getDominantDatasetStyles(name, sideLabel) {
+  const dominant = getDominantSide(name);
+  const isDominant = dominant === sideLabel;
+  return {
+    color: isDominant ? C_GREEN : C_GOLD,
+    dash: isDominant ? [] : [0, 6],
+    cap: isDominant ? "butt" : "round"
+  };
+}
+
+function diffCls(d) {
+  const a = Math.abs(d);
+  return a < THRESH_OK ? "diff-ok" : a < THRESH_WARN ? "diff-warn" : "diff-bad";
+}
+
+function cellCls(v) {
+  return v < THRESH_OK ? "cell-good" : v < THRESH_WARN ? "cell-warn" : "cell-bad";
+}
+
+function sign(v) { return v >= 0 ? "+" : ""; }
+
+function setEmptyNote(id, text) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = text;
+}
+
+function makePitchLinePlugin(pluginId, allDates, pitchSet) {
+  return {
+    id: pluginId,
+    beforeDatasetsDraw(chart) {
+      const { ctx, chartArea, scales } = chart;
+      if (!chartArea || !scales.x || !allDates.length) return;
+      ctx.save();
+      ctx.strokeStyle = C_GRAY;
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([5,5]);
+      allDates.forEach((date, idx) => {
+        if (!pitchSet.has(date)) return;
+        const x = scales.x.getPixelForTick(idx);
+        if (!isFinite(x)) return;
+        ctx.beginPath();
+        ctx.moveTo(x, chartArea.top);
+        ctx.lineTo(x, chartArea.bottom);
+        ctx.stroke();
+      });
+      ctx.restore();
+    }
+  };
+}
+
+function compact(values) {
+  return (values || []).filter(v => v != null && Number.isFinite(v));
+}
+
+function firstNonNull(values) {
+  return (values || []).find(v => v != null && Number.isFinite(v));
+}
+
+function seriesMax(values) {
+  const vals = compact(values);
+  return vals.length ? Math.max(...vals) : null;
+}
+
+function seriesMin(values) {
+  const vals = compact(values);
+  return vals.length ? Math.min(...vals) : null;
+}
+
+function flaggedDropFromMax(values, thresholdPct) {
+  const ref = seriesMax(values);
+  return (values || []).map(v => {
+    if (v == null || ref == null || ref === 0) return false;
+    return ((ref - v) / ref) >= thresholdPct;
+  });
+}
+
+function flaggedDropFromBaseline(values, thresholdPct) {
+  const ref = firstNonNull(values);
+  return (values || []).map(v => {
+    if (v == null || ref == null || ref === 0) return false;
+    return ((ref - v) / ref) >= thresholdPct;
+  });
+}
+
+function flaggedIncreaseFromMin(values, thresholdPct) {
+  const ref = seriesMin(values);
+  return (values || []).map(v => {
+    if (v == null || ref == null) return false;
+    if (ref === 0) return v > 0;
+    return ((v - ref) / ref) >= thresholdPct;
+  });
+}
+
+function pointColorArray(values, baseColor, flags) {
+  return (values || []).map((v, i) => v == null ? baseColor : (flags[i] ? C_RED : baseColor));
+}
+
+function pointRadiusArray(values, baseRadius, flags) {
+  return (values || []).map((v, i) => v == null ? 0 : (flags[i] ? baseRadius + 1 : baseRadius));
+}
+
+function applyPointFlags(dataset, values, flags, baseColor, baseRadius) {
+  dataset.pointBackgroundColor = pointColorArray(values, baseColor, flags);
+  dataset.pointBorderColor = pointColorArray(values, baseColor, flags);
+  dataset.pointRadius = pointRadiusArray(values, baseRadius, flags);
+  dataset.pointHoverRadius = pointRadiusArray(values, baseRadius + 2, flags);
+  return dataset;
+}
+
+function initSelectors() {
+  const dSel = document.getElementById("sel-date");
+  monthDates.forEach(d => {
+    const o = document.createElement("option");
+    o.value = o.textContent = d;
+    dSel.appendChild(o);
+  });
+  activeMonthDate = monthDates.length ? monthDates[monthDates.length - 1] : null;
+  if (activeMonthDate) dSel.value = activeMonthDate;
+  dSel.addEventListener("change", e => {
+    activeMonthDate = e.target.value;
+    renderMonthly();
+  });
+
+  const aSel = document.getElementById("sel-athlete-rom-inline");
+  monthAths.forEach(a => {
+    const o = document.createElement("option");
+    o.value = o.textContent = a;
+    aSel.appendChild(o);
+  });
+  activeAthRom = monthAths.length ? monthAths[0] : null;
+  if (activeAthRom) aSel.value = activeAthRom;
+  aSel.addEventListener("change", e => {
+    activeAthRom = e.target.value;
+    renderRomTimeline();
+  });
+
+  const saSel = document.getElementById("sel-athlete-str");
+  const athletePool = [...new Set([...weekAths, ...scheduleAths])].sort();
+  athletePool.forEach(a => {
+    const o = document.createElement("option");
+    o.value = o.textContent = a;
+    saSel.appendChild(o);
+  });
+  activeStrAth = athletePool.length ? athletePool[0] : null;
+  if (activeStrAth) saSel.value = activeStrAth;
+  saSel.addEventListener("change", e => {
+    activeStrAth = e.target.value;
+    renderStrTimeline();
+    renderGripTimeline();
+    renderVeloTimeline();
+    renderShoulderMobilityTimeline();
+    renderCervicalTimeline();
+    renderBalanceMobilityTimeline();
+    renderApleyTorsoTimeline();
+  });
+}
+
+function buildArcChart(rows) {
+  if (!rows.length) return;
+  const lbl = rows.map(r => r.Name);
+  const bgT = rows.map(r => Math.abs(r.Arc_Diff) > THRESH_WARN ? C_RED : C_GREEN);
+  const bgN = rows.map(r => Math.abs(r.Arc_Diff) > THRESH_WARN ? C_RED : C_GOLD);
+
+  if (arcChart) arcChart.destroy();
+  arcChart = new Chart(document.getElementById("arcBarChart"), {
+    type:"bar",
+    data:{
+      labels:lbl,
+      datasets:[
+        { label:"Throwing Arm", data:rows.map(r => r.Arc_Throw), backgroundColor:bgT, borderColor:bgT, borderWidth:1, borderRadius:4 },
+        { label:"Non-Throwing Arm", data:rows.map(r => r.Arc_NonThrow), backgroundColor:bgN, borderColor:bgN, borderWidth:1, borderRadius:4 }
+      ]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{
+        legend:{ position:"top", labels:{ boxWidth:12, padding:14, color:"#000000" } },
+        tooltip:{ callbacks:{ label:c => ` ${c.dataset.label}: ${c.parsed.y}°` } }
+      },
+      scales:{
+        x:{ grid:{ display:false }, ticks:{ color:"#000000" } },
+        y:{ grid:{ color:C_GRID }, min:100, max:220, title:{ display:true, text:"Total Arc (°)", color:"#000000" }, ticks:{ color:"#000000", callback:v => v + "°" } }
+      }
+    }
+  });
+}
+
+function buildIrErChart(rows) {
+  if (!rows.length) return;
+  const lbl = rows.map(r => r.Name);
+
+  if (irErChart) irErChart.destroy();
+  irErChart = new Chart(document.getElementById("irErChart"), {
+    type:"bar",
+    data:{
+      labels:lbl,
+      datasets:[
+        { label:"IR Throw", data:rows.map(r => r.IR_Throw), backgroundColor:C_GREEN, borderColor:C_GREEN, borderWidth:1, borderRadius:3 },
+        { label:"ER Throw", data:rows.map(r => r.ER_Throw), backgroundColor:C_GREEN_DARK, borderColor:C_GREEN_DARK, borderWidth:1, borderRadius:3 },
+        { label:"IR Non-Throw", data:rows.map(r => r.IR_NonThrow), backgroundColor:C_GOLD, borderColor:C_GOLD, borderWidth:1, borderRadius:3 },
+        { label:"ER Non-Throw", data:rows.map(r => r.ER_NonThrow), backgroundColor:C_GOLD_DARK, borderColor:C_GOLD_DARK, borderWidth:1, borderRadius:3 }
+      ]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{
+        legend:{ position:"top", labels:{ boxWidth:12, padding:14, color:"#000000" } },
+        tooltip:{ callbacks:{ label:c => ` ${c.dataset.label}: ${c.parsed.y}°` } }
+      },
+      scales:{
+        x:{ grid:{ display:false }, ticks:{ color:"#000000" } },
+        y:{ grid:{ color:C_GRID }, min:0, title:{ display:true, text:"Degrees (°)", color:"#000000" }, ticks:{ color:"#000000", callback:v => v + "°" } }
+      }
+    }
+  });
+}
+
+function buildArcCards(rows) {
+  const el = document.getElementById("arcCards");
+  el.innerHTML = "";
+  if (!rows.length) return;
+
+  const mx = Math.max(...rows.flatMap(r => [r.Arc_Throw, r.Arc_NonThrow]));
+  rows.forEach(r => {
+    const d = r.Arc_NonThrow - r.Arc_Throw;
+    const cls = diffCls(d);
+    const c = document.createElement("div");
+    c.className = "arc-card";
+    c.innerHTML = `
+      <div class="arc-card-name">${r.Name}</div>
+      <div class="arc-bars">
+        <div class="arc-row">
+          <span class="arc-label">T</span>
+          <div class="arc-bar-track">
+            <div class="arc-bar-fill" style="width:${(r.Arc_Throw / mx * 100).toFixed(1)}%;background:${C_GREEN}">
+              <span>${r.Arc_Throw}°</span>
+            </div>
+          </div>
+        </div>
+        <div class="arc-row">
+          <span class="arc-label">NT</span>
+          <div class="arc-bar-track">
+            <div class="arc-bar-fill" style="width:${(r.Arc_NonThrow / mx * 100).toFixed(1)}%;background:${C_GOLD}">
+              <span>${r.Arc_NonThrow}°</span>
+            </div>
+          </div>
+        </div>
+        <div class="arc-row" style="justify-content:flex-end">
+          <span style="font-size:.68rem;color:#6b7694;margin-right:4px">Diff:</span>
+          <span class="arc-diff ${cls}">${d >= 0 ? "+" : ""}${d.toFixed(1)}°</span>
+        </div>
+      </div>`;
+    el.appendChild(c);
+  });
+}
+
+function renderRomTimeline() {
+  if (!activeAthRom) {
+    setEmptyNote("romTimelineNote", "No monthly athlete data found.");
+    return;
+  }
+  const rows = byMonthAth(activeAthRom);
+  const dates = rows.map(r => r.Date);
+
+  const map = {
+    arc:{ t:"Arc_Throw", n:"Arc_NonThrow", lbl:"Total Arc (°)" },
+    ir:{ t:"IR_Throw", n:"IR_NonThrow", lbl:"IR (°)" },
+    er:{ t:"ER_Throw", n:"ER_NonThrow", lbl:"ER (°)" }
+  };
+  const k = map[activeRomMetric];
+  if (!rows.length) {
+    setEmptyNote("romTimelineNote", "No monthly data for this athlete.");
+    return;
+  }
+
+  if (romTlChart) romTlChart.destroy();
+  romTlChart = new Chart(document.getElementById("romTimelineChart"), {
+    type:"line",
+    data:{
+      labels:dates,
+      datasets:[
+        { label:"Throwing Arm", data:rows.map(r => r[k.t]), borderColor:C_GREEN, backgroundColor:C_GREEN+"22", pointRadius:6, pointHoverRadius:8, borderWidth:3, tension:0.3, fill:false, spanGaps:true },
+        { label:"Non-Throwing Arm", data:rows.map(r => r[k.n]), borderColor:C_GOLD, backgroundColor:C_GOLD+"22", pointRadius:6, pointHoverRadius:8, borderWidth:3, borderDash:[6,3], tension:0.3, fill:false, spanGaps:true }
+      ]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{
+        legend:{ position:"top", labels:{ boxWidth:12, padding:14, color:"#000000" } },
+        tooltip:{ callbacks:{ label:c => ` ${c.dataset.label}: ${c.parsed.y}°` } }
+      },
+      scales:{
+        x:{ grid:{ display:false }, title:{ display:true, text:"Assessment Date", color:"#000000" }, ticks:{ color:"#000000" } },
+        y:{ grid:{ color:C_GRID }, title:{ display:true, text:k.lbl, color:"#000000" }, ticks:{ color:"#000000", callback:v => v + "°" } }
+      }
+    }
+  });
+
+  setEmptyNote("romTimelineNote", `${activeAthRom} — ${k.lbl} across ${dates.length} date${dates.length !== 1 ? "s" : ""}.`);
+}
+
+function buildMonthlyTable(rows) {
+  const tb = document.getElementById("monthlyTableBody");
+  tb.innerHTML = "";
+  rows.forEach(r => {
+    const ir = r.IR_NonThrow - r.IR_Throw;
+    const er = r.ER_NonThrow - r.ER_Throw;
+    const arc = r.Arc_NonThrow - r.Arc_Throw;
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td>${r.Name}</td>
+      <td>${r.IR_Throw}</td><td>${r.IR_NonThrow}</td>
+      <td class="${cellCls(Math.abs(ir))}">${sign(ir)}${ir.toFixed(1)}°</td>
+      <td>${r.ER_Throw}</td><td>${r.ER_NonThrow}</td>
+      <td class="${cellCls(Math.abs(er))}">${sign(er)}${er.toFixed(1)}°</td>
+      <td>${r.Arc_Throw}</td><td>${r.Arc_NonThrow}</td>
+      <td class="${cellCls(Math.abs(arc))}">${sign(arc)}${arc.toFixed(1)}°</td>`;
+    tb.appendChild(row);
+  });
+}
+
+function renderStrTimeline() {
+  if (!activeStrAth) {
+    setEmptyNote("strTimelineNote", "No weekly athlete data found.");
+    return;
+  }
+
+  const strengthRows = byWeekAth(activeStrAth);
+  const pitchRows = byScheduleAth(activeStrAth);
+  const strengthDates = strengthRows.map(r => r.Date);
+  const pitchDates = pitchRows.map(r => r.Date);
+  const allDates = [...new Set([...strengthDates, ...pitchDates])].sort();
+
+  const leftStyle = getDominantDatasetStyles(activeStrAth, "L");
+  const rightStyle = getDominantDatasetStyles(activeStrAth, "R");
+
+  const lKey = activeStrMetric === "er" ? "Left_ER" : "Left_IR";
+  const rKey = activeStrMetric === "er" ? "Right_ER" : "Right_IR";
+  const lbl = activeStrMetric === "er" ? "ER Strength" : "IR Strength";
+
+  const strengthMap = {};
+  strengthRows.forEach(r => { strengthMap[r.Date] = r; });
+
+  const pitchSet = new Set(pitchDates);
+  const leftData = allDates.map(d => strengthMap[d]?.[lKey] ?? null);
+  const rightData = allDates.map(d => strengthMap[d]?.[rKey] ?? null);
+
+  if (!allDates.length) {
+    setEmptyNote("strTimelineNote", "No ER/IR or schedule data available for this athlete.");
+    return;
+  }
+
+  const leftFlags = flaggedDropFromMax(leftData, 0.10);
+  const rightFlags = flaggedDropFromMax(rightData, 0.10);
+  const pitchPlugin = makePitchLinePlugin("pitchLinesStrength", allDates, pitchSet);
+
+  const leftDs = applyPointFlags({
+    label:"Left " + activeStrMetric.toUpperCase(),
+    data:leftData,
+    borderColor:leftStyle.color,
+    backgroundColor:leftStyle.color+"22",
+    borderWidth:3,
+    borderDash:leftStyle.dash,
+    borderCapStyle:leftStyle.cap,
+    tension:0.3,
+    fill:false,
+    spanGaps:true
+  }, leftData, leftFlags, leftStyle.color, 6);
+
+  const rightDs = applyPointFlags({
+    label:"Right " + activeStrMetric.toUpperCase(),
+    data:rightData,
+    borderColor:rightStyle.color,
+    backgroundColor:rightStyle.color+"22",
+    borderWidth:3,
+    borderDash:rightStyle.dash,
+    borderCapStyle:rightStyle.cap,
+    tension:0.3,
+    fill:false,
+    spanGaps:true
+  }, rightData, rightFlags, rightStyle.color, 6);
+
+  if (strTlChart) strTlChart.destroy();
+  strTlChart = new Chart(document.getElementById("strTimelineChart"), {
+    type:"line",
+    plugins:[pitchPlugin],
+    data:{
+      labels:allDates,
+      datasets:[
+        leftDs,
+        rightDs,
+        { label:"Pitched", data:allDates.map(() => null), borderColor:C_GRAY, backgroundColor:C_GRAY, borderWidth:2, borderDash:[5,5], pointRadius:0, pointHoverRadius:0 }
+      ]
+    },
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+      plugins:{
+        legend:{ position:"top", labels:{ boxWidth:12, padding:14, color:"#000000" } },
+        tooltip:{
+          callbacks:{
+            label:c => c.dataset.label === "Pitched" ? null : (c.parsed.y == null ? "No data" : ` ${c.dataset.label}: ${c.parsed.y} N`)
+          }
+        }
+      },
+      scales:{
+        x:{ grid:{ display:false }, title:{ display:true, text:"Date", color:"#000000" }, ticks:{ color:"#000000" } },
+        y:{ grid:{ color:C_GRID }, title:{ display:true, text:lbl + " (N)", color:"#000000" }, ticks:{ color:"#000000", callback:v => v + " N" } }
+      }
+    }
+  })
+}
+
+function renderGripTimeline() {
+  if (!activeStrAth) {
+    setEmptyNote("gripTimelineNote", "No weekly athlete data found.");
+    return;
+  }
+
+  const rows = byWeekAth(activeStrAth);
+  const pitchRows = byScheduleAth(activeStrAth);
+  const leftStyle = getDominantDatasetStyles(activeStrAth, "L");
+  const rightStyle = getDominantDatasetStyles(activeStrAth, "R");
+
+  const strengthDates = rows.map(r => r.Date);
+  const pitchDates = pitchRows.map(r => r.Date);
+  const allDates = [...new Set([...strengthDates, ...pitchDates])].sort();
+  const rowMap = {};
+  rows.forEach(r => { rowMap[r.Date] = r; });
+
+  if (!allDates.length) {
+    setEmptyNote("gripTimelineNote", "No grip, jump, RSI, or schedule data available for this athlete.");
+    return;
+  }
+
+  const pitchSet = new Set(pitchDates);
+  const pitchPlugin = makePitchLinePlugin("pitchLinesGripJump", allDates, pitchSet);
+
+  let datasets = [];
+  let noteText = "";
+
+  if (activeGripJumpMetric === "grip") {
+    const leftData = allDates.map(d => rowMap[d]?.Left_Grip ?? null);
+    const rightData = allDates.map(d => rowMap[d]?.Right_Grip ?? null);
+    const leftFlags = flaggedDropFromBaseline(leftData, 0.10);
+    const rightFlags = flaggedDropFromBaseline(rightData, 0.10);
+
+    datasets = [
+      applyPointFlags({
+        label:"Left Grip",
+        data:leftData,
+        borderColor:leftStyle.color,
+        backgroundColor:leftStyle.color+"22",
+        borderDash:leftStyle.dash,
+        borderCapStyle:leftStyle.cap,
+        borderWidth:3,
+        tension:0.3,
+        fill:false,
+        spanGaps:true
+      }, leftData, leftFlags, leftStyle.color, 5),
+      applyPointFlags({
+        label:"Right Grip",
+        data:rightData,
+        borderColor:rightStyle.color,
+        backgroundColor:rightStyle.color+"22",
+        borderDash:rightStyle.dash,
+        borderCapStyle:rightStyle.cap,
+        borderWidth:3,
+        tension:0.3,
+        fill:false,
+        spanGaps:true
+      }, rightData, rightFlags, rightStyle.color, 5),
+      { label:"Pitched", data:allDates.map(() => null), borderColor:C_GRAY, backgroundColor:C_GRAY, borderWidth:2, borderDash:[5,5], pointRadius:0, pointHoverRadius:0 }
+    ]
+  } else {
+    const jumpData = allDates.map(d => rowMap[d]?.Jump_Height ?? null);
+    const rsiData = allDates.map(d => rowMap[d]?.RSI ?? null);
+    const jumpFlags = flaggedDropFromMax(jumpData, 0.10);
+    const rsiFlags = flaggedDropFromMax(rsiData, 0.10);
+
+    datasets = [
+      applyPointFlags({
+        label:"Jump Height",
+        data:jumpData,
+        yAxisID:"y",
+        borderColor:C_GREEN,
+        backgroundColor:C_GREEN+"22",
+        borderWidth:3,
+        tension:0.3,
+        fill:false,
+        spanGaps:true
+      }, jumpData, jumpFlags, C_GREEN, 5),
+      applyPointFlags({
+        label:"RSI",
+        data:rsiData,
+        yAxisID:"y1",
+        borderColor:C_GOLD,
+        backgroundColor:C_GOLD+"22",
+        borderWidth:3,
+        tension:0.3,
+        fill:false,
+        spanGaps:true
+      }, rsiData, rsiFlags, C_GOLD, 5),
+      { label:"Pitched", data:allDates.map(() => null), yAxisID:"y", borderColor:C_GRAY, backgroundColor:C_GRAY, borderWidth:2, borderDash:[5,5], pointRadius:0, pointHoverRadius:0 }
+    ]
+  }
+
+  if (gripTlChart) gripTlChart.destroy();
+  gripTlChart = new Chart(document.getElementById("gripTimelineChart"), {
+    type:"line",
+    plugins:[pitchPlugin],
+    data:{ labels:allDates, datasets },
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+      interaction:{ mode:"index", intersect:false },
+      plugins:{
+        legend:{ position:"top", labels:{ boxWidth:12, padding:14, color:"#000000" } },
+        tooltip:{
+          callbacks:{
+            label:c => {
+              if (c.dataset.label === "Pitched") return null;
+              if (c.parsed.y == null) return "No data";
+              return ` ${c.dataset.label}: ${c.parsed.y}`;
+            }
+          }
+        }
+      },
+      scales: activeGripJumpMetric === "grip" ? {
+        x:{ grid:{ display:false }, title:{ display:true, text:"Date", color:"#000000" }, ticks:{ color:"#000000" } },
+        y:{ type:"linear", display:true, position:"left", grid:{ color:C_GRID }, title:{ display:true, text:"Grip", color:"#000000" }, ticks:{ color:"#000000" } }
+      } : {
+        x:{ grid:{ display:false }, title:{ display:true, text:"Date", color:"#000000" }, ticks:{ color:"#000000" } },
+        y:{ type:"linear", display:true, position:"left", grid:{ color:C_GRID }, title:{ display:true, text:"Jump Height", color:"#000000" }, ticks:{ color:"#000000" } },
+        y1:{ type:"linear", display:true, position:"right", grid:{ drawOnChartArea:false }, title:{ display:true, text:"RSI", color:"#000000" }, ticks:{ color:"#000000" } }
+      }
+    }
+  });
+
+  setEmptyNote("gripTimelineNote", noteText);
+}
+
+function renderVeloTimeline() {
+  if (!activeStrAth) {
+    setEmptyNote("veloTimelineNote", "No schedule athlete data found.");
+    return;
+  }
+
+  const rows = byScheduleAth(activeStrAth);
+  const dates = rows.map(r => r.Date);
+  const pitchSet = new Set(dates);
+
+  if (!dates.length) {
+    setEmptyNote("veloTimelineNote", "No velo/schedule data available for this athlete.");
+    return;
+  }
+
+  const pitchPlugin = makePitchLinePlugin("pitchLinesVelo", dates, pitchSet);
+
+  if (veloTlChart) veloTlChart.destroy();
+  veloTlChart = new Chart(document.getElementById("veloTimelineChart"), {
+    type:"line",
+    plugins:[pitchPlugin],
+    data:{
+      labels:dates,
+      datasets:[
+        { label:"Average Velo", data:rows.map(r => r.Avg_Velo ?? null), yAxisID:"y", borderColor:C_GREEN, backgroundColor:C_GREEN+"22", pointRadius:5, pointHoverRadius:7, borderWidth:3, tension:0.3, fill:false, spanGaps:true },
+        { label:"Max Velo", data:rows.map(r => r.Max_Velo ?? null), yAxisID:"y", borderColor:C_GOLD, backgroundColor:C_GOLD+"22", pointRadius:5, pointHoverRadius:7, borderWidth:3, tension:0.3, fill:false, spanGaps:true },
+        { label:"Disp", data:rows.map(r => r.Disp ?? null), yAxisID:"y1", borderColor:C_BLACK, backgroundColor:C_BLACK+"22", pointRadius:5, pointHoverRadius:7, borderWidth:3, tension:0.3, fill:false, spanGaps:true },
+        { label:"Pitched", data:dates.map(() => null), yAxisID:"y", borderColor:C_GRAY, backgroundColor:C_GRAY, borderWidth:2, borderDash:[5,5], pointRadius:0, pointHoverRadius:0 }
+      ]
+    },
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+      interaction:{ mode:"index", intersect:false },
+      plugins:{
+        legend:{ position:"top", labels:{ boxWidth:12, padding:14, color:"#000000" } },
+        tooltip:{
+          callbacks:{
+            label:c => {
+              if (c.dataset.label === "Pitched") return null;
+              if (c.parsed.y == null) return "No data";
+              if (c.dataset.label === "Average Velo" || c.dataset.label === "Max Velo") return ` ${c.dataset.label}: ${c.parsed.y} mph`;
+              return ` ${c.dataset.label}: ${c.parsed.y}`;
+            }
+          }
+        }
+      },
+      scales:{
+        x:{ grid:{ display:false }, title:{ display:true, text:"Date", color:"#000000" }, ticks:{ color:"#000000" } },
+        y:{ type:"linear", display:true, position:"left", grid:{ color:C_GRID }, title:{ display:true, text:"Velocity (mph)", color:"#000000" }, ticks:{ color:"#000000", callback:v => v + " mph" } },
+        y1:{ type:"linear", display:true, position:"right", grid:{ drawOnChartArea:false }, title:{ display:true, text:"Disp", color:"#000000" }, ticks:{ color:"#000000" } }
+      }
+    }
+  })
+}
+
+function renderShoulderMobilityTimeline() {
+  if (!activeStrAth) {
+    setEmptyNote("shoulderMobilityNote", "No weekly athlete data found.");
+    return;
+  }
+
+  const rows = byWeekAth(activeStrAth);
+  const pitchRows = byScheduleAth(activeStrAth);
+  const datesWeekly = rows.map(r => r.Date);
+  const pitchDates = pitchRows.map(r => r.Date);
+  const allDates = [...new Set([...datesWeekly, ...pitchDates])].sort();
+  const rowMap = {};
+  rows.forEach(r => { rowMap[r.Date] = r; });
+
+  const leftStyle = getDominantDatasetStyles(activeStrAth, "L");
+  const rightStyle = getDominantDatasetStyles(activeStrAth, "R");
+
+  if (!allDates.length) {
+    setEmptyNote("shoulderMobilityNote", "No shoulder mobility or schedule data available for this athlete.");
+    return;
+  }
+
+  const pitchSet = new Set(pitchDates);
+  const pitchPlugin = makePitchLinePlugin("pitchLinesShoulder", allDates, pitchSet);
+
+  let datasets = [];
+  let noteText = "";
+  let scales = {
+    x:{ grid:{ display:false }, ticks:{ color:"#000000" } },
+    y:{ grid:{ color:C_GRID }, title:{ display:true, text:"Shoulder Mobility", color:"#000000" }, ticks:{ color:"#000000" } }
+  };
+
+  if (activeShoulderMetric === "flexext") {
+    const leftFlex = allDates.map(d => rowMap[d]?.Left_Shoulder_Flexion ?? null);
+    const rightFlex = allDates.map(d => rowMap[d]?.Right_Shoulder_Flexion ?? null);
+    const leftExt = allDates.map(d => rowMap[d]?.Left_Shoulder_Extension ?? null);
+    const rightExt = allDates.map(d => rowMap[d]?.Right_Shoulder_Extension ?? null);
+
+    datasets = [
+      applyPointFlags({
+        label:"Left Flexion", data:leftFlex, borderColor:leftStyle.color, backgroundColor:leftStyle.color+"22",
+        borderDash:leftStyle.dash, borderCapStyle:leftStyle.cap, borderWidth:3, tension:0.3, fill:false, spanGaps:true
+      }, leftFlex, flaggedDropFromMax(leftFlex, 0.10), leftStyle.color, 5),
+      applyPointFlags({
+        label:"Right Flexion", data:rightFlex, borderColor:rightStyle.color, backgroundColor:rightStyle.color+"22",
+        borderDash:rightStyle.dash, borderCapStyle:rightStyle.cap, borderWidth:3, tension:0.3, fill:false, spanGaps:true
+      }, rightFlex, flaggedDropFromMax(rightFlex, 0.10), rightStyle.color, 5),
+      applyPointFlags({
+        label:"Left Extension", data:leftExt, borderColor:leftStyle.color, backgroundColor:leftStyle.color+"22",
+        borderDash:leftStyle.dash, borderCapStyle:leftStyle.cap, borderWidth:3, tension:0.3, fill:false, spanGaps:true, pointStyle:"rectRot"
+      }, leftExt, flaggedDropFromMax(leftExt, 0.10), leftStyle.color, 5),
+      applyPointFlags({
+        label:"Right Extension", data:rightExt, borderColor:rightStyle.color, backgroundColor:rightStyle.color+"22",
+        borderDash:rightStyle.dash, borderCapStyle:rightStyle.cap, borderWidth:3, tension:0.3, fill:false, spanGaps:true, pointStyle:"rectRot"
+      }, rightExt, flaggedDropFromMax(rightExt, 0.10), rightStyle.color, 5),
+      { label:"Pitched", data:allDates.map(() => null), borderColor:C_GRAY, backgroundColor:C_GRAY, borderWidth:2, borderDash:[5,5], pointRadius:0, pointHoverRadius:0 }
+    ]
+  } else if (activeShoulderMetric === "irer") {
+    const leftIR = allDates.map(d => rowMap[d]?.Left_Shoulder_IR ?? null);
+    const rightIR = allDates.map(d => rowMap[d]?.Right_Shoulder_IR ?? null);
+    const leftER = allDates.map(d => rowMap[d]?.Left_Shoulder_ER ?? null);
+    const rightER = allDates.map(d => rowMap[d]?.Right_Shoulder_ER ?? null);
+
+    datasets = [
+      applyPointFlags({
+        label:"Left IR", data:leftIR, borderColor:leftStyle.color, backgroundColor:leftStyle.color+"22",
+        borderDash:leftStyle.dash, borderCapStyle:leftStyle.cap, borderWidth:3, tension:0.3, fill:false, spanGaps:true
+      }, leftIR, flaggedDropFromMax(leftIR, 0.10), leftStyle.color, 5),
+      applyPointFlags({
+        label:"Right IR", data:rightIR, borderColor:rightStyle.color, backgroundColor:rightStyle.color+"22",
+        borderDash:rightStyle.dash, borderCapStyle:rightStyle.cap, borderWidth:3, tension:0.3, fill:false, spanGaps:true
+      }, rightIR, flaggedDropFromMax(rightIR, 0.10), rightStyle.color, 5),
+      applyPointFlags({
+        label:"Left ER", data:leftER, borderColor:leftStyle.color, backgroundColor:leftStyle.color+"22",
+        borderDash:leftStyle.dash, borderCapStyle:leftStyle.cap, borderWidth:3, tension:0.3, fill:false, spanGaps:true, pointStyle:"rectRot"
+      }, leftER, flaggedDropFromMax(leftER, 0.10), leftStyle.color, 5),
+      applyPointFlags({
+        label:"Right ER", data:rightER, borderColor:rightStyle.color, backgroundColor:rightStyle.color+"22",
+        borderDash:rightStyle.dash, borderCapStyle:rightStyle.cap, borderWidth:3, tension:0.3, fill:false, spanGaps:true, pointStyle:"rectRot"
+      }, rightER, flaggedDropFromMax(rightER, 0.10), rightStyle.color, 5),
+      { label:"Pitched", data:allDates.map(() => null), borderColor:C_GRAY, backgroundColor:C_GRAY, borderWidth:2, borderDash:[5,5], pointRadius:0, pointHoverRadius:0 }
+    ]
+  } else {
+    const leftArc = allDates.map(d => rowMap[d]?.L_Arc ?? null);
+    const rightArc = allDates.map(d => rowMap[d]?.R_Arc ?? null);
+    const ratio = allDates.map(d => rowMap[d]?.ER_IR_Ratio ?? null);
+
+    datasets = [
+      applyPointFlags({
+        label:"Left Arc", data:leftArc, yAxisID:"y", borderColor:leftStyle.color, backgroundColor:leftStyle.color+"22",
+        borderDash:leftStyle.dash, borderCapStyle:leftStyle.cap, borderWidth:3, tension:0.3, fill:false, spanGaps:true
+      }, leftArc, flaggedDropFromMax(leftArc, 0.10), leftStyle.color, 5),
+      applyPointFlags({
+        label:"Right Arc", data:rightArc, yAxisID:"y", borderColor:rightStyle.color, backgroundColor:rightStyle.color+"22",
+        borderDash:rightStyle.dash, borderCapStyle:rightStyle.cap, borderWidth:3, tension:0.3, fill:false, spanGaps:true
+      }, rightArc, flaggedDropFromMax(rightArc, 0.10), rightStyle.color, 5),
+      applyPointFlags({
+        label:"ER:IR Ratio", data:ratio, yAxisID:"y1", borderColor:C_BLUE, backgroundColor:C_BLUE+"22",
+        borderWidth:3, tension:0.3, fill:false, spanGaps:true
+      }, ratio, flaggedDropFromMax(ratio, 0.10), C_BLUE, 5),
+      { label:"Pitched", data:allDates.map(() => null), yAxisID:"y", borderColor:C_GRAY, backgroundColor:C_GRAY, borderWidth:2, borderDash:[5,5], pointRadius:0, pointHoverRadius:0 }
+    ];
+    scales = {
+      x:{ grid:{ display:false }, ticks:{ color:"#000000" } },
+      y:{ type:"linear", display:true, position:"left", grid:{ color:C_GRID }, title:{ display:true, text:"Arc (°)", color:"#000000" }, ticks:{ color:"#000000", callback:v => v + "°" } },
+      y1:{ type:"linear", display:true, position:"right", grid:{ drawOnChartArea:false }, title:{ display:true, text:"ER:IR Ratio", color:"#000000" }, ticks:{ color:"#000000" } }
+    }
+  }
+
+  if (shoulderMobilityChart) shoulderMobilityChart.destroy();
+  shoulderMobilityChart = new Chart(document.getElementById("shoulderMobilityChart"), {
+    type:"line",
+    plugins:[pitchPlugin],
+    data:{ labels:allDates, datasets },
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+      interaction:{ mode:"index", intersect:false },
+      plugins:{
+        legend:{ position:"top", labels:{ boxWidth:12, padding:12, color:"#000000" } },
+        tooltip:{
+          callbacks:{
+            label:c => {
+              if (c.dataset.label === "Pitched") return null;
+              if (c.parsed.y == null) return "No data";
+              if (c.dataset.label === "ER:IR Ratio") return ` ${c.dataset.label}: ${c.parsed.y}`;
+              return ` ${c.dataset.label}: ${c.parsed.y}°`;
+            }
+          }
+        }
+      },
+      scales
+    }
+  });
+
+  setEmptyNote("shoulderMobilityNote", noteText);
+}
+
+function renderCervicalTimeline() {
+  if (!activeStrAth) {
+    setEmptyNote("cervicalNote", "No weekly athlete data found.");
+    return;
+  }
+
+  const rows = byWeekAth(activeStrAth);
+  const pitchRows = byScheduleAth(activeStrAth);
+  const datesWeekly = rows.map(r => r.Date);
+  const pitchDates = pitchRows.map(r => r.Date);
+  const allDates = [...new Set([...datesWeekly, ...pitchDates])].sort();
+  const rowMap = {};
+  rows.forEach(r => { rowMap[r.Date] = r; });
+
+  const leftStyle = getDominantDatasetStyles(activeStrAth, "L");
+  const rightStyle = getDominantDatasetStyles(activeStrAth, "R");
+
+  if (!allDates.length) {
+    setEmptyNote("cervicalNote", "No cervical or schedule data available for this athlete.");
+    return;
+  }
+
+  const pitchSet = new Set(pitchDates);
+  const pitchPlugin = makePitchLinePlugin("pitchLinesCervical", allDates, pitchSet);
+
+  let datasets = [];
+  let noteText = "";
+
+  if (activeCervicalMetric === "flexext") {
+    const flex = allDates.map(d => rowMap[d]?.Cervical_Flexion ?? null);
+    const ext = allDates.map(d => rowMap[d]?.Cervical_Extension ?? null);
+
+    datasets = [
+      applyPointFlags({
+        label:"Flexion", data:flex, borderColor:C_GREEN, backgroundColor:C_GREEN+"22",
+        borderWidth:3, tension:0.3, fill:false, spanGaps:true
+      }, flex, flaggedDropFromMax(flex, 0.03), C_GREEN, 5),
+      applyPointFlags({
+        label:"Extension", data:ext, borderColor:C_GOLD, backgroundColor:C_GOLD+"22",
+        borderWidth:3, tension:0.3, fill:false, spanGaps:true
+      }, ext, flaggedDropFromMax(ext, 0.03), C_GOLD, 5),
+      { label:"Pitched", data:allDates.map(() => null), borderColor:C_GRAY, backgroundColor:C_GRAY, borderWidth:2, borderDash:[5,5], pointRadius:0, pointHoverRadius:0 }
+    ]
+  } else {
+    const leftRot = allDates.map(d => rowMap[d]?.Left_Cervical_Rotation ?? null);
+    const rightRot = allDates.map(d => rowMap[d]?.Right_Cervical_Rotation ?? null);
+
+    datasets = [
+      applyPointFlags({
+        label:"Left Rotation", data:leftRot, borderColor:leftStyle.color, backgroundColor:leftStyle.color+"22",
+        borderDash:leftStyle.dash, borderCapStyle:leftStyle.cap, borderWidth:3, tension:0.3, fill:false, spanGaps:true
+      }, leftRot, flaggedDropFromMax(leftRot, 0.03), leftStyle.color, 5),
+      applyPointFlags({
+        label:"Right Rotation", data:rightRot, borderColor:rightStyle.color, backgroundColor:rightStyle.color+"22",
+        borderDash:rightStyle.dash, borderCapStyle:rightStyle.cap, borderWidth:3, tension:0.3, fill:false, spanGaps:true
+      }, rightRot, flaggedDropFromMax(rightRot, 0.03), rightStyle.color, 5),
+      { label:"Pitched", data:allDates.map(() => null), borderColor:C_GRAY, backgroundColor:C_GRAY, borderWidth:2, borderDash:[5,5], pointRadius:0, pointHoverRadius:0 }
+    ]
+  }
+
+  if (cervicalChart) cervicalChart.destroy();
+  cervicalChart = new Chart(document.getElementById("cervicalChart"), {
+    type:"line",
+    plugins:[pitchPlugin],
+    data:{ labels:allDates, datasets },
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+      interaction:{ mode:"index", intersect:false },
+      plugins:{
+        legend:{ position:"top", labels:{ boxWidth:12, padding:12, color:"#000000" } },
+        tooltip:{
+          callbacks:{
+            label:c => {
+              if (c.dataset.label === "Pitched") return null;
+              if (c.parsed.y == null) return "No data";
+              return ` ${c.dataset.label}: ${c.parsed.y}`;
+            }
+          }
+        }
+      },
+      scales:{
+        x:{ grid:{ display:false }, ticks:{ color:"#000000" } },
+        y:{ grid:{ color:C_GRID }, title:{ display:true, text:"Cervical Mobility", color:"#000000" }, ticks:{ color:"#000000" } }
+      }
+    }
+  });
+
+  setEmptyNote("cervicalNote", noteText);
+}
+
+function renderBalanceMobilityTimeline() {
+  if (!activeStrAth) {
+    setEmptyNote("balanceMobilityNote", "No weekly athlete data found.");
+    return;
+  }
+
+  const rows = byWeekAth(activeStrAth);
+  const pitchRows = byScheduleAth(activeStrAth);
+  const datesWeekly = rows.map(r => r.Date);
+  const pitchDates = pitchRows.map(r => r.Date);
+  const allDates = [...new Set([...datesWeekly, ...pitchDates])].sort();
+  const rowMap = {};
+  rows.forEach(r => { rowMap[r.Date] = r; });
+
+  const leftStyle = getDominantDatasetStyles(activeStrAth, "L");
+  const rightStyle = getDominantDatasetStyles(activeStrAth, "R");
+
+  if (!allDates.length) {
+    setEmptyNote("balanceMobilityNote", "No balance, mobility, or schedule data available for this athlete.");
+    return;
+  }
+
+  const pitchSet = new Set(pitchDates);
+  const pitchPlugin = makePitchLinePlugin("pitchLinesBalance", allDates, pitchSet);
+
+  let datasets = [];
+  let noteText = "";
+
+  if (activeBalanceMetric === "balance") {
+    const leftVar = allDates.map(d => rowMap[d]?.Left_Single_Leg_Balance_Variability ?? null);
+    const rightVar = allDates.map(d => rowMap[d]?.Right_Single_Leg_Balance_Variability ?? null);
+
+    datasets = [
+      applyPointFlags({
+        label:"Left Variability", data:leftVar, borderColor:leftStyle.color, backgroundColor:leftStyle.color+"22",
+        borderDash:leftStyle.dash, borderCapStyle:leftStyle.cap, borderWidth:3, tension:0.3, fill:false, spanGaps:true
+      }, leftVar, flaggedIncreaseFromMin(leftVar, 0.10), leftStyle.color, 5),
+      applyPointFlags({
+        label:"Right Variability", data:rightVar, borderColor:rightStyle.color, backgroundColor:rightStyle.color+"22",
+        borderDash:rightStyle.dash, borderCapStyle:rightStyle.cap, borderWidth:3, tension:0.3, fill:false, spanGaps:true
+      }, rightVar, flaggedIncreaseFromMin(rightVar, 0.10), rightStyle.color, 5),
+      { label:"Pitched", data:allDates.map(() => null), borderColor:C_GRAY, backgroundColor:C_GRAY, borderWidth:2, borderDash:[5,5], pointRadius:0, pointHoverRadius:0 }
+    ]
+  } else {
+    const toe = allDates.map(d => rowMap[d]?.Toe_Touch ?? null);
+    const reach = allDates.map(d => rowMap[d]?.Reach_Back ?? null);
+    const dorsi = allDates.map(d => rowMap[d]?.Squat_Ankle_Dorsiflexion ?? null);
+
+    datasets = [
+      applyPointFlags({
+        label:"Toe Touch", data:toe, borderColor:C_GREEN, backgroundColor:C_GREEN+"22",
+        borderWidth:3, tension:0.3, fill:false, spanGaps:true
+      }, toe, flaggedDropFromMax(toe, 0.10), C_GREEN, 5),
+      applyPointFlags({
+        label:"Reach Back", data:reach, borderColor:C_GOLD, backgroundColor:C_GOLD+"22",
+        borderWidth:3, tension:0.3, fill:false, spanGaps:true
+      }, reach, flaggedDropFromMax(reach, 0.10), C_GOLD, 5),
+      applyPointFlags({
+        label:"Squat Ankle Dorsiflexion", data:dorsi, borderColor:C_BLACK, backgroundColor:C_BLACK+"22",
+        borderWidth:3, tension:0.3, fill:false, spanGaps:true
+      }, dorsi, flaggedDropFromMax(dorsi, 0.10), C_BLACK, 5),
+      { label:"Pitched", data:allDates.map(() => null), borderColor:C_GRAY, backgroundColor:C_GRAY, borderWidth:2, borderDash:[5,5], pointRadius:0, pointHoverRadius:0 }
+    ]
+  }
+
+  if (balanceMobilityChart) balanceMobilityChart.destroy();
+  balanceMobilityChart = new Chart(document.getElementById("balanceMobilityChart"), {
+    type:"line",
+    plugins:[pitchPlugin],
+    data:{ labels:allDates, datasets },
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+      interaction:{ mode:"index", intersect:false },
+      plugins:{
+        legend:{ position:"top", labels:{ boxWidth:12, padding:12, color:"#000000" } },
+        tooltip:{
+          callbacks:{
+            label:c => {
+              if (c.dataset.label === "Pitched") return null;
+              if (c.parsed.y == null) return "No data";
+              return ` ${c.dataset.label}: ${c.parsed.y}`;
+            }
+          }
+        }
+      },
+      scales:{
+        x:{ grid:{ display:false }, ticks:{ color:"#000000" } },
+        y:{ grid:{ color:C_GRID }, title:{ display:true, text:"Balance / Mobility", color:"#000000" }, ticks:{ color:"#000000" } }
+      }
+    }
+  });
+
+  setEmptyNote("balanceMobilityNote", noteText);
+}
+
+function renderApleyTorsoTimeline() {
+  if (!activeStrAth) {
+    setEmptyNote("apleyTorsoNote", "No weekly athlete data found.");
+    return;
+  }
+
+  const rows = byWeekAth(activeStrAth);
+  const pitchRows = byScheduleAth(activeStrAth);
+  const datesWeekly = rows.map(r => r.Date);
+  const pitchDates = pitchRows.map(r => r.Date);
+  const allDates = [...new Set([...datesWeekly, ...pitchDates])].sort();
+  const rowMap = {};
+  rows.forEach(r => { rowMap[r.Date] = r; });
+
+  const leftStyle = getDominantDatasetStyles(activeStrAth, "L");
+  const rightStyle = getDominantDatasetStyles(activeStrAth, "R");
+
+  if (!allDates.length) {
+    setEmptyNote("apleyTorsoNote", "No Apley, torso, or schedule data available for this athlete.");
+    return;
+  }
+
+  const pitchSet = new Set(pitchDates);
+  const pitchPlugin = makePitchLinePlugin("pitchLinesApleyTorso", allDates, pitchSet);
+
+  let datasets = [];
+  let noteText = "";
+
+  if (activeApleyMetric === "apley") {
+    const lo = allDates.map(d => rowMap[d]?.Left_Apley_Overhand ?? null);
+    const ro = allDates.map(d => rowMap[d]?.Right_Apley_Overhand ?? null);
+    const lu = allDates.map(d => rowMap[d]?.Left_Apley_Underhand ?? null);
+    const ru = allDates.map(d => rowMap[d]?.Right_Apley_Underhand ?? null);
+
+    datasets = [
+      applyPointFlags({
+        label:"Left Apley Overhand", data:lo, borderColor:leftStyle.color, backgroundColor:leftStyle.color+"22",
+        borderDash:leftStyle.dash, borderCapStyle:leftStyle.cap, borderWidth:3, tension:0.3, fill:false, spanGaps:true
+      }, lo, flaggedDropFromMax(lo, 0.12), leftStyle.color, 5),
+      applyPointFlags({
+        label:"Right Apley Overhand", data:ro, borderColor:rightStyle.color, backgroundColor:rightStyle.color+"22",
+        borderDash:rightStyle.dash, borderCapStyle:rightStyle.cap, borderWidth:3, tension:0.3, fill:false, spanGaps:true
+      }, ro, flaggedDropFromMax(ro, 0.12), rightStyle.color, 5),
+      applyPointFlags({
+        label:"Left Apley Underhand", data:lu, borderColor:leftStyle.color, backgroundColor:leftStyle.color+"22",
+        borderDash:leftStyle.dash, borderCapStyle:leftStyle.cap, borderWidth:3, tension:0.3, fill:false, spanGaps:true, pointStyle:"rectRot"
+      }, lu, flaggedDropFromMax(lu, 0.12), leftStyle.color, 5),
+      applyPointFlags({
+        label:"Right Apley Underhand", data:ru, borderColor:rightStyle.color, backgroundColor:rightStyle.color+"22",
+        borderDash:rightStyle.dash, borderCapStyle:rightStyle.cap, borderWidth:3, tension:0.3, fill:false, spanGaps:true, pointStyle:"rectRot"
+      }, ru, flaggedDropFromMax(ru, 0.12), rightStyle.color, 5),
+      { label:"Pitched", data:allDates.map(() => null), borderColor:C_GRAY, backgroundColor:C_GRAY, borderWidth:2, borderDash:[5,5], pointRadius:0, pointHoverRadius:0 }
+    ]
+  } else {
+    const lt = allDates.map(d => rowMap[d]?.Left_Torso_Rotation ?? null);
+    const rt = allDates.map(d => rowMap[d]?.Right_Torso_Rotation ?? null);
+
+    datasets = [
+      applyPointFlags({
+        label:"Left Torso Rotation", data:lt, borderColor:leftStyle.color, backgroundColor:leftStyle.color+"22",
+        borderDash:leftStyle.dash, borderCapStyle:leftStyle.cap, borderWidth:3, tension:0.3, fill:false, spanGaps:true
+      }, lt, flaggedDropFromMax(lt, 0.10), leftStyle.color, 5),
+      applyPointFlags({
+        label:"Right Torso Rotation", data:rt, borderColor:rightStyle.color, backgroundColor:rightStyle.color+"22",
+        borderDash:rightStyle.dash, borderCapStyle:rightStyle.cap, borderWidth:3, tension:0.3, fill:false, spanGaps:true
+      }, rt, flaggedDropFromMax(rt, 0.10), rightStyle.color, 5),
+      { label:"Pitched", data:allDates.map(() => null), borderColor:C_GRAY, backgroundColor:C_GRAY, borderWidth:2, borderDash:[5,5], pointRadius:0, pointHoverRadius:0 }
+    ]
+  }
+
+  if (apleyTorsoChart) apleyTorsoChart.destroy();
+  apleyTorsoChart = new Chart(document.getElementById("apleyTorsoChart"), {
+    type:"line",
+    plugins:[pitchPlugin],
+    data:{ labels:allDates, datasets },
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+      interaction:{ mode:"index", intersect:false },
+      plugins:{
+        legend:{ position:"top", labels:{ boxWidth:12, padding:12, color:"#000000" } },
+        tooltip:{
+          callbacks:{
+            label:c => {
+              if (c.dataset.label === "Pitched") return null;
+              if (c.parsed.y == null) return "No data";
+              return ` ${c.dataset.label}: ${c.parsed.y}`;
+            }
+          }
+        }
+      },
+      scales:{
+        x:{ grid:{ display:false }, ticks:{ color:"#000000" } },
+        y:{ grid:{ color:C_GRID }, title:{ display:true, text:"Apley / Torso Rotation", color:"#000000" }, ticks:{ color:"#000000" } }
+      }
+    }
+  });
+
+  setEmptyNote("apleyTorsoNote", noteText);
+}
+
+function getMetricInfo(metric) {
+  const map = {
+    left_er:{ key:"Left_ER", label:"Left ER", color:C_GREEN },
+    right_er:{ key:"Right_ER", label:"Right ER", color:C_GOLD },
+    left_ir:{ key:"Left_IR", label:"Left IR", color:C_GREEN },
+    right_ir:{ key:"Right_IR", label:"Right IR", color:C_GOLD },
+    left_grip:{ key:"Left_Grip", label:"Left Grip", color:C_GREEN },
+    right_grip:{ key:"Right_Grip", label:"Right Grip", color:C_GOLD },
+    jump_height:{ key:"Jump_Height", label:"Jump Height", color:C_GREEN },
+    rsi:{ key:"RSI", label:"RSI", color:C_GOLD }
+  };
+  return map[metric];
+}
+
+function buildSnapChart() {
+  const info = getMetricInfo(activeSnapMetric);
+  const peaks = {};
+  (WEEKLY || []).forEach(r => {
+    const v = r[info.key];
+    if (v == null) return;
+    if (!(r.Name in peaks) || v > peaks[r.Name]) peaks[r.Name] = v;
+  });
+
+  const sorted = Object.entries(peaks).map(([name, value]) => ({ name, value })).sort((a,b) => b.value - a.value);
+  const labels = sorted.map(d => d.name);
+  const values = sorted.map(d => d.value);
+
+  if (snapChart) snapChart.destroy();
+  snapChart = new Chart(document.getElementById("snapBarChart"), {
+    type:"bar",
+    data:{
+      labels,
+      datasets:[
+        { label:info.label, data:values, backgroundColor:info.color, borderColor:info.color, borderWidth:1, borderRadius:4 }
+      ]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{
+        legend:{ position:"top", labels:{ boxWidth:12, padding:14, color:"#000000" } },
+        tooltip:{ callbacks:{ label:c => ` ${c.dataset.label}: ${c.parsed.y}` } }
+      },
+      scales:{
+        x:{ grid:{ display:false }, ticks:{ color:"#000000" } },
+        y:{ grid:{ color:C_GRID }, title:{ display:true, text:info.label, color:"#000000" }, ticks:{ color:"#000000" } }
+      }
+    }
+  });
+}
+
+function buildStrengthCards() {
+  const el = document.getElementById("strengthCards");
+  el.innerHTML = "";
+
+  const peaks = {};
+  (WEEKLY || []).forEach(r => {
+    if (!peaks[r.Name]) peaks[r.Name] = {
+      Left_Grip:null, Right_Grip:null,
+      Left_ER:null, Right_ER:null,
+      Left_IR:null, Right_IR:null,
+      Jump_Height:null, RSI:null
+    };
+    ["Left_Grip","Right_Grip","Left_ER","Right_ER","Left_IR","Right_IR","Jump_Height","RSI"].forEach(k => {
+      if (r[k] != null && (peaks[r.Name][k] == null || r[k] > peaks[r.Name][k])) peaks[r.Name][k] = r[k];
+    });
+  });
+
+  const athletes = Object.keys(peaks).sort();
+  const allVals = athletes.flatMap(n => Object.values(peaks[n])).filter(v => v != null);
+  const mx = allVals.length ? Math.max(...allVals) : 300;
+
+  function bar(val, clr) {
+    if (val == null) return `<div class="s-track"><div class="s-fill" style="width:0%"></div></div>`;
+    return `<div class="s-track"><div class="s-fill" style="width:${(val / mx * 100).toFixed(1)}%;background:${clr}"><span>${val}</span></div></div>`;
+  }
+
+  athletes.forEach(name => {
+    const r = peaks[name];
+    const c = document.createElement("div");
+    c.className = "strength-card";
+    c.innerHTML = `
+      <div class="strength-card-name">${name}</div>
+      <div class="strength-metric">Grip Peak</div>
+      <div class="strength-bars">
+        <div class="s-row"><span class="s-lbl">Left</span>${bar(r.Left_Grip, C_GREEN)}</div>
+        <div class="s-row"><span class="s-lbl">Right</span>${bar(r.Right_Grip, C_GOLD)}</div>
+      </div>
+      <hr style="border:none;border-top:1px solid #dde3ed;margin:8px 0">
+      <div class="strength-metric">ER Peak</div>
+      <div class="strength-bars">
+        <div class="s-row"><span class="s-lbl">Left</span>${bar(r.Left_ER, C_GREEN)}</div>
+        <div class="s-row"><span class="s-lbl">Right</span>${bar(r.Right_ER, C_GOLD)}</div>
+      </div>
+      <hr style="border:none;border-top:1px solid #dde3ed;margin:8px 0">
+      <div class="strength-metric">IR Peak</div>
+      <div class="strength-bars">
+        <div class="s-row"><span class="s-lbl">Left</span>${bar(r.Left_IR, C_GREEN)}</div>
+        <div class="s-row"><span class="s-lbl">Right</span>${bar(r.Right_IR, C_GOLD)}</div>
+      </div>
+      <hr style="border:none;border-top:1px solid #dde3ed;margin:8px 0">
+      <div class="strength-metric">Jump Height / RSI Peak</div>
+      <div class="strength-bars">
+        <div class="s-row"><span class="s-lbl">Jump</span>${bar(r.Jump_Height, C_GREEN)}</div>
+        <div class="s-row"><span class="s-lbl">RSI</span>${bar(r.RSI, C_GOLD)}</div>
+      </div>`;
+    el.appendChild(c);
+  });
+}
+
+function renderMonthly() {
+  if (!activeMonthDate) return;
+  const rows = byMonthDate(activeMonthDate);
+  buildArcChart(rows);
+  buildIrErChart(rows);
+  buildArcCards(rows);
+  buildMonthlyTable(rows);
+}
+
+document.getElementById("romTabs").addEventListener("click", e => {
+  const b = e.target.closest(".tab");
+  if (!b) return;
+  document.querySelectorAll("#romTabs .tab").forEach(t => t.classList.remove("active"));
+  b.classList.add("active");
+  activeRomMetric = b.dataset.metric;
+  renderRomTimeline();
+});
+
+document.getElementById("strTabs").addEventListener("click", e => {
+  const b = e.target.closest(".tab");
+  if (!b) return;
+  document.querySelectorAll("#strTabs .tab").forEach(t => t.classList.remove("active"));
+  b.classList.add("active");
+  activeStrMetric = b.dataset.metric;
+  renderStrTimeline();
+});
+
+document.getElementById("gripJumpTabs").addEventListener("click", e => {
+  const b = e.target.closest(".tab");
+  if (!b) return;
+  document.querySelectorAll("#gripJumpTabs .tab").forEach(t => t.classList.remove("active"));
+  b.classList.add("active");
+  activeGripJumpMetric = b.dataset.metric;
+  renderGripTimeline();
+});
+
+document.getElementById("shoulderTabs").addEventListener("click", e => {
+  const b = e.target.closest(".tab");
+  if (!b) return;
+  document.querySelectorAll("#shoulderTabs .tab").forEach(t => t.classList.remove("active"));
+  b.classList.add("active");
+  activeShoulderMetric = b.dataset.metric;
+  renderShoulderMobilityTimeline();
+});
+
+document.getElementById("cervicalTabs").addEventListener("click", e => {
+  const b = e.target.closest(".tab");
+  if (!b) return;
+  document.querySelectorAll("#cervicalTabs .tab").forEach(t => t.classList.remove("active"));
+  b.classList.add("active");
+  activeCervicalMetric = b.dataset.metric;
+  renderCervicalTimeline();
+});
+
+document.getElementById("balanceTabs").addEventListener("click", e => {
+  const b = e.target.closest(".tab");
+  if (!b) return;
+  document.querySelectorAll("#balanceTabs .tab").forEach(t => t.classList.remove("active"));
+  b.classList.add("active");
+  activeBalanceMetric = b.dataset.metric;
+  renderBalanceMobilityTimeline();
+});
+
+document.getElementById("apleyTabs").addEventListener("click", e => {
+  const b = e.target.closest(".tab");
+  if (!b) return;
+  document.querySelectorAll("#apleyTabs .tab").forEach(t => t.classList.remove("active"));
+  b.classList.add("active");
+  activeApleyMetric = b.dataset.metric;
+  renderApleyTorsoTimeline();
+});
+
+document.getElementById("snapTabs").addEventListener("click", e => {
+  const b = e.target.closest(".tab");
+  if (!b) return;
+  document.querySelectorAll("#snapTabs .tab").forEach(t => t.classList.remove("active"));
+  b.classList.add("active");
+  activeSnapMetric = b.dataset.metric;
+  buildSnapChart();
+});
+
+initSelectors();
+renderMonthly();
+renderRomTimeline();
+renderStrTimeline();
+renderGripTimeline();
+renderVeloTimeline();
+renderShoulderMobilityTimeline();
+renderCervicalTimeline();
+renderBalanceMobilityTimeline();
+renderApleyTorsoTimeline();
+buildSnapChart();
+buildStrengthCards();
+</script>
+</body>
+</html>
