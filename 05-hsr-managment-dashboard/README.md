@@ -83,3 +83,5 @@ The dashboard reads the GPS sheet as text first and then converts dates manually
 - DT
 - lubridate
 - stringr
+
+![HSR Management Dashboard](HSR_report.png)
