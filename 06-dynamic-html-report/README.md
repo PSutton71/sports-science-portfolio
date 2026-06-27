@@ -63,3 +63,13 @@ The report includes sections such as:
 
 ## Practical Value
 This project demonstrates how athlete monitoring data can be translated into a practical decision-support tool for sports performance settings. It shows the ability to connect data processing in R with front-end reporting tools that improve communication, usability, and applied interpretation for coaches and practitioners. 
+
+![Dynamic HTML Report 1](html_1.png)
+
+![Dynamic HTML Report 2](html_2.png)
+
+![Dynamic HTML Report 3](html_3.png)
+
+![Dynamic HTML Report 4](html_4.png)
+
+![Dynamic HTML Report 5](html_5.png)
