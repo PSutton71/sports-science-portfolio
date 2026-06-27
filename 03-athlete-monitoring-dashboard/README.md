@@ -30,3 +30,15 @@ Developed a multi-tab Shiny application that displays workload data, wellness vi
 - Provides a quick and accessible reference for performance, workload, and wellness data in one location.
 - Supports timely decision-making through an interface that can be updated rapidly as new data become available.
 - Can be used during weekly staff meetings, to inform return-to-play protocols, to monitor athlete progress, and to support periodization decisions.
+
+![Dashboard 1](dashboard_1.png)
+
+![Dashboard 2](dashboard_2.png)
+
+![Dashboard 3](dashboard_3.png)
+
+![Dashboard 4](dashboard_4.png)
+
+![Dashboard 5](dashboard_5.png)
+
+![Dashboard 6](dashboard_6.png)
