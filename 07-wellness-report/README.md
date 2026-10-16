@@ -44,7 +44,7 @@ The script also prints a console summary of the latest day, including a "check i
 - Individual item scores show *why* an athlete is flagged, such as poor sleep versus high soreness, so the response can match the cause.
 - The report can be shared or opened on a phone before practice for fast decision-making about modifications and athlete readiness.
 
-![Wellness report screenshot](Image-1.png)
-![Wellness report screenshot](Image-2.png)
-![Wellness report screenshot](Image-3.png)
-![Wellness report screenshot](Image-4.png)
+![Wellness report screenshot1](Image-1.png)
+![Wellness report screenshot2](Image-2.png)
+![Wellness report screenshot3](Image-3.png)
+![Wellness report screenshot4](Image-4.png)

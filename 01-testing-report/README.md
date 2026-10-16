@@ -45,9 +45,9 @@ A simple console menu lets staff generate a report for one athlete, or every ath
 - The team dashboard gives staff a leaderboard view of every score and a dropdown to review any athlete's readiness profile before planning training.
 - Individual reports can be handed directly to athletes so they understand their results and training priorities.
 
-![Athlete performance report screenshot](Image-1.png")
-![Athlete performance report screenshot](Image-2.png")
-![Athlete performance report screenshot](Image-3.png")
-![Athlete performance report screenshot](Image-4.png")
-![Athlete performance report screenshot](Image-5.png")
-![Athlete performance report screenshot](Image-6.png")
+![Athlete performance report screenshot1](Image-1.png")
+![Athlete performance report screenshot2](Image-2.png")
+![Athlete performance report screenshot3](Image-3.png")
+![Athlete performance report screenshot4](Image-4.png")
+![Athlete performance report screenshot5](Image-5.png")
+![Athlete performance report screenshot6](Image-6.png")
