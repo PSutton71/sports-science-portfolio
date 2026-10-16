@@ -1,0 +1,1957 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Testing Report</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --primary:#006A52;
+  --primary-dark:#0f2d52;
+  --accent:#FBD872;
+  --light:#00965E;
+  --bg:#edf1f7;
+  --panel:#ffffff;
+  --track:#e9eef2;
+  --border:#dde3ed;
+  --text:#1a1a2e;
+  --muted:#6b7694;
+  --green:#1e7d40;
+  --red:#c0392b;
+  --amber:#c97000;
+  --gray:#8a8f98;
+  --black:#111111;
+}
+
+body {
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  padding:2rem 1rem;
+}
+
+.page {
+  max-width:1180px;
+  margin:0 auto;
+  background:var(--panel);
+  border-radius:12px;
+  overflow:hidden;
+  box-shadow:0 4px 24px rgba(0,0,0,.10);
+}
+
+.header {
+  background:linear-gradient(135deg,var(--primary) 0%,var(--primary-dark) 100%);
+  color:white;
+  padding:2rem 2.5rem;
+  display:flex;
+  align-items:center;
+  gap:2rem;
+}
+
+.header-badge {
+  width:110px;
+  height:110px;
+  background:rgba(255,255,255,.12);
+  border:2px solid rgba(255,255,255,.35);
+  border-radius:12px;
+  padding:6px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-shrink:0;
+  overflow:hidden;
+}
+
+.header-badge-img {
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  display:block;
+}
+
+.header h1 {
+  font-size:1.5rem;
+  font-weight:700;
+  margin-bottom:4px;
+}
+
+.header p {
+  font-size:.88rem;
+  opacity:.85;
+  margin-bottom:10px;
+}
+
+.header-chips {
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+}
+
+.chip {
+  background:rgba(255,255,255,.18);
+  border-radius:20px;
+  padding:3px 12px;
+  font-size:.78rem;
+  font-weight:600;
+}
+
+.section-divider {
+  background:var(--primary);
+  color:white;
+  padding:.6rem 2.5rem;
+  font-size:.8rem;
+  font-weight:700;
+  letter-spacing:.06em;
+  text-transform:uppercase;
+}
+
+.controls {
+  background:var(--light);
+  border-bottom:1px solid var(--border);
+  padding:1rem 2.5rem;
+  display:flex;
+  gap:16px;
+  flex-wrap:wrap;
+  align-items:center;
+}
+
+.controls label {
+  font-size:.8rem;
+  font-weight:600;
+  color:#000000;
+  margin-right:6px;
+}
+
+.controls select {
+  font-size:.85rem;
+  padding:6px 12px;
+  border:1px solid var(--border);
+  border-radius:6px;
+  background:white;
+  color:#000000;
+  cursor:pointer;
+}
+
+.body {
+  padding:2rem 2.5rem;
+}
+
+.section {
+  margin-bottom:2.5rem;
+}
+
+.section-title {
+  font-size:.95rem;
+  font-weight:700;
+  color:var(--text);
+  border-left:4px solid var(--accent);
+  padding-left:12px;
+  margin-bottom:1.2rem;
+}
+
+.section-title small {
+  font-size:.75rem;
+  font-weight:400;
+  color:var(--muted);
+  margin-left:8px;
+}
+
+.chart-wrap {
+  position:relative;
+  width:100%;
+}
+
+.note {
+  font-size:.76rem;
+  color:var(--muted);
+  margin-top:8px;
+  line-height:1.5;
+}
+
+.arc-grid {
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(190px,1fr));
+  gap:12px;
+  margin-bottom:1rem;
+}
+
+.arc-card {
+  background:#ffffff;
+  border:1.5px solid #006A52;
+  border-radius:10px;
+  padding:14px;
+  text-align:center;
+}
+
+.arc-card-name {
+  font-size:.75rem;
+  font-weight:700;
+  color:#006A52;
+  margin-bottom:8px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+.arc-bars {
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+
+.arc-row {
+  display:flex;
+  align-items:center;
+  gap:6px;
+  font-size:.72rem;
+}
+
+.arc-label {
+  width:22px;
+  font-weight:600;
+  color:var(--muted);
+  flex-shrink:0;
+  font-size:.68rem;
+}
+
+.arc-bar-track {
+  flex:1;
+  background:var(--track);
+  border-radius:4px;
+  height:14px;
+  overflow:hidden;
+}
+
+.arc-bar-fill {
+  height:100%;
+  border-radius:4px;
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  padding-right:4px;
+}
+
+.arc-bar-fill span {
+  font-size:.65rem;
+  font-weight:700;
+  color:#1A1A1A;
+  white-space:nowrap;
+}
+
+.arc-diff {
+  font-size:.7rem;
+  font-weight:700;
+  width:44px;
+  text-align:right;
+  flex-shrink:0;
+}
+
+.diff-ok { color:var(--green); }
+.diff-warn { color:var(--amber); }
+.diff-bad { color:var(--red); }
+
+.strength-grid {
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(230px,1fr));
+  gap:12px;
+  margin-bottom:1rem;
+}
+
+.strength-card {
+  background:#ffffff;
+  border:1.5px solid #006A52;
+  border-radius:10px;
+  padding:14px;
+}
+
+.strength-card-name {
+  font-size:.78rem;
+  font-weight:700;
+  color:#006A52;
+  margin-bottom:10px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+.strength-metric {
+  font-size:.72rem;
+  color:var(--muted);
+  margin-bottom:4px;
+  font-weight:600;
+}
+
+.strength-bars {
+  display:flex;
+  flex-direction:column;
+  gap:5px;
+  margin-bottom:8px;
+}
+
+.s-row {
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+
+.s-lbl {
+  width:34px;
+  font-size:.68rem;
+  font-weight:700;
+  flex-shrink:0;
+  color:#000000;
+}
+
+.s-track {
+  flex:1;
+  background:#e0e7ef;
+  border-radius:4px;
+  height:12px;
+  overflow:hidden;
+}
+
+.s-fill {
+  height:100%;
+  border-radius:4px;
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  padding-right:3px;
+}
+
+.s-fill span {
+  font-size:.6rem;
+  font-weight:700;
+  color:#1A1A1A;
+  white-space:nowrap;
+}
+
+.table-wrap {
+  overflow-x:auto;
+}
+
+table {
+  width:100%;
+  border-collapse:collapse;
+  font-size:.78rem;
+  min-width:700px;
+}
+
+thead tr {
+  background:var(--primary);
+}
+
+thead th {
+  color:white;
+  padding:9px 10px;
+  text-align:center;
+  font-weight:600;
+  font-size:.74rem;
+  white-space:nowrap;
+}
+
+thead th:first-child {
+  text-align:left;
+}
+
+tbody td {
+  padding:7px 10px;
+  border-bottom:1px solid var(--border);
+  text-align:center;
+}
+
+tbody td:first-child {
+  text-align:left;
+  font-weight:700;
+  color:var(--primary);
+}
+
+tbody tr:nth-child(even) td {
+  background:rgba(0,106,82,0.08);
+}
+
+.cell-bad { color:var(--red); font-weight:700; }
+.cell-warn { color:var(--amber); font-weight:700; }
+.cell-good { color:var(--green); font-weight:700; }
+
+.tab-bar {
+  display:flex;
+  gap:6px;
+  flex-wrap:wrap;
+  margin-bottom:12px;
+}
+
+.tab {
+  padding:5px 14px;
+  border-radius:20px;
+  font-size:.78rem;
+  font-weight:600;
+  cursor:pointer;
+  border:1.5px solid var(--border);
+  background:white;
+  color:var(--muted);
+  transition:all .15s;
+}
+
+.tab.active,
+.tab:hover {
+  background:var(--primary);
+  color:white;
+  border-color:var(--primary);
+}
+
+.thresh-legend {
+  display:flex;
+  gap:14px;
+  flex-wrap:wrap;
+  font-size:.75rem;
+  margin-bottom:10px;
+}
+
+.thresh-badge {
+  display:flex;
+  align-items:center;
+  gap:5px;
+}
+
+.thresh-dot {
+  width:10px;
+  height:10px;
+  border-radius:50%;
+  flex-shrink:0;
+}
+
+.footer {
+  background:var(--light);
+  border-top:1px solid var(--border);
+  padding:.9rem 2.5rem;
+  font-size:.73rem;
+  color:var(--muted);
+  display:flex;
+  justify-content:space-between;
+  flex-wrap:wrap;
+  gap:4px;
+}
+
+@media(max-width:640px) {
+  .body { padding:1.2rem; }
+  .header { padding:1.2rem; flex-direction:column; gap:1rem; }
+  .controls { padding:.8rem 1.2rem; }
+  .arc-grid, .strength-grid { grid-template-columns:repeat(1,1fr); }
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+<div class="header">
+  <div class="header-badge">
+    <img src="./logo.png" alt="Fill with logo" class="header-badge-img">
+  </div>
+  <div>
+    <h1>Testing Report</h1>
+    <p>Baseball</p>
+    <div class="header-chips">
+      <span class="chip">Dominant = solid green</span>
+      <span class="chip">Non-dominant = dotted gold</span>
+    </div>
+  </div>
+</div>
+
+<div class="section-divider">Weekly Assessment</div>
+
+<div class="controls">
+  <div><label for="sel-athlete-str">Athlete</label><select id="sel-athlete-str"></select></div>
+</div>
+
+<div class="body">
+
+  <div class="section">
+    <div class="section-title">IR &amp; ER Strength Timeline
+      <small>Left vs. right arm &middot; selected athlete</small>
+    </div>
+    <div class="tab-bar" id="strTabs">
+      <button class="tab active" data-metric="er">ER</button>
+      <button class="tab" data-metric="ir">IR</button>
+    </div>
+    <div class="chart-wrap" style="height:300px;"><canvas id="strTimelineChart"></canvas></div>
+    <p class="note" id="strTimelineNote"></p>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Grip / Jump Timeline
+      <small>Selected athlete</small>
+    </div>
+    <div class="tab-bar" id="gripJumpTabs">
+      <button class="tab active" data-metric="grip">Grip</button>
+      <button class="tab" data-metric="jump">Jump / RSI</button>
+    </div>
+    <div class="chart-wrap" style="height:320px;"><canvas id="gripTimelineChart"></canvas></div>
+    <p class="note" id="gripTimelineNote"></p>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Pitching Velocity Timeline
+      <small>Average velo, max velo, and Disp &middot; selected athlete</small>
+    </div>
+    <div class="chart-wrap" style="height:320px;"><canvas id="veloTimelineChart"></canvas></div>
+    <p class="note" id="veloTimelineNote"></p>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Shoulder Mobility Timeline
+      <small>Selected athlete</small>
+    </div>
+    <div class="tab-bar" id="shoulderTabs">
+      <button class="tab active" data-metric="flexext">Flexion / Extension</button>
+      <button class="tab" data-metric="irer">IR / ER</button>
+      <button class="tab" data-metric="arc_ratio">Arc / ER:IR Ratio</button>
+    </div>
+    <div class="chart-wrap" style="height:340px;"><canvas id="shoulderMobilityChart"></canvas></div>
+    <p class="note" id="shoulderMobilityNote"></p>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Cervical Timeline
+      <small>Selected athlete</small>
+    </div>
+    <div class="tab-bar" id="cervicalTabs">
+      <button class="tab active" data-metric="flexext">Flexion / Extension</button>
+      <button class="tab" data-metric="rotation">Left / Right Rotation</button>
+    </div>
+    <div class="chart-wrap" style="height:320px;"><canvas id="cervicalChart"></canvas></div>
+    <p class="note" id="cervicalNote"></p>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Balance and Mobility Timeline
+      <small>Selected athlete</small>
+    </div>
+    <div class="tab-bar" id="balanceTabs">
+      <button class="tab active" data-metric="balance">R / L Variability</button>
+      <button class="tab" data-metric="mobility">Toe Touch / Reach Back / Dorsiflexion</button>
+    </div>
+    <div class="chart-wrap" style="height:340px;"><canvas id="balanceMobilityChart"></canvas></div>
+    <p class="note" id="balanceMobilityNote"></p>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Apley and Torso Rotation Timeline
+      <small>Selected athlete</small>
+    </div>
+    <div class="tab-bar" id="apleyTabs">
+      <button class="tab active" data-metric="apley">Apley</button>
+      <button class="tab" data-metric="torso">Torso Rotation</button>
+    </div>
+    <div class="chart-wrap" style="height:340px;"><canvas id="apleyTorsoChart"></canvas></div>
+    <p class="note" id="apleyTorsoNote"></p>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Strength Leaderboard
+      <small>Peak value per athlete</small>
+    </div>
+    <div class="tab-bar" id="snapTabs">
+      <button class="tab active" data-metric="left_er">Left ER</button>
+      <button class="tab" data-metric="right_er">Right ER</button>
+      <button class="tab" data-metric="left_ir">Left IR</button>
+      <button class="tab" data-metric="right_ir">Right IR</button>
+      <button class="tab" data-metric="left_grip">Left Grip</button>
+      <button class="tab" data-metric="right_grip">Right Grip</button>
+      <button class="tab" data-metric="jump_height">Jump Height</button>
+      <button class="tab" data-metric="rsi">RSI</button>
+    </div>
+    <div class="chart-wrap" style="height:360px;"><canvas id="snapBarChart"></canvas></div>
+    <p class="note">Values reflect each athlete’s highest recorded value across all testing dates for the selected metric.</p>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Peak Strength Cards
+      <small>Peak weekly values across all recorded dates</small>
+    </div>
+    <div class="strength-grid" id="strengthCards"></div>
+  </div>
+
+</div>
+
+<div class="section-divider">Monthly ROM Assessment</div>
+
+<div class="controls" id="monthly-controls">
+  <div><label for="sel-date">Assessment Date</label><select id="sel-date"></select></div>
+  <div><label for="sel-athlete-rom-inline">Athlete</label><select id="sel-athlete-rom-inline"></select></div>
+</div>
+
+<div class="body">
+
+  <div class="section">
+    <div class="section-title">Total Motion Arc — Throw vs. Non-Throw
+      <small>IR + ER &middot; all athletes &middot; selected date</small>
+    </div>
+    <div class="chart-wrap" style="height:320px;"><canvas id="arcBarChart"></canvas></div>
+    <p class="note">Bars turn red when arc difference &gt; 10&deg;.</p>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Internal &amp; External Rotation — All Athletes
+      <small>Grouped by motion &middot; selected date</small>
+    </div>
+    <div class="chart-wrap" style="height:320px;"><canvas id="irErChart"></canvas></div>
+    <p class="note">Watch for throwing-arm IR &lt; 40&deg; and IR loss that exceeds ER gain.</p>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Individual Arc Breakdown
+      <small>Diff = Non-Throw &minus; Throw &middot; positive = non-throw arm larger</small>
+    </div>
+    <div class="thresh-legend">
+      <span class="thresh-badge"><span class="thresh-dot" style="background:#1e7d40"></span>&lt;5&deg; Symmetric</span>
+      <span class="thresh-badge"><span class="thresh-dot" style="background:#c97000"></span>5&ndash;10&deg; Monitor</span>
+      <span class="thresh-badge"><span class="thresh-dot" style="background:#c0392b"></span>&gt;10&deg; Concern</span>
+    </div>
+    <div class="arc-grid" id="arcCards"></div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Athlete ROM Timeline
+      <small>Select athlete below &middot; toggle metric below</small>
+    </div>
+    <div class="tab-bar" id="romTabs">
+      <button class="tab active" data-metric="arc">Total Arc</button>
+      <button class="tab" data-metric="ir">IR</button>
+      <button class="tab" data-metric="er">ER</button>
+    </div>
+    <div class="chart-wrap" style="height:300px;"><canvas id="romTimelineChart"></canvas></div>
+    <p class="note" id="romTimelineNote"></p>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Monthly Data Table
+      <small>Selected date &middot; IR / ER / Arc</small>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Athlete</th>
+            <th>IR Throw</th>
+            <th>IR Non-Throw</th>
+            <th>IR Diff</th>
+            <th>ER Throw</th>
+            <th>ER Non-Throw</th>
+            <th>ER Diff</th>
+            <th>Arc Throw</th>
+            <th>Arc Non-Throw</th>
+            <th>Arc Diff</th>
+          </tr>
+        </thead>
+        <tbody id="monthlyTableBody"></tbody>
+      </table>
+    </div>
+    <p class="note">
+      <span class="cell-bad">Red &gt;10&deg;</span> &nbsp;&middot;&nbsp;
+      <span class="cell-warn">Amber 5&ndash;10&deg;</span> &nbsp;&middot;&nbsp;
+      <span class="cell-good">Green &lt;5&deg;</span>
+    </p>
+  </div>
+
+</div>
+
+<div class="footer">
+  <span>Shoulder ROM &amp; Weekly Assessment &nbsp;&middot;&nbsp; Baseball</span>
+  <span>Arc diff target &lt;5&deg; &nbsp;&middot;&nbsp; Dominant side = solid green</span>
+</div>
+</div>
+
+<script>
+const MONTHLY = [{"Date":"2026-05-01","Name":"Athlete 12","IR_Throw":40,"IR_NonThrow":48,"IR_Diff":8,"ER_Throw":142,"ER_NonThrow":133.5,"ER_Diff":-8.5,"Arc_Throw":182,"Arc_NonThrow":181.5,"Arc_Diff":-0.5},{"Date":"2026-05-01","Name":"Athlete 13","IR_Throw":32,"IR_NonThrow":47.5,"IR_Diff":15.5,"ER_Throw":119.5,"ER_NonThrow":107.5,"ER_Diff":-12,"Arc_Throw":151.5,"Arc_NonThrow":155,"Arc_Diff":3.5},{"Date":"2026-05-01","Name":"Athlete 2","IR_Throw":37,"IR_NonThrow":58,"IR_Diff":21,"ER_Throw":123.5,"ER_NonThrow":111.5,"ER_Diff":-12,"Arc_Throw":160.5,"Arc_NonThrow":169.5,"Arc_Diff":9},{"Date":"2026-05-01","Name":"Athlete 3","IR_Throw":47,"IR_NonThrow":61,"IR_Diff":14,"ER_Throw":116.5,"ER_NonThrow":118,"ER_Diff":1.5,"Arc_Throw":163.5,"Arc_NonThrow":179,"Arc_Diff":15.5},{"Date":"2026-05-01","Name":"Athlete 4","IR_Throw":43,"IR_NonThrow":62,"IR_Diff":19,"ER_Throw":121.5,"ER_NonThrow":105,"ER_Diff":-16.5,"Arc_Throw":164.5,"Arc_NonThrow":167,"Arc_Diff":2.5},{"Date":"2026-05-01","Name":"Athlete 5","IR_Throw":38,"IR_NonThrow":55,"IR_Diff":17,"ER_Throw":106,"ER_NonThrow":103.5,"ER_Diff":-2.5,"Arc_Throw":144,"Arc_NonThrow":158.5,"Arc_Diff":14.5},{"Date":"2026-05-01","Name":"Athlete 7","IR_Throw":38.5,"IR_NonThrow":62.5,"IR_Diff":24,"ER_Throw":120.5,"ER_NonThrow":113,"ER_Diff":-7.5,"Arc_Throw":159,"Arc_NonThrow":175.5,"Arc_Diff":16.5},{"Date":"2026-05-01","Name":"Athlete 8","IR_Throw":31.5,"IR_NonThrow":45.5,"IR_Diff":14,"ER_Throw":136,"ER_NonThrow":107.5,"ER_Diff":-28.5,"Arc_Throw":167.5,"Arc_NonThrow":153,"Arc_Diff":-14.5},{"Date":"2026-05-01","Name":"Athlete 9","IR_Throw":38,"IR_NonThrow":61.5,"IR_Diff":23.5,"ER_Throw":125,"ER_NonThrow":109.5,"ER_Diff":-15.5,"Arc_Throw":163,"Arc_NonThrow":171,"Arc_Diff":8},{"Date":"2026-05-15","Name":"Athlete 12","IR_Throw":40,"IR_NonThrow":48,"IR_Diff":8,"ER_Throw":142,"ER_NonThrow":133,"ER_Diff":-9,"Arc_Throw":182,"Arc_NonThrow":181.5,"Arc_Diff":-0.5},{"Date":"2026-05-15","Name":"Athlete 13","IR_Throw":44,"IR_NonThrow":52,"IR_Diff":8,"ER_Throw":145,"ER_NonThrow":136,"ER_Diff":-9,"Arc_Throw":185,"Arc_NonThrow":184,"Arc_Diff":-1},{"Date":"2026-05-15","Name":"Athlete 2","IR_Throw":46,"IR_NonThrow":54,"IR_Diff":8,"ER_Throw":147,"ER_NonThrow":138,"ER_Diff":-9,"Arc_Throw":187,"Arc_NonThrow":186,"Arc_Diff":-1},{"Date":"2026-05-15","Name":"Athlete 3","IR_Throw":41,"IR_NonThrow":49,"IR_Diff":8,"ER_Throw":141,"ER_NonThrow":133,"ER_Diff":-8,"Arc_Throw":181,"Arc_NonThrow":180,"Arc_Diff":-1},{"Date":"2026-05-15","Name":"Athlete 4","IR_Throw":45,"IR_NonThrow":53,"IR_Diff":8,"ER_Throw":146,"ER_NonThrow":137,"ER_Diff":-9,"Arc_Throw":186,"Arc_NonThrow":185,"Arc_Diff":-1},{"Date":"2026-05-15","Name":"Athlete 5","IR_Throw":43,"IR_NonThrow":51,"IR_Diff":8,"ER_Throw":144,"ER_NonThrow":135,"ER_Diff":-9,"Arc_Throw":184,"Arc_NonThrow":183,"Arc_Diff":-1},{"Date":"2026-05-15","Name":"Athlete 7","IR_Throw":47,"IR_NonThrow":55,"IR_Diff":8,"ER_Throw":148,"ER_NonThrow":139,"ER_Diff":-9,"Arc_Throw":188,"Arc_NonThrow":187,"Arc_Diff":-1},{"Date":"2026-05-15","Name":"Athlete 8","IR_Throw":42,"IR_NonThrow":50,"IR_Diff":8,"ER_Throw":143,"ER_NonThrow":134,"ER_Diff":-9,"Arc_Throw":183,"Arc_NonThrow":182,"Arc_Diff":-1},{"Date":"2026-05-15","Name":"Athlete 9","IR_Throw":39,"IR_NonThrow":47,"IR_Diff":8,"ER_Throw":140,"ER_NonThrow":132,"ER_Diff":-8,"Arc_Throw":180,"Arc_NonThrow":179,"Arc_Diff":-1},{"Date":"2026-05-29","Name":"Athlete 12","IR_Throw":40,"IR_NonThrow":48,"IR_Diff":8,"ER_Throw":141,"ER_NonThrow":133,"ER_Diff":-8,"Arc_Throw":181,"Arc_NonThrow":180,"Arc_Diff":-1},{"Date":"2026-05-29","Name":"Athlete 13","IR_Throw":44,"IR_NonThrow":52,"IR_Diff":8,"ER_Throw":145,"ER_NonThrow":137,"ER_Diff":-8,"Arc_Throw":185,"Arc_NonThrow":184,"Arc_Diff":-1},{"Date":"2026-05-29","Name":"Athlete 2","IR_Throw":46,"IR_NonThrow":54,"IR_Diff":8,"ER_Throw":147,"ER_NonThrow":139,"ER_Diff":-8,"Arc_Throw":187,"Arc_NonThrow":186,"Arc_Diff":-1},{"Date":"2026-05-29","Name":"Athlete 3","IR_Throw":41,"IR_NonThrow":49,"IR_Diff":8,"ER_Throw":142,"ER_NonThrow":134,"ER_Diff":-8,"Arc_Throw":182,"Arc_NonThrow":181,"Arc_Diff":-1},{"Date":"2026-05-29","Name":"Athlete 4","IR_Throw":45,"IR_NonThrow":53,"IR_Diff":8,"ER_Throw":146,"ER_NonThrow":138,"ER_Diff":-8,"Arc_Throw":186,"Arc_NonThrow":185,"Arc_Diff":-1},{"Date":"2026-05-29","Name":"Athlete 5","IR_Throw":43,"IR_NonThrow":51,"IR_Diff":8,"ER_Throw":144,"ER_NonThrow":136,"ER_Diff":-8,"Arc_Throw":184,"Arc_NonThrow":183,"Arc_Diff":-1},{"Date":"2026-05-29","Name":"Athlete 7","IR_Throw":47,"IR_NonThrow":55,"IR_Diff":8,"ER_Throw":148,"ER_NonThrow":140,"ER_Diff":-8,"Arc_Throw":188,"Arc_NonThrow":187,"Arc_Diff":-1},{"Date":"2026-05-29","Name":"Athlete 8","IR_Throw":42,"IR_NonThrow":50,"IR_Diff":8,"ER_Throw":143,"ER_NonThrow":135,"ER_Diff":-8,"Arc_Throw":183,"Arc_NonThrow":182,"Arc_Diff":-1},{"Date":"2026-05-29","Name":"Athlete 9","IR_Throw":43,"IR_NonThrow":51,"IR_Diff":8,"ER_Throw":144,"ER_NonThrow":136,"ER_Diff":-8,"Arc_Throw":184,"Arc_NonThrow":183,"Arc_Diff":-1}];
+const WEEKLY = [{"Date":"2016-06-18","Name":"Athlete 12","Visit":"R1","Pitches":null,"Left_Grip":121,"Right_Grip":138,"Jump_Height":null,"RSI":null,"Left_ER":null,"Right_ER":null,"Left_IR":null,"Right_IR":null,"Left_Shoulder_Flexion":null,"Right_Shoulder_Flexion":null,"Left_Shoulder_Extension":null,"Right_Shoulder_Extension":null,"Left_Shoulder_IR":null,"Right_Shoulder_IR":null,"Left_Shoulder_ER":null,"Right_Shoulder_ER":null,"L_Arc":null,"R_Arc":null,"ER_IR_Ratio":null,"Cervical_Flexion":null,"Cervical_Extension":null,"Left_Cervical_Rotation":null,"Right_Cervical_Rotation":null,"Left_Single_Leg_Balance_Variability":null,"Right_Single_Leg_Balance_Variability":null,"Toe_Touch":null,"Reach_Back":null,"Squat_Ankle_Dorsiflexion":null,"Left_Apley_Overhand":null,"Right_Apley_Overhand":null,"Left_Apley_Underhand":null,"Right_Apley_Underhand":null,"Left_Torso_Rotation":null,"Right_Torso_Rotation":null},{"Date":"2026-06-03","Name":"Athlete 4","Visit":"R1","Pitches":null,"Left_Grip":157,"Right_Grip":137,"Jump_Height":null,"RSI":null,"Left_ER":null,"Right_ER":null,"Left_IR":null,"Right_IR":null,"Left_Shoulder_Flexion":179.73,"Right_Shoulder_Flexion":174.546,"Left_Shoulder_Extension":65.569,"Right_Shoulder_Extension":56.295,"Left_Shoulder_IR":84.217,"Right_Shoulder_IR":78.599,"Left_Shoulder_ER":85.41,"Right_Shoulder_ER":94.386,"L_Arc":169.627,"R_Arc":172.985,"ER_IR_Ratio":null,"Cervical_Flexion":null,"Cervical_Extension":null,"Left_Cervical_Rotation":59.666,"Right_Cervical_Rotation":61.692,"Left_Single_Leg_Balance_Variability":5.782,"Right_Single_Leg_Balance_Variability":4.837,"Toe_Touch":null,"Reach_Back":null,"Squat_Ankle_Dorsiflexion":null,"Left_Apley_Overhand":null,"Right_Apley_Overhand":null,"Left_Apley_Underhand":null,"Right_Apley_Underhand":null,"Left_Torso_Rotation":null,"Right_Torso_Rotation":null},{"Date":"2026-06-03","Name":"Athlete 4","Visit":"R1","Pitches":38,"Left_Grip":157,"Right_Grip":137,"Jump_Height":171,"RSI":2.5147,"Left_ER":162,"Right_ER":150,"Left_IR":170,"Right_IR":162,"Left_Shoulder_Flexion":179.73,"Right_Shoulder_Flexion":174.55,"Left_Shoulder_Extension":65.57,"Right_Shoulder_Extension":56.3,"Left_Shoulder_IR":84.22,"Right_Shoulder_IR":78.6,"Left_Shoulder_ER":85.41,"Right_Shoulder_ER":94.39,"L_Arc":169.63,"R_Arc":172.99,"ER_IR_Ratio":0.9529,"Cervical_Flexion":59.67,"Cervical_Extension":61.69,"Left_Cervical_Rotation":5.78,"Right_Cervical_Rotation":4.84,"Left_Single_Leg_Balance_Variability":0.62,"Right_Single_Leg_Balance_Variability":0.88,"Toe_Touch":12.4,"Reach_Back":7.9,"Squat_Ankle_Dorsiflexion":21.3,"Left_Apley_Overhand":19.8,"Right_Apley_Overhand":24.6,"Left_Apley_Underhand":23.1,"Right_Apley_Underhand":169.63,"Left_Torso_Rotation":28.4,"Right_Torso_Rotation":0.72},{"Date":"2026-06-04","Name":"Athlete 12","Visit":"R1","Pitches":null,"Left_Grip":122,"Right_Grip":127,"Jump_Height":22.028,"RSI":0.2833,"Left_ER":158,"Right_ER":151,"Left_IR":228,"Right_IR":224,"Left_Shoulder_Flexion":196.214,"Right_Shoulder_Flexion":199.259,"Left_Shoulder_Extension":77.567,"Right_Shoulder_Extension":73.77,"Left_Shoulder_IR":112.992,"Right_Shoulder_IR":90.254,"Left_Shoulder_ER":101.865,"Right_Shoulder_ER":135.081,"L_Arc":214.857,"R_Arc":225.335,"ER_IR_Ratio":0.693,"Cervical_Flexion":66.203,"Cervical_Extension":80.661,"Left_Cervical_Rotation":71.854,"Right_Cervical_Rotation":72.839,"Left_Single_Leg_Balance_Variability":6.04,"Right_Single_Leg_Balance_Variability":3.183,"Toe_Touch":-4.336,"Reach_Back":167.166,"Squat_Ankle_Dorsiflexion":34.41,"Left_Apley_Overhand":-5.964,"Right_Apley_Overhand":-4.098,"Left_Apley_Underhand":21.44,"Right_Apley_Underhand":18.852,"Left_Torso_Rotation":31.672,"Right_Torso_Rotation":24.825},{"Date":"2026-06-04","Name":"Athlete 12","Visit":"R1","Pitches":39,"Left_Grip":122,"Right_Grip":127,"Jump_Height":22.03,"RSI":0.2592,"Left_ER":158,"Right_ER":151,"Left_IR":228,"Right_IR":224,"Left_Shoulder_Flexion":196.21,"Right_Shoulder_Flexion":199.26,"Left_Shoulder_Extension":77.57,"Right_Shoulder_Extension":73.77,"Left_Shoulder_IR":112.99,"Right_Shoulder_IR":90.25,"Left_Shoulder_ER":101.86,"Right_Shoulder_ER":135.08,"L_Arc":214.85,"R_Arc":225.33,"ER_IR_Ratio":0.693,"Cervical_Flexion":66.2,"Cervical_Extension":80.66,"Left_Cervical_Rotation":71.85,"Right_Cervical_Rotation":72.84,"Left_Single_Leg_Balance_Variability":6.04,"Right_Single_Leg_Balance_Variability":3.18,"Toe_Touch":-4.34,"Reach_Back":167.17,"Squat_Ankle_Dorsiflexion":34.41,"Left_Apley_Overhand":-5.96,"Right_Apley_Overhand":-4.1,"Left_Apley_Underhand":21.44,"Right_Apley_Underhand":18.85,"Left_Torso_Rotation":31.67,"Right_Torso_Rotation":24.83},{"Date":"2026-06-04","Name":"Athlete 2","Visit":"R1","Pitches":null,"Left_Grip":124,"Right_Grip":126,"Jump_Height":20.16,"RSI":0.2952,"Left_ER":173,"Right_ER":118,"Left_IR":273,"Right_IR":256,"Left_Shoulder_Flexion":null,"Right_Shoulder_Flexion":198.212,"Left_Shoulder_Extension":null,"Right_Shoulder_Extension":63.48,"Left_Shoulder_IR":null,"Right_Shoulder_IR":61.079,"Left_Shoulder_ER":null,"Right_Shoulder_ER":124.986,"L_Arc":null,"R_Arc":186.065,"ER_IR_Ratio":0.6337,"Cervical_Flexion":65.478,"Cervical_Extension":59.381,"Left_Cervical_Rotation":70.078,"Right_Cervical_Rotation":65.958,"Left_Single_Leg_Balance_Variability":3.48,"Right_Single_Leg_Balance_Variability":5.112,"Toe_Touch":1.42,"Reach_Back":162.481,"Squat_Ankle_Dorsiflexion":28.491,"Left_Apley_Overhand":1.629,"Right_Apley_Overhand":14.397,"Left_Apley_Underhand":20.836,"Right_Apley_Underhand":21.196,"Left_Torso_Rotation":48.169,"Right_Torso_Rotation":51.276},{"Date":"2026-06-04","Name":"Athlete 2","Visit":"R1","Pitches":42,"Left_Grip":124,"Right_Grip":126,"Jump_Height":0.78,"RSI":0.03,"Left_ER":173,"Right_ER":118,"Left_IR":273,"Right_IR":256,"Left_Shoulder_Flexion":198.21,"Right_Shoulder_Flexion":65.48,"Left_Shoulder_Extension":63.48,"Right_Shoulder_Extension":59.38,"Left_Shoulder_IR":61.08,"Right_Shoulder_IR":70.08,"Left_Shoulder_ER":124.99,"Right_Shoulder_ER":65.96,"L_Arc":186.07,"R_Arc":136.04,"ER_IR_Ratio":0.6337,"Cervical_Flexion":3.48,"Cervical_Extension":5.11,"Left_Cervical_Rotation":1.42,"Right_Cervical_Rotation":162.48,"Left_Single_Leg_Balance_Variability":28.49,"Right_Single_Leg_Balance_Variability":1.63,"Toe_Touch":20.84,"Reach_Back":14.4,"Squat_Ankle_Dorsiflexion":21.2,"Left_Apley_Overhand":48.17,"Right_Apley_Overhand":20.16,"Left_Apley_Underhand":51.28,"Right_Apley_Underhand":0.68,"Left_Torso_Rotation":0.3,"Right_Torso_Rotation":20.04},{"Date":"2026-06-05","Name":"Athlete 2","Visit":"R2","Pitches":20,"Left_Grip":null,"Right_Grip":null,"Jump_Height":null,"RSI":null,"Left_ER":159,"Right_ER":153,"Left_IR":253,"Right_IR":268,"Left_Shoulder_Flexion":null,"Right_Shoulder_Flexion":null,"Left_Shoulder_Extension":null,"Right_Shoulder_Extension":null,"Left_Shoulder_IR":null,"Right_Shoulder_IR":null,"Left_Shoulder_ER":null,"Right_Shoulder_ER":null,"L_Arc":null,"R_Arc":null,"ER_IR_Ratio":0.6285,"Cervical_Flexion":null,"Cervical_Extension":null,"Left_Cervical_Rotation":70.078,"Right_Cervical_Rotation":65.958,"Left_Single_Leg_Balance_Variability":2.735,"Right_Single_Leg_Balance_Variability":6.01,"Toe_Touch":null,"Reach_Back":null,"Squat_Ankle_Dorsiflexion":null,"Left_Apley_Overhand":null,"Right_Apley_Overhand":null,"Left_Apley_Underhand":null,"Right_Apley_Underhand":null,"Left_Torso_Rotation":null,"Right_Torso_Rotation":null},{"Date":"2026-06-05","Name":"Athlete 2","Visit":"R2","Pitches":20,"Left_Grip":153,"Right_Grip":159,"Jump_Height":0,"RSI":0,"Left_ER":151,"Right_ER":153,"Left_IR":253,"Right_IR":268,"Left_Shoulder_Flexion":192.11,"Right_Shoulder_Flexion":151.33,"Left_Shoulder_Extension":70.08,"Right_Shoulder_Extension":63.12,"Left_Shoulder_IR":65.96,"Right_Shoulder_IR":58.9,"Left_Shoulder_ER":62.5,"Right_Shoulder_ER":72.3,"L_Arc":128.46,"R_Arc":131.2,"ER_IR_Ratio":0.5968,"Cervical_Flexion":21,"Cervical_Extension":20.5,"Left_Cervical_Rotation":2.74,"Right_Cervical_Rotation":6.01,"Left_Single_Leg_Balance_Variability":5.11,"Right_Single_Leg_Balance_Variability":4,"Toe_Touch":14.8,"Reach_Back":10.2,"Squat_Ankle_Dorsiflexion":19.6,"Left_Apley_Overhand":17.3,"Right_Apley_Overhand":16.8,"Left_Apley_Underhand":15.4,"Right_Apley_Underhand":0,"Left_Torso_Rotation":0.63,"Right_Torso_Rotation":0.63},{"Date":"2026-06-05","Name":"Athlete 7","Visit":"S1","Pitches":55,"Left_Grip":null,"Right_Grip":null,"Jump_Height":23.853,"RSI":0.3498,"Left_ER":163,"Right_ER":144,"Left_IR":276,"Right_IR":240,"Left_Shoulder_Flexion":174.286,"Right_Shoulder_Flexion":169.798,"Left_Shoulder_Extension":64.496,"Right_Shoulder_Extension":39.859,"Left_Shoulder_IR":63.464,"Right_Shoulder_IR":85.332,"Left_Shoulder_ER":107.642,"Right_Shoulder_ER":103.037,"L_Arc":171.106,"R_Arc":188.369,"ER_IR_Ratio":0.5906,"Cervical_Flexion":50.623,"Cervical_Extension":42.151,"Left_Cervical_Rotation":63.385,"Right_Cervical_Rotation":61.228,"Left_Single_Leg_Balance_Variability":8.496,"Right_Single_Leg_Balance_Variability":7.323,"Toe_Touch":0.287,"Reach_Back":145.906,"Squat_Ankle_Dorsiflexion":23.414,"Left_Apley_Overhand":1.368,"Right_Apley_Overhand":3.465,"Left_Apley_Underhand":15.471,"Right_Apley_Underhand":24.297,"Left_Torso_Rotation":43.906,"Right_Torso_Rotation":31.332},{"Date":"2026-06-05","Name":"Athlete 7","Visit":"S1","Pitches":55,"Left_Grip":144,"Right_Grip":163,"Jump_Height":23.61,"RSI":0.3472,"Left_ER":163,"Right_ER":150,"Left_IR":276,"Right_IR":240,"Left_Shoulder_Flexion":174.29,"Right_Shoulder_Flexion":169.8,"Left_Shoulder_Extension":64.5,"Right_Shoulder_Extension":39.86,"Left_Shoulder_IR":63.46,"Right_Shoulder_IR":85.33,"Left_Shoulder_ER":107.64,"Right_Shoulder_ER":103.04,"L_Arc":171.1,"R_Arc":188.37,"ER_IR_Ratio":0.5906,"Cervical_Flexion":50.62,"Cervical_Extension":42.15,"Left_Cervical_Rotation":63.39,"Right_Cervical_Rotation":61.23,"Left_Single_Leg_Balance_Variability":8.5,"Right_Single_Leg_Balance_Variability":7.32,"Toe_Touch":0.29,"Reach_Back":145.91,"Squat_Ankle_Dorsiflexion":23.41,"Left_Apley_Overhand":1.37,"Right_Apley_Overhand":3.47,"Left_Apley_Underhand":15.47,"Right_Apley_Underhand":24.3,"Left_Torso_Rotation":43.91,"Right_Torso_Rotation":31.33},{"Date":"2026-06-05","Name":"Athlete 9","Visit":"R2","Pitches":54,"Left_Grip":null,"Right_Grip":null,"Jump_Height":19.544,"RSI":0.3394,"Left_ER":128,"Right_ER":108,"Left_IR":274,"Right_IR":302,"Left_Shoulder_Flexion":205.905,"Right_Shoulder_Flexion":198.334,"Left_Shoulder_Extension":60.405,"Right_Shoulder_Extension":56.517,"Left_Shoulder_IR":96.255,"Right_Shoulder_IR":45.778,"Left_Shoulder_ER":94.245,"Right_Shoulder_ER":108.784,"L_Arc":190.5,"R_Arc":154.562,"ER_IR_Ratio":0.4672,"Cervical_Flexion":55.057,"Cervical_Extension":49.672,"Left_Cervical_Rotation":60.624,"Right_Cervical_Rotation":64.213,"Left_Single_Leg_Balance_Variability":3.491,"Right_Single_Leg_Balance_Variability":2.65,"Toe_Touch":-5.733,"Reach_Back":148.632,"Squat_Ankle_Dorsiflexion":17.498,"Left_Apley_Overhand":-8.437,"Right_Apley_Overhand":12.622,"Left_Apley_Underhand":24.115,"Right_Apley_Underhand":23.713,"Left_Torso_Rotation":45.752,"Right_Torso_Rotation":46.868},{"Date":"2026-06-05","Name":"Athlete 9","Visit":"R2","Pitches":54,"Left_Grip":110,"Right_Grip":128,"Jump_Height":18.4,"RSI":0.3407,"Left_ER":120,"Right_ER":105,"Left_IR":274,"Right_IR":302,"Left_Shoulder_Flexion":205.91,"Right_Shoulder_Flexion":198.33,"Left_Shoulder_Extension":60.41,"Right_Shoulder_Extension":56.52,"Left_Shoulder_IR":96.26,"Right_Shoulder_IR":45.78,"Left_Shoulder_ER":94.25,"Right_Shoulder_ER":108.78,"L_Arc":190.51,"R_Arc":154.56,"ER_IR_Ratio":0.438,"Cervical_Flexion":55.06,"Cervical_Extension":49.67,"Left_Cervical_Rotation":60.62,"Right_Cervical_Rotation":64.21,"Left_Single_Leg_Balance_Variability":3.49,"Right_Single_Leg_Balance_Variability":2.65,"Toe_Touch":-5.73,"Reach_Back":148.63,"Squat_Ankle_Dorsiflexion":17.5,"Left_Apley_Overhand":-8.44,"Right_Apley_Overhand":12.62,"Left_Apley_Underhand":24.12,"Right_Apley_Underhand":23.71,"Left_Torso_Rotation":45.75,"Right_Torso_Rotation":46.87},{"Date":"2026-06-06","Name":"Athlete 3","Visit":"R2","Pitches":46,"Left_Grip":null,"Right_Grip":null,"Jump_Height":23.9,"RSI":0.2958,"Left_ER":135,"Right_ER":105,"Left_IR":254,"Right_IR":141,"Left_Shoulder_Flexion":191.329,"Right_Shoulder_Flexion":149.775,"Left_Shoulder_Extension":63.629,"Right_Shoulder_Extension":42.433,"Left_Shoulder_IR":101.219,"Right_Shoulder_IR":77.645,"Left_Shoulder_ER":109.764,"Right_Shoulder_ER":115.426,"L_Arc":210.983,"R_Arc":193.071,"ER_IR_Ratio":0.5315,"Cervical_Flexion":56.887,"Cervical_Extension":54.526,"Left_Cervical_Rotation":57.504,"Right_Cervical_Rotation":63.124,"Left_Single_Leg_Balance_Variability":5.15,"Right_Single_Leg_Balance_Variability":3.677,"Toe_Touch":0.932,"Reach_Back":142.649,"Squat_Ankle_Dorsiflexion":28.474,"Left_Apley_Overhand":3.61,"Right_Apley_Overhand":-51.041,"Left_Apley_Underhand":22.596,"Right_Apley_Underhand":29.319,"Left_Torso_Rotation":37.948,"Right_Torso_Rotation":28.306},{"Date":"2026-06-06","Name":"Athlete 3","Visit":"R2","Pitches":109.76,"Left_Grip":135,"Right_Grip":105,"Jump_Height":0.92,"RSI":0.0368,"Left_ER":254,"Right_ER":141,"Left_IR":63.63,"Right_IR":191.33,"Left_Shoulder_Flexion":149.78,"Right_Shoulder_Flexion":56.89,"Left_Shoulder_Extension":42.43,"Right_Shoulder_Extension":54.53,"Left_Shoulder_IR":77.65,"Right_Shoulder_IR":57.5,"Left_Shoulder_ER":115.43,"Right_Shoulder_ER":63.12,"L_Arc":193.08,"R_Arc":120.62,"ER_IR_Ratio":3.9918,"Cervical_Flexion":5.15,"Cervical_Extension":3.68,"Left_Cervical_Rotation":0.93,"Right_Cervical_Rotation":142.65,"Left_Single_Leg_Balance_Variability":28.47,"Right_Single_Leg_Balance_Variability":3.61,"Toe_Touch":22.6,"Reach_Back":-51.04,"Squat_Ankle_Dorsiflexion":29.32,"Left_Apley_Overhand":37.95,"Right_Apley_Overhand":23.9,"Left_Apley_Underhand":28.31,"Right_Apley_Underhand":0.81,"Left_Torso_Rotation":0.3,"Right_Torso_Rotation":23.27},{"Date":"2026-06-06","Name":"Athlete 5","Visit":"S1","Pitches":31,"Left_Grip":null,"Right_Grip":null,"Jump_Height":19.186,"RSI":0.2453,"Left_ER":null,"Right_ER":null,"Left_IR":null,"Right_IR":null,"Left_Shoulder_Flexion":161.792,"Right_Shoulder_Flexion":166.12,"Left_Shoulder_Extension":45.18,"Right_Shoulder_Extension":47.941,"Left_Shoulder_IR":59.052,"Right_Shoulder_IR":56.102,"Left_Shoulder_ER":94.537,"Right_Shoulder_ER":118.662,"L_Arc":153.589,"R_Arc":174.764,"ER_IR_Ratio":null,"Cervical_Flexion":41.371,"Cervical_Extension":36.566,"Left_Cervical_Rotation":58.905,"Right_Cervical_Rotation":61.426,"Left_Single_Leg_Balance_Variability":2.896,"Right_Single_Leg_Balance_Variability":3.004,"Toe_Touch":3.246,"Reach_Back":164.241,"Squat_Ankle_Dorsiflexion":30.173,"Left_Apley_Overhand":-4.979,"Right_Apley_Overhand":2.027,"Left_Apley_Underhand":23.543,"Right_Apley_Underhand":31.955,"Left_Torso_Rotation":34.356,"Right_Torso_Rotation":32.719},{"Date":"2026-06-06","Name":"Athlete 5","Visit":"S1","Pitches":31,"Left_Grip":130,"Right_Grip":132,"Jump_Height":19.01,"RSI":0.2437,"Left_ER":161,"Right_ER":155,"Left_IR":168,"Right_IR":171,"Left_Shoulder_Flexion":161.79,"Right_Shoulder_Flexion":166.12,"Left_Shoulder_Extension":45.18,"Right_Shoulder_Extension":47.94,"Left_Shoulder_IR":59.05,"Right_Shoulder_IR":56.1,"Left_Shoulder_ER":94.54,"Right_Shoulder_ER":118.66,"L_Arc":153.59,"R_Arc":174.76,"ER_IR_Ratio":0.9583,"Cervical_Flexion":41.37,"Cervical_Extension":36.57,"Left_Cervical_Rotation":58.91,"Right_Cervical_Rotation":61.43,"Left_Single_Leg_Balance_Variability":2.9,"Right_Single_Leg_Balance_Variability":3,"Toe_Touch":3.25,"Reach_Back":164.24,"Squat_Ankle_Dorsiflexion":30.17,"Left_Apley_Overhand":-4.98,"Right_Apley_Overhand":2.03,"Left_Apley_Underhand":23.54,"Right_Apley_Underhand":31.96,"Left_Torso_Rotation":34.36,"Right_Torso_Rotation":32.72},{"Date":"2026-06-06","Name":"Athlete 8","Visit":"R2","Pitches":null,"Left_Grip":null,"Right_Grip":null,"Jump_Height":23.335,"RSI":0.3546,"Left_ER":185,"Right_ER":130,"Left_IR":243,"Right_IR":238,"Left_Shoulder_Flexion":177.418,"Right_Shoulder_Flexion":171.341,"Left_Shoulder_Extension":51.245,"Right_Shoulder_Extension":50.157,"Left_Shoulder_IR":90.75,"Right_Shoulder_IR":87.594,"Left_Shoulder_ER":113.684,"Right_Shoulder_ER":136.579,"L_Arc":204.434,"R_Arc":224.173,"ER_IR_Ratio":0.7613,"Cervical_Flexion":72.342,"Cervical_Extension":67.158,"Left_Cervical_Rotation":71.562,"Right_Cervical_Rotation":73.141,"Left_Single_Leg_Balance_Variability":2.326,"Right_Single_Leg_Balance_Variability":4.802,"Toe_Touch":-1.046,"Reach_Back":144.991,"Squat_Ankle_Dorsiflexion":37.784,"Left_Apley_Overhand":-10.249,"Right_Apley_Overhand":9.478,"Left_Apley_Underhand":26.885,"Right_Apley_Underhand":25.977,"Left_Torso_Rotation":40.636,"Right_Torso_Rotation":30.88},{"Date":"2026-06-06","Name":"Athlete 8","Visit":"R2","Pitches":113.68,"Left_Grip":185,"Right_Grip":130,"Jump_Height":0.67,"RSI":0.0203,"Left_ER":243,"Right_ER":238,"Left_IR":68,"Right_IR":177.42,"Left_Shoulder_Flexion":171.34,"Right_Shoulder_Flexion":72.34,"Left_Shoulder_Extension":50.16,"Right_Shoulder_Extension":67.16,"Left_Shoulder_IR":87.59,"Right_Shoulder_IR":71.56,"Left_Shoulder_ER":136.58,"Right_Shoulder_ER":73.14,"L_Arc":224.17,"R_Arc":144.7,"ER_IR_Ratio":3.5735,"Cervical_Flexion":2.33,"Cervical_Extension":4.8,"Left_Cervical_Rotation":-1.05,"Right_Cervical_Rotation":144.99,"Left_Single_Leg_Balance_Variability":37.78,"Right_Single_Leg_Balance_Variability":-10.25,"Toe_Touch":26.89,"Reach_Back":9.48,"Squat_Ankle_Dorsiflexion":25.98,"Left_Apley_Overhand":40.64,"Right_Apley_Overhand":23.34,"Left_Apley_Underhand":30.88,"Right_Apley_Underhand":0.66,"Left_Torso_Rotation":0.36,"Right_Torso_Rotation":22.27},{"Date":"2026-06-07","Name":"Athlete 12","Visit":"R2","Pitches":38,"Left_Grip":null,"Right_Grip":null,"Jump_Height":null,"RSI":null,"Left_ER":141,"Right_ER":146,"Left_IR":247,"Right_IR":221,"Left_Shoulder_Flexion":207.379,"Right_Shoulder_Flexion":186.185,"Left_Shoulder_Extension":93.186,"Right_Shoulder_Extension":104.244,"Left_Shoulder_IR":112.886,"Right_Shoulder_IR":105.693,"Left_Shoulder_ER":115.631,"Right_Shoulder_ER":122.288,"L_Arc":228.517,"R_Arc":227.981,"ER_IR_Ratio":0.5709,"Cervical_Flexion":null,"Cervical_Extension":null,"Left_Cervical_Rotation":71.854,"Right_Cervical_Rotation":72.839,"Left_Single_Leg_Balance_Variability":3.268,"Right_Single_Leg_Balance_Variability":3.032,"Toe_Touch":null,"Reach_Back":null,"Squat_Ankle_Dorsiflexion":null,"Left_Apley_Overhand":null,"Right_Apley_Overhand":null,"Left_Apley_Underhand":null,"Right_Apley_Underhand":null,"Left_Torso_Rotation":null,"Right_Torso_Rotation":null},{"Date":"2026-06-07","Name":"Athlete 4","Visit":"R2","Pitches":34,"Left_Grip":null,"Right_Grip":null,"Jump_Height":22.164,"RSI":0.3071,"Left_ER":147,"Right_ER":133,"Left_IR":231,"Right_IR":253,"Left_Shoulder_Flexion":175.925,"Right_Shoulder_Flexion":166.608,"Left_Shoulder_Extension":61.708,"Right_Shoulder_Extension":68.828,"Left_Shoulder_IR":77.221,"Right_Shoulder_IR":89.929,"Left_Shoulder_ER":68.728,"Right_Shoulder_ER":90.467,"L_Arc":145.949,"R_Arc":180.396,"ER_IR_Ratio":0.6364,"Cervical_Flexion":64.664,"Cervical_Extension":55.967,"Left_Cervical_Rotation":70.838,"Right_Cervical_Rotation":64.296,"Left_Single_Leg_Balance_Variability":5.782,"Right_Single_Leg_Balance_Variability":4.837,"Toe_Touch":-14.336,"Reach_Back":169.758,"Squat_Ankle_Dorsiflexion":36.77,"Left_Apley_Overhand":-8.446,"Right_Apley_Overhand":2.233,"Left_Apley_Underhand":18.539,"Right_Apley_Underhand":30.695,"Left_Torso_Rotation":44.173,"Right_Torso_Rotation":53.082},{"Date":"2026-06-07","Name":"Athlete 4","Visit":"R2","Pitches":68.73,"Left_Grip":147,"Right_Grip":133,"Jump_Height":0.73,"RSI":0.0235,"Left_ER":231,"Right_ER":253,"Left_IR":61.71,"Right_IR":175.93,"Left_Shoulder_Flexion":166.61,"Right_Shoulder_Flexion":64.66,"Left_Shoulder_Extension":68.83,"Right_Shoulder_Extension":55.97,"Left_Shoulder_IR":89.93,"Right_Shoulder_IR":70.84,"Left_Shoulder_ER":90.47,"Right_Shoulder_ER":64.3,"L_Arc":180.4,"R_Arc":135.14,"ER_IR_Ratio":3.7433,"Cervical_Flexion":5.78,"Cervical_Extension":4.84,"Left_Cervical_Rotation":-14.34,"Right_Cervical_Rotation":169.76,"Left_Single_Leg_Balance_Variability":36.77,"Right_Single_Leg_Balance_Variability":-8.45,"Toe_Touch":18.54,"Reach_Back":2.23,"Squat_Ankle_Dorsiflexion":30.7,"Left_Apley_Overhand":44.17,"Right_Apley_Overhand":20.97,"Left_Apley_Underhand":53.08,"Right_Apley_Underhand":0.68,"Left_Torso_Rotation":0.31,"Right_Torso_Rotation":22.16},{"Date":"2026-06-07","Name":"Athlete 7","Visit":"S2","Pitches":null,"Left_Grip":null,"Right_Grip":null,"Jump_Height":null,"RSI":null,"Left_ER":163,"Right_ER":144,"Left_IR":276,"Right_IR":240,"Left_Shoulder_Flexion":179.244,"Right_Shoulder_Flexion":178.694,"Left_Shoulder_Extension":60.218,"Right_Shoulder_Extension":49.775,"Left_Shoulder_IR":71.701,"Right_Shoulder_IR":54.411,"Left_Shoulder_ER":102.457,"Right_Shoulder_ER":106.661,"L_Arc":174.158,"R_Arc":161.072,"ER_IR_Ratio":0.5906,"Cervical_Flexion":null,"Cervical_Extension":null,"Left_Cervical_Rotation":64.739,"Right_Cervical_Rotation":63.906,"Left_Single_Leg_Balance_Variability":8.594,"Right_Single_Leg_Balance_Variability":3.539,"Toe_Touch":null,"Reach_Back":null,"Squat_Ankle_Dorsiflexion":null,"Left_Apley_Overhand":null,"Right_Apley_Overhand":null,"Left_Apley_Underhand":null,"Right_Apley_Underhand":null,"Left_Torso_Rotation":null,"Right_Torso_Rotation":null},{"Date":"2026-06-07","Name":"Athlete 7","Visit":"S2","Pitches":57,"Left_Grip":150,"Right_Grip":163,"Jump_Height":null,"RSI":null,"Left_ER":165,"Right_ER":160,"Left_IR":276,"Right_IR":240,"Left_Shoulder_Flexion":179.24,"Right_Shoulder_Flexion":178.69,"Left_Shoulder_Extension":60.22,"Right_Shoulder_Extension":49.78,"Left_Shoulder_IR":71.7,"Right_Shoulder_IR":54.41,"Left_Shoulder_ER":102.46,"Right_Shoulder_ER":106.66,"L_Arc":174.16,"R_Arc":161.07,"ER_IR_Ratio":0.5978,"Cervical_Flexion":64.74,"Cervical_Extension":63.91,"Left_Cervical_Rotation":8.59,"Right_Cervical_Rotation":3.54,"Left_Single_Leg_Balance_Variability":0,"Right_Single_Leg_Balance_Variability":0,"Toe_Touch":10.2,"Reach_Back":6.3,"Squat_Ankle_Dorsiflexion":18.4,"Left_Apley_Overhand":16.7,"Right_Apley_Overhand":22.5,"Left_Apley_Underhand":21.8,"Right_Apley_Underhand":174.16,"Left_Torso_Rotation":35.1,"Right_Torso_Rotation":0.59},{"Date":"2026-06-08","Name":"Athlete 12","Visit":"R2","Pitches":115.63,"Left_Grip":141,"Right_Grip":146,"Jump_Height":null,"RSI":null,"Left_ER":247,"Right_ER":221,"Left_IR":93.19,"Right_IR":207.38,"Left_Shoulder_Flexion":186.19,"Right_Shoulder_Flexion":71.85,"Left_Shoulder_Extension":104.24,"Right_Shoulder_Extension":72.84,"Left_Shoulder_IR":105.69,"Right_Shoulder_IR":3.27,"Left_Shoulder_ER":122.29,"Right_Shoulder_ER":3.03,"L_Arc":227.98,"R_Arc":6.3,"ER_IR_Ratio":2.6505,"Cervical_Flexion":0,"Cervical_Extension":0,"Left_Cervical_Rotation":14,"Right_Cervical_Rotation":8.8,"Left_Single_Leg_Balance_Variability":27.5,"Right_Single_Leg_Balance_Variability":25.1,"Toe_Touch":22,"Reach_Back":21.5,"Squat_Ankle_Dorsiflexion":228.52,"Left_Apley_Overhand":227.98,"Right_Apley_Overhand":null,"Left_Apley_Underhand":0.57,"Right_Apley_Underhand":null,"Left_Torso_Rotation":null,"Right_Torso_Rotation":null},{"Date":"2026-06-08","Name":"Athlete 13","Visit":"R1","Pitches":31,"Left_Grip":127,"Right_Grip":127,"Jump_Height":22.138,"RSI":0.3542,"Left_ER":null,"Right_ER":null,"Left_IR":null,"Right_IR":null,"Left_Shoulder_Flexion":171.028,"Right_Shoulder_Flexion":164.023,"Left_Shoulder_Extension":46.887,"Right_Shoulder_Extension":57.682,"Left_Shoulder_IR":70.334,"Right_Shoulder_IR":48.546,"Left_Shoulder_ER":75.863,"Right_Shoulder_ER":100.397,"L_Arc":146.197,"R_Arc":148.943,"ER_IR_Ratio":null,"Cervical_Flexion":null,"Cervical_Extension":null,"Left_Cervical_Rotation":63.338,"Right_Cervical_Rotation":66.989,"Left_Single_Leg_Balance_Variability":10.373,"Right_Single_Leg_Balance_Variability":9.806,"Toe_Touch":null,"Reach_Back":null,"Squat_Ankle_Dorsiflexion":null,"Left_Apley_Overhand":null,"Right_Apley_Overhand":null,"Left_Apley_Underhand":null,"Right_Apley_Underhand":null,"Left_Torso_Rotation":null,"Right_Torso_Rotation":null},{"Date":"2026-06-08","Name":"Athlete 3","Visit":"R1","Pitches":null,"Left_Grip":120,"Right_Grip":135,"Jump_Height":null,"RSI":null,"Left_ER":null,"Right_ER":null,"Left_IR":null,"Right_IR":null,"Left_Shoulder_Flexion":178.293,"Right_Shoulder_Flexion":155.497,"Left_Shoulder_Extension":64.24,"Right_Shoulder_Extension":50.302,"Left_Shoulder_IR":76.762,"Right_Shoulder_IR":68.013,"Left_Shoulder_ER":109.595,"Right_Shoulder_ER":114.032,"L_Arc":186.357,"R_Arc":182.045,"ER_IR_Ratio":null,"Cervical_Flexion":null,"Cervical_Extension":null,"Left_Cervical_Rotation":56.994,"Right_Cervical_Rotation":66.13,"Left_Single_Leg_Balance_Variability":5.953,"Right_Single_Leg_Balance_Variability":3.469,"Toe_Touch":null,"Reach_Back":null,"Squat_Ankle_Dorsiflexion":null,"Left_Apley_Overhand":null,"Right_Apley_Overhand":null,"Left_Apley_Underhand":null,"Right_Apley_Underhand":null,"Left_Torso_Rotation":null,"Right_Torso_Rotation":null},{"Date":"2026-06-08","Name":"Athlete 5","Visit":"S2","Pitches":null,"Left_Grip":145,"Right_Grip":139,"Jump_Height":null,"RSI":null,"Left_ER":null,"Right_ER":null,"Left_IR":null,"Right_IR":null,"Left_Shoulder_Flexion":null,"Right_Shoulder_Flexion":null,"Left_Shoulder_Extension":null,"Right_Shoulder_Extension":null,"Left_Shoulder_IR":null,"Right_Shoulder_IR":null,"Left_Shoulder_ER":null,"Right_Shoulder_ER":null,"L_Arc":null,"R_Arc":null,"ER_IR_Ratio":null,"Cervical_Flexion":null,"Cervical_Extension":null,"Left_Cervical_Rotation":null,"Right_Cervical_Rotation":null,"Left_Single_Leg_Balance_Variability":null,"Right_Single_Leg_Balance_Variability":null,"Toe_Touch":null,"Reach_Back":null,"Squat_Ankle_Dorsiflexion":null,"Left_Apley_Overhand":null,"Right_Apley_Overhand":null,"Left_Apley_Underhand":null,"Right_Apley_Underhand":null,"Left_Torso_Rotation":null,"Right_Torso_Rotation":null},{"Date":"2026-06-08","Name":"Athlete 8","Visit":"R2","Pitches":14,"Left_Grip":null,"Right_Grip":null,"Jump_Height":null,"RSI":null,"Left_ER":185,"Right_ER":130,"Left_IR":243,"Right_IR":238,"Left_Shoulder_Flexion":180.775,"Right_Shoulder_Flexion":172.422,"Left_Shoulder_Extension":48.117,"Right_Shoulder_Extension":54.717,"Left_Shoulder_IR":77.325,"Right_Shoulder_IR":83.817,"Left_Shoulder_ER":113.82,"Right_Shoulder_ER":143.092,"L_Arc":191.145,"R_Arc":226.909,"ER_IR_Ratio":0.7613,"Cervical_Flexion":null,"Cervical_Extension":null,"Left_Cervical_Rotation":73.719,"Right_Cervical_Rotation":74.104,"Left_Single_Leg_Balance_Variability":7.678,"Right_Single_Leg_Balance_Variability":3.446,"Toe_Touch":null,"Reach_Back":null,"Squat_Ankle_Dorsiflexion":null,"Left_Apley_Overhand":null,"Right_Apley_Overhand":null,"Left_Apley_Underhand":null,"Right_Apley_Underhand":null,"Left_Torso_Rotation":null,"Right_Torso_Rotation":null},{"Date":"2026-06-09","Name":"Athlete 1","Visit":"R2","Pitches":50,"Left_Grip":null,"Right_Grip":null,"Jump_Height":null,"RSI":null,"Left_ER":168,"Right_ER":204,"Left_IR":253,"Right_IR":319,"Left_Shoulder_Flexion":150.302,"Right_Shoulder_Flexion":176.778,"Left_Shoulder_Extension":43.919,"Right_Shoulder_Extension":54.633,"Left_Shoulder_IR":66.449,"Right_Shoulder_IR":87.307,"Left_Shoulder_ER":97.616,"Right_Shoulder_ER":103.525,"L_Arc":164.065,"R_Arc":190.832,"ER_IR_Ratio":0.664,"Cervical_Flexion":60.741,"Cervical_Extension":49.473,"Left_Cervical_Rotation":62.119,"Right_Cervical_Rotation":62.281,"Left_Single_Leg_Balance_Variability":4.433,"Right_Single_Leg_Balance_Variability":3.049,"Toe_Touch":2.285,"Reach_Back":152.307,"Squat_Ankle_Dorsiflexion":28.484,"Left_Apley_Overhand":20.849,"Right_Apley_Overhand":-5.259,"Left_Apley_Underhand":19.788,"Right_Apley_Underhand":20.013,"Left_Torso_Rotation":35.615,"Right_Torso_Rotation":41.785},{"Date":"2026-06-09","Name":"Athlete 5","Visit":"S3","Pitches":62,"Left_Grip":null,"Right_Grip":null,"Jump_Height":20.766,"RSI":0.256,"Left_ER":104,"Right_ER":116,"Left_IR":198,"Right_IR":182,"Left_Shoulder_Flexion":158.228,"Right_Shoulder_Flexion":158.171,"Left_Shoulder_Extension":45.802,"Right_Shoulder_Extension":47.387,"Left_Shoulder_IR":53.426,"Right_Shoulder_IR":49.36,"Left_Shoulder_ER":91.58,"Right_Shoulder_ER":112.18,"L_Arc":145.006,"R_Arc":161.54,"ER_IR_Ratio":0.5253,"Cervical_Flexion":66.073,"Cervical_Extension":37.594,"Left_Cervical_Rotation":57.629,"Right_Cervical_Rotation":62.932,"Left_Single_Leg_Balance_Variability":9.091,"Right_Single_Leg_Balance_Variability":2.775,"Toe_Touch":3.152,"Reach_Back":157.64,"Squat_Ankle_Dorsiflexion":36.818,"Left_Apley_Overhand":-4.073,"Right_Apley_Overhand":4.61,"Left_Apley_Underhand":23.949,"Right_Apley_Underhand":28.758,"Left_Torso_Rotation":43.455,"Right_Torso_Rotation":48.924},{"Date":"2026-06-09","Name":"Athlete 7","Visit":"S1","Pitches":null,"Left_Grip":null,"Right_Grip":null,"Jump_Height":22.571,"RSI":0.3872,"Left_ER":null,"Right_ER":null,"Left_IR":null,"Right_IR":null,"Left_Shoulder_Flexion":192.914,"Right_Shoulder_Flexion":null,"Left_Shoulder_Extension":69.679,"Right_Shoulder_Extension":null,"Left_Shoulder_IR":74.781,"Right_Shoulder_IR":null,"Left_Shoulder_ER":103.168,"Right_Shoulder_ER":null,"L_Arc":177.949,"R_Arc":null,"ER_IR_Ratio":null,"Cervical_Flexion":null,"Cervical_Extension":null,"Left_Cervical_Rotation":60.322,"Right_Cervical_Rotation":64.13,"Left_Single_Leg_Balance_Variability":5.794,"Right_Single_Leg_Balance_Variability":4.268,"Toe_Touch":null,"Reach_Back":null,"Squat_Ankle_Dorsiflexion":null,"Left_Apley_Overhand":4.079,"Right_Apley_Overhand":10.661,"Left_Apley_Underhand":18.197,"Right_Apley_Underhand":29.604,"Left_Torso_Rotation":null,"Right_Torso_Rotation":null},{"Date":"2026-06-09","Name":"Athlete 9","Visit":"R2","Pitches":13,"Left_Grip":null,"Right_Grip":null,"Jump_Height":19.863,"RSI":0.3454,"Left_ER":148,"Right_ER":113,"Left_IR":238,"Right_IR":228,"Left_Shoulder_Flexion":194.713,"Right_Shoulder_Flexion":198.139,"Left_Shoulder_Extension":54.343,"Right_Shoulder_Extension":70.222,"Left_Shoulder_IR":87.461,"Right_Shoulder_IR":63.492,"Left_Shoulder_ER":103.099,"Right_Shoulder_ER":118.793,"L_Arc":190.56,"R_Arc":182.285,"ER_IR_Ratio":0.6218,"Cervical_Flexion":null,"Cervical_Extension":null,"Left_Cervical_Rotation":63.661,"Right_Cervical_Rotation":64.895,"Left_Single_Leg_Balance_Variability":9.326,"Right_Single_Leg_Balance_Variability":11.256,"Toe_Touch":null,"Reach_Back":null,"Squat_Ankle_Dorsiflexion":null,"Left_Apley_Overhand":-3.677,"Right_Apley_Overhand":15.062,"Left_Apley_Underhand":21.344,"Right_Apley_Underhand":24.787,"Left_Torso_Rotation":null,"Right_Torso_Rotation":null},{"Date":"2026-06-10","Name":"Athlete 2","Visit":"S1","Pitches":null,"Left_Grip":null,"Right_Grip":null,"Jump_Height":19.786,"RSI":0.2966,"Left_ER":null,"Right_ER":null,"Left_IR":null,"Right_IR":null,"Left_Shoulder_Flexion":null,"Right_Shoulder_Flexion":201.581,"Left_Shoulder_Extension":null,"Right_Shoulder_Extension":62.64,"Left_Shoulder_IR":null,"Right_Shoulder_IR":46.806,"Left_Shoulder_ER":null,"Right_Shoulder_ER":140.227,"L_Arc":null,"R_Arc":187.033,"ER_IR_Ratio":null,"Cervical_Flexion":56.971,"Cervical_Extension":64.209,"Left_Cervical_Rotation":73.412,"Right_Cervical_Rotation":76.854,"Left_Single_Leg_Balance_Variability":6.742,"Right_Single_Leg_Balance_Variability":6.597,"Toe_Touch":1.206,"Reach_Back":164.928,"Squat_Ankle_Dorsiflexion":24.512,"Left_Apley_Overhand":9.252,"Right_Apley_Overhand":19.707,"Left_Apley_Underhand":24.705,"Right_Apley_Underhand":27.017,"Left_Torso_Rotation":57.636,"Right_Torso_Rotation":54.499},{"Date":"2026-06-10","Name":"Athlete 3","Visit":"R2","Pitches":77,"Left_Grip":null,"Right_Grip":null,"Jump_Height":null,"RSI":null,"Left_ER":165,"Right_ER":113,"Left_IR":209,"Right_IR":186,"Left_Shoulder_Flexion":181.517,"Right_Shoulder_Flexion":154.366,"Left_Shoulder_Extension":57.819,"Right_Shoulder_Extension":41.883,"Left_Shoulder_IR":69.925,"Right_Shoulder_IR":48.404,"Left_Shoulder_ER":113.913,"Right_Shoulder_ER":99.041,"L_Arc":183.838,"R_Arc":147.445,"ER_IR_Ratio":0.7895,"Cervical_Flexion":54.996,"Cervical_Extension":46.933,"Left_Cervical_Rotation":55.796,"Right_Cervical_Rotation":64.864,"Left_Single_Leg_Balance_Variability":7.087,"Right_Single_Leg_Balance_Variability":3.645,"Toe_Touch":0.69,"Reach_Back":161.21,"Squat_Ankle_Dorsiflexion":31.68,"Left_Apley_Overhand":10.765,"Right_Apley_Overhand":-8.013,"Left_Apley_Underhand":25.539,"Right_Apley_Underhand":35.296,"Left_Torso_Rotation":16.501,"Right_Torso_Rotation":34.313},{"Date":"2026-06-10","Name":"Athlete 4","Visit":"R1","Pitches":null,"Left_Grip":136,"Right_Grip":134,"Jump_Height":20.819,"RSI":0.284,"Left_ER":null,"Right_ER":null,"Left_IR":null,"Right_IR":null,"Left_Shoulder_Flexion":182.089,"Right_Shoulder_Flexion":186.165,"Left_Shoulder_Extension":66.971,"Right_Shoulder_Extension":71.616,"Left_Shoulder_IR":83.074,"Right_Shoulder_IR":97.595,"Left_Shoulder_ER":77.295,"Right_Shoulder_ER":95.787,"L_Arc":160.369,"R_Arc":193.382,"ER_IR_Ratio":null,"Cervical_Flexion":65.707,"Cervical_Extension":50.012,"Left_Cervical_Rotation":64.64,"Right_Cervical_Rotation":62.791,"Left_Single_Leg_Balance_Variability":5.081,"Right_Single_Leg_Balance_Variability":4.684,"Toe_Touch":-15.549,"Reach_Back":152.877,"Squat_Ankle_Dorsiflexion":38.94,"Left_Apley_Overhand":-6.369,"Right_Apley_Overhand":5.706,"Left_Apley_Underhand":17.193,"Right_Apley_Underhand":25.621,"Left_Torso_Rotation":47.313,"Right_Torso_Rotation":50.894},{"Date":"2026-06-10","Name":"Athlete 8","Visit":"R1","Pitches":77,"Left_Grip":146,"Right_Grip":125,"Jump_Height":23.626,"RSI":0.3459,"Left_ER":null,"Right_ER":null,"Left_IR":null,"Right_IR":null,"Left_Shoulder_Flexion":178.763,"Right_Shoulder_Flexion":172.682,"Left_Shoulder_Extension":54.141,"Right_Shoulder_Extension":53.434,"Left_Shoulder_IR":70.986,"Right_Shoulder_IR":89.646,"Left_Shoulder_ER":113.223,"Right_Shoulder_ER":135.606,"L_Arc":184.209,"R_Arc":225.252,"ER_IR_Ratio":null,"Cervical_Flexion":null,"Cervical_Extension":null,"Left_Cervical_Rotation":72.12,"Right_Cervical_Rotation":74.557,"Left_Single_Leg_Balance_Variability":5.473,"Right_Single_Leg_Balance_Variability":10.258,"Toe_Touch":null,"Reach_Back":null,"Squat_Ankle_Dorsiflexion":null,"Left_Apley_Overhand":null,"Right_Apley_Overhand":null,"Left_Apley_Underhand":null,"Right_Apley_Underhand":null,"Left_Torso_Rotation":null,"Right_Torso_Rotation":null},{"Date":"2026-06-11","Name":"Athlete 12","Visit":"R1","Pitches":38,"Left_Grip":126,"Right_Grip":130,"Jump_Height":24.4,"RSI":0.2987,"Left_ER":null,"Right_ER":null,"Left_IR":null,"Right_IR":null,"Left_Shoulder_Flexion":198.346,"Right_Shoulder_Flexion":199.843,"Left_Shoulder_Extension":101.822,"Right_Shoulder_Extension":84.954,"Left_Shoulder_IR":111.432,"Right_Shoulder_IR":94.474,"Left_Shoulder_ER":120.66,"Right_Shoulder_ER":139.011,"L_Arc":232.092,"R_Arc":233.485,"ER_IR_Ratio":null,"Cervical_Flexion":72.044,"Cervical_Extension":82.395,"Left_Cervical_Rotation":66.885,"Right_Cervical_Rotation":68.807,"Left_Single_Leg_Balance_Variability":3.801,"Right_Single_Leg_Balance_Variability":3.397,"Toe_Touch":-5.396,"Reach_Back":152.849,"Squat_Ankle_Dorsiflexion":29.677,"Left_Apley_Overhand":-1.884,"Right_Apley_Overhand":-4.321,"Left_Apley_Underhand":13.431,"Right_Apley_Underhand":20.619,"Left_Torso_Rotation":56.545,"Right_Torso_Rotation":45.807},{"Date":"2026-06-11","Name":"Athlete 6","Visit":"R1","Pitches":null,"Left_Grip":146,"Right_Grip":139,"Jump_Height":23.026,"RSI":0.3638,"Left_ER":null,"Right_ER":null,"Left_IR":null,"Right_IR":null,"Left_Shoulder_Flexion":190.523,"Right_Shoulder_Flexion":183.487,"Left_Shoulder_Extension":68.071,"Right_Shoulder_Extension":62.139,"Left_Shoulder_IR":55.639,"Right_Shoulder_IR":35.237,"Left_Shoulder_ER":99.446,"Right_Shoulder_ER":124.478,"L_Arc":155.085,"R_Arc":159.715,"ER_IR_Ratio":null,"Cervical_Flexion":61.765,"Cervical_Extension":56.333,"Left_Cervical_Rotation":62.536,"Right_Cervical_Rotation":62.859,"Left_Single_Leg_Balance_Variability":10.049,"Right_Single_Leg_Balance_Variability":7.581,"Toe_Touch":4.478,"Reach_Back":160.903,"Squat_Ankle_Dorsiflexion":28.774,"Left_Apley_Overhand":null,"Right_Apley_Overhand":null,"Left_Apley_Underhand":null,"Right_Apley_Underhand":null,"Left_Torso_Rotation":44.444,"Right_Torso_Rotation":49.434},{"Date":"2026-06-11","Name":"Athlete 7","Visit":"S2","Pitches":null,"Left_Grip":146,"Right_Grip":150,"Jump_Height":null,"RSI":null,"Left_ER":null,"Right_ER":null,"Left_IR":null,"Right_IR":null,"Left_Shoulder_Flexion":null,"Right_Shoulder_Flexion":null,"Left_Shoulder_Extension":null,"Right_Shoulder_Extension":null,"Left_Shoulder_IR":null,"Right_Shoulder_IR":null,"Left_Shoulder_ER":null,"Right_Shoulder_ER":null,"L_Arc":null,"R_Arc":null,"ER_IR_Ratio":null,"Cervical_Flexion":null,"Cervical_Extension":null,"Left_Cervical_Rotation":null,"Right_Cervical_Rotation":null,"Left_Single_Leg_Balance_Variability":null,"Right_Single_Leg_Balance_Variability":null,"Toe_Touch":null,"Reach_Back":null,"Squat_Ankle_Dorsiflexion":null,"Left_Apley_Overhand":null,"Right_Apley_Overhand":null,"Left_Apley_Underhand":null,"Right_Apley_Underhand":null,"Left_Torso_Rotation":null,"Right_Torso_Rotation":null},{"Date":"2026-06-11","Name":"Athlete 9","Visit":"R1","Pitches":null,"Left_Grip":132,"Right_Grip":115,"Jump_Height":null,"RSI":null,"Left_ER":null,"Right_ER":null,"Left_IR":null,"Right_IR":null,"Left_Shoulder_Flexion":null,"Right_Shoulder_Flexion":null,"Left_Shoulder_Extension":null,"Right_Shoulder_Extension":null,"Left_Shoulder_IR":null,"Right_Shoulder_IR":null,"Left_Shoulder_ER":null,"Right_Shoulder_ER":null,"L_Arc":null,"R_Arc":null,"ER_IR_Ratio":null,"Cervical_Flexion":null,"Cervical_Extension":null,"Left_Cervical_Rotation":null,"Right_Cervical_Rotation":null,"Left_Single_Leg_Balance_Variability":null,"Right_Single_Leg_Balance_Variability":null,"Toe_Touch":null,"Reach_Back":null,"Squat_Ankle_Dorsiflexion":null,"Left_Apley_Overhand":null,"Right_Apley_Overhand":null,"Left_Apley_Underhand":null,"Right_Apley_Underhand":null,"Left_Torso_Rotation":null,"Right_Torso_Rotation":null},{"Date":"2026-06-12","Name":"Athlete 2","Visit":"S2","Pitches":67,"Left_Grip":114,"Right_Grip":120,"Jump_Height":null,"RSI":null,"Left_ER":null,"Right_ER":null,"Left_IR":null,"Right_IR":null,"Left_Shoulder_Flexion":null,"Right_Shoulder_Flexion":null,"Left_Shoulder_Extension":null,"Right_Shoulder_Extension":null,"Left_Shoulder_IR":null,"Right_Shoulder_IR":null,"Left_Shoulder_ER":null,"Right_Shoulder_ER":null,"L_Arc":null,"R_Arc":null,"ER_IR_Ratio":null,"Cervical_Flexion":null,"Cervical_Extension":null,"Left_Cervical_Rotation":68.015,"Right_Cervical_Rotation":64.463,"Left_Single_Leg_Balance_Variability":6.734,"Right_Single_Leg_Balance_Variability":6.815,"Toe_Touch":null,"Reach_Back":null,"Squat_Ankle_Dorsiflexion":null,"Left_Apley_Overhand":null,"Right_Apley_Overhand":null,"Left_Apley_Underhand":null,"Right_Apley_Underhand":null,"Left_Torso_Rotation":null,"Right_Torso_Rotation":null},{"Date":"2026-06-12","Name":"Athlete 4","Visit":"R2","Pitches":43,"Left_Grip":null,"Right_Grip":null,"Jump_Height":null,"RSI":null,"Left_ER":142,"Right_ER":131,"Left_IR":194,"Right_IR":225,"Left_Shoulder_Flexion":174.977,"Right_Shoulder_Flexion":168.152,"Left_Shoulder_Extension":66.925,"Right_Shoulder_Extension":68.396,"Left_Shoulder_IR":91.992,"Right_Shoulder_IR":81.016,"Left_Shoulder_ER":79.768,"Right_Shoulder_ER":87.15,"L_Arc":171.76,"R_Arc":168.166,"ER_IR_Ratio":0.732,"Cervical_Flexion":null,"Cervical_Extension":null,"Left_Cervical_Rotation":65.828,"Right_Cervical_Rotation":64.734,"Left_Single_Leg_Balance_Variability":3.799,"Right_Single_Leg_Balance_Variability":3.373,"Toe_Touch":null,"Reach_Back":null,"Squat_Ankle_Dorsiflexion":null,"Left_Apley_Overhand":null,"Right_Apley_Overhand":null,"Left_Apley_Underhand":null,"Right_Apley_Underhand":null,"Left_Torso_Rotation":null,"Right_Torso_Rotation":null},{"Date":"2026-06-12","Name":"Athlete 6","Visit":"R2","Pitches":31,"Left_Grip":null,"Right_Grip":null,"Jump_Height":null,"RSI":null,"Left_ER":162,"Right_ER":135,"Left_IR":272,"Right_IR":232,"Left_Shoulder_Flexion":189.301,"Right_Shoulder_Flexion":172.147,"Left_Shoulder_Extension":59.87,"Right_Shoulder_Extension":56.799,"Left_Shoulder_IR":58.772,"Right_Shoulder_IR":33.208,"Left_Shoulder_ER":100.444,"Right_Shoulder_ER":121.26,"L_Arc":159.216,"R_Arc":154.468,"ER_IR_Ratio":0.5956,"Cervical_Flexion":null,"Cervical_Extension":null,"Left_Cervical_Rotation":64.317,"Right_Cervical_Rotation":60.749,"Left_Single_Leg_Balance_Variability":3.524,"Right_Single_Leg_Balance_Variability":2.274,"Toe_Touch":null,"Reach_Back":null,"Squat_Ankle_Dorsiflexion":null,"Left_Apley_Overhand":null,"Right_Apley_Overhand":null,"Left_Apley_Underhand":null,"Right_Apley_Underhand":null,"Left_Torso_Rotation":null,"Right_Torso_Rotation":null},{"Date":"2026-06-12","Name":"Athlete 7","Visit":"S3","Pitches":38,"Left_Grip":null,"Right_Grip":null,"Jump_Height":null,"RSI":null,"Left_ER":143,"Right_ER":137,"Left_IR":230,"Right_IR":171,"Left_Shoulder_Flexion":null,"Right_Shoulder_Flexion":null,"Left_Shoulder_Extension":null,"Right_Shoulder_Extension":null,"Left_Shoulder_IR":null,"Right_Shoulder_IR":null,"Left_Shoulder_ER":null,"Right_Shoulder_ER":null,"L_Arc":null,"R_Arc":null,"ER_IR_Ratio":0.6217,"Cervical_Flexion":null,"Cervical_Extension":null,"Left_Cervical_Rotation":null,"Right_Cervical_Rotation":null,"Left_Single_Leg_Balance_Variability":null,"Right_Single_Leg_Balance_Variability":null,"Toe_Touch":null,"Reach_Back":null,"Squat_Ankle_Dorsiflexion":null,"Left_Apley_Overhand":null,"Right_Apley_Overhand":null,"Left_Apley_Underhand":null,"Right_Apley_Underhand":null,"Left_Torso_Rotation":null,"Right_Torso_Rotation":null},{"Date":"2026-06-13","Name":"Athlete 11","Visit":"R2","Pitches":28,"Left_Grip":null,"Right_Grip":null,"Jump_Height":null,"RSI":null,"Left_ER":161,"Right_ER":132,"Left_IR":265,"Right_IR":278,"Left_Shoulder_Flexion":null,"Right_Shoulder_Flexion":null,"Left_Shoulder_Extension":null,"Right_Shoulder_Extension":null,"Left_Shoulder_IR":null,"Right_Shoulder_IR":null,"Left_Shoulder_ER":null,"Right_Shoulder_ER":null,"L_Arc":null,"R_Arc":null,"ER_IR_Ratio":0.6075,"Cervical_Flexion":null,"Cervical_Extension":null,"Left_Cervical_Rotation":null,"Right_Cervical_Rotation":null,"Left_Single_Leg_Balance_Variability":null,"Right_Single_Leg_Balance_Variability":null,"Toe_Touch":null,"Reach_Back":null,"Squat_Ankle_Dorsiflexion":null,"Left_Apley_Overhand":null,"Right_Apley_Overhand":null,"Left_Apley_Underhand":null,"Right_Apley_Underhand":null,"Left_Torso_Rotation":null,"Right_Torso_Rotation":null},{"Date":"2026-06-13","Name":"Athlete 13","Visit":"R2","Pitches":54,"Left_Grip":null,"Right_Grip":null,"Jump_Height":null,"RSI":null,"Left_ER":147,"Right_ER":136,"Left_IR":233,"Right_IR":197,"Left_Shoulder_Flexion":179.857,"Right_Shoulder_Flexion":179.862,"Left_Shoulder_Extension":48.117,"Right_Shoulder_Extension":52.437,"Left_Shoulder_IR":57.028,"Right_Shoulder_IR":52.915,"Left_Shoulder_ER":83.119,"Right_Shoulder_ER":110.774,"L_Arc":140.147,"R_Arc":163.689,"ER_IR_Ratio":0.6309,"Cervical_Flexion":54.561,"Cervical_Extension":45.325,"Left_Cervical_Rotation":67.104,"Right_Cervical_Rotation":66.588,"Left_Single_Leg_Balance_Variability":4.199,"Right_Single_Leg_Balance_Variability":10.204,"Toe_Touch":0.795,"Reach_Back":155.991,"Squat_Ankle_Dorsiflexion":21.993,"Left_Apley_Overhand":-2.946,"Right_Apley_Overhand":12.688,"Left_Apley_Underhand":24.719,"Right_Apley_Underhand":20.846,"Left_Torso_Rotation":50.191,"Right_Torso_Rotation":41.708},{"Date":"2026-06-13","Name":"Athlete 2","Visit":"S3","Pitches":null,"Left_Grip":null,"Right_Grip":null,"Jump_Height":null,"RSI":null,"Left_ER":157,"Right_ER":113,"Left_IR":236,"Right_IR":267,"Left_Shoulder_Flexion":null,"Right_Shoulder_Flexion":null,"Left_Shoulder_Extension":null,"Right_Shoulder_Extension":null,"Left_Shoulder_IR":null,"Right_Shoulder_IR":null,"Left_Shoulder_ER":null,"Right_Shoulder_ER":null,"L_Arc":null,"R_Arc":null,"ER_IR_Ratio":0.6653,"Cervical_Flexion":null,"Cervical_Extension":null,"Left_Cervical_Rotation":null,"Right_Cervical_Rotation":null,"Left_Single_Leg_Balance_Variability":null,"Right_Single_Leg_Balance_Variability":null,"Toe_Touch":null,"Reach_Back":null,"Squat_Ankle_Dorsiflexion":null,"Left_Apley_Overhand":null,"Right_Apley_Overhand":null,"Left_Apley_Underhand":null,"Right_Apley_Underhand":null,"Left_Torso_Rotation":null,"Right_Torso_Rotation":null},{"Date":"2026-06-14","Name":"Athlete 12","Visit":"R2","Pitches":null,"Left_Grip":null,"Right_Grip":null,"Jump_Height":null,"RSI":null,"Left_ER":184,"Right_ER":146,"Left_IR":254,"Right_IR":239,"Left_Shoulder_Flexion":198.307,"Right_Shoulder_Flexion":199.469,"Left_Shoulder_Extension":92.074,"Right_Shoulder_Extension":101.085,"Left_Shoulder_IR":103.698,"Right_Shoulder_IR":94.55,"Left_Shoulder_ER":121.866,"Right_Shoulder_ER":134.539,"L_Arc":225.564,"R_Arc":229.089,"ER_IR_Ratio":0.7244,"Cervical_Flexion":null,"Cervical_Extension":null,"Left_Cervical_Rotation":72.906,"Right_Cervical_Rotation":69.323,"Left_Single_Leg_Balance_Variability":3.336,"Right_Single_Leg_Balance_Variability":5.678,"Toe_Touch":null,"Reach_Back":null,"Squat_Ankle_Dorsiflexion":null,"Left_Apley_Overhand":null,"Right_Apley_Overhand":null,"Left_Apley_Underhand":null,"Right_Apley_Underhand":null,"Left_Torso_Rotation":null,"Right_Torso_Rotation":null},{"Date":"2026-06-14","Name":"Athlete 5","Visit":"S2","Pitches":null,"Left_Grip":141,"Right_Grip":145,"Jump_Height":null,"RSI":null,"Left_ER":null,"Right_ER":null,"Left_IR":null,"Right_IR":null,"Left_Shoulder_Flexion":null,"Right_Shoulder_Flexion":null,"Left_Shoulder_Extension":null,"Right_Shoulder_Extension":null,"Left_Shoulder_IR":null,"Right_Shoulder_IR":null,"Left_Shoulder_ER":null,"Right_Shoulder_ER":null,"L_Arc":null,"R_Arc":null,"ER_IR_Ratio":null,"Cervical_Flexion":null,"Cervical_Extension":null,"Left_Cervical_Rotation":null,"Right_Cervical_Rotation":null,"Left_Single_Leg_Balance_Variability":null,"Right_Single_Leg_Balance_Variability":null,"Toe_Touch":null,"Reach_Back":null,"Squat_Ankle_Dorsiflexion":null,"Left_Apley_Overhand":null,"Right_Apley_Overhand":null,"Left_Apley_Underhand":null,"Right_Apley_Underhand":null,"Left_Torso_Rotation":null,"Right_Torso_Rotation":null},{"Date":"2026-06-15","Name":"Athlete 5","Visit":"S3","Pitches":null,"Left_Grip":null,"Right_Grip":null,"Jump_Height":null,"RSI":null,"Left_ER":134,"Right_ER":94,"Left_IR":188,"Right_IR":246,"Left_Shoulder_Flexion":null,"Right_Shoulder_Flexion":null,"Left_Shoulder_Extension":null,"Right_Shoulder_Extension":null,"Left_Shoulder_IR":null,"Right_Shoulder_IR":null,"Left_Shoulder_ER":null,"Right_Shoulder_ER":null,"L_Arc":null,"R_Arc":null,"ER_IR_Ratio":0.7128,"Cervical_Flexion":null,"Cervical_Extension":null,"Left_Cervical_Rotation":null,"Right_Cervical_Rotation":null,"Left_Single_Leg_Balance_Variability":null,"Right_Single_Leg_Balance_Variability":null,"Toe_Touch":null,"Reach_Back":null,"Squat_Ankle_Dorsiflexion":null,"Left_Apley_Overhand":null,"Right_Apley_Overhand":null,"Left_Apley_Underhand":null,"Right_Apley_Underhand":null,"Left_Torso_Rotation":null,"Right_Torso_Rotation":null},{"Date":"2026-06-16","Name":"Athlete 1","Visit":"S2","Pitches":null,"Left_Grip":126,"Right_Grip":119,"Jump_Height":null,"RSI":null,"Left_ER":null,"Right_ER":null,"Left_IR":null,"Right_IR":null,"Left_Shoulder_Flexion":null,"Right_Shoulder_Flexion":null,"Left_Shoulder_Extension":null,"Right_Shoulder_Extension":null,"Left_Shoulder_IR":null,"Right_Shoulder_IR":null,"Left_Shoulder_ER":null,"Right_Shoulder_ER":null,"L_Arc":null,"R_Arc":null,"ER_IR_Ratio":null,"Cervical_Flexion":null,"Cervical_Extension":null,"Left_Cervical_Rotation":null,"Right_Cervical_Rotation":null,"Left_Single_Leg_Balance_Variability":null,"Right_Single_Leg_Balance_Variability":null,"Toe_Touch":null,"Reach_Back":null,"Squat_Ankle_Dorsiflexion":null,"Left_Apley_Overhand":null,"Right_Apley_Overhand":null,"Left_Apley_Underhand":null,"Right_Apley_Underhand":null,"Left_Torso_Rotation":null,"Right_Torso_Rotation":null},{"Date":"2026-06-16","Name":"Athlete 13","Visit":"R1","Pitches":null,"Left_Grip":120,"Right_Grip":121,"Jump_Height":null,"RSI":null,"Left_ER":null,"Right_ER":null,"Left_IR":null,"Right_IR":null,"Left_Shoulder_Flexion":null,"Right_Shoulder_Flexion":null,"Left_Shoulder_Extension":null,"Right_Shoulder_Extension":null,"Left_Shoulder_IR":null,"Right_Shoulder_IR":null,"Left_Shoulder_ER":null,"Right_Shoulder_ER":null,"L_Arc":null,"R_Arc":null,"ER_IR_Ratio":null,"Cervical_Flexion":null,"Cervical_Extension":null,"Left_Cervical_Rotation":null,"Right_Cervical_Rotation":null,"Left_Single_Leg_Balance_Variability":null,"Right_Single_Leg_Balance_Variability":null,"Toe_Touch":null,"Reach_Back":null,"Squat_Ankle_Dorsiflexion":null,"Left_Apley_Overhand":null,"Right_Apley_Overhand":null,"Left_Apley_Underhand":null,"Right_Apley_Underhand":null,"Left_Torso_Rotation":null,"Right_Torso_Rotation":null},{"Date":"2026-06-16","Name":"Athlete 3","Visit":"R1","Pitches":null,"Left_Grip":135,"Right_Grip":135,"Jump_Height":null,"RSI":null,"Left_ER":null,"Right_ER":null,"Left_IR":null,"Right_IR":null,"Left_Shoulder_Flexion":null,"Right_Shoulder_Flexion":null,"Left_Shoulder_Extension":null,"Right_Shoulder_Extension":null,"Left_Shoulder_IR":null,"Right_Shoulder_IR":null,"Left_Shoulder_ER":null,"Right_Shoulder_ER":null,"L_Arc":null,"R_Arc":null,"ER_IR_Ratio":null,"Cervical_Flexion":null,"Cervical_Extension":null,"Left_Cervical_Rotation":null,"Right_Cervical_Rotation":null,"Left_Single_Leg_Balance_Variability":null,"Right_Single_Leg_Balance_Variability":null,"Toe_Touch":null,"Reach_Back":null,"Squat_Ankle_Dorsiflexion":null,"Left_Apley_Overhand":null,"Right_Apley_Overhand":null,"Left_Apley_Underhand":null,"Right_Apley_Underhand":null,"Left_Torso_Rotation":null,"Right_Torso_Rotation":null},{"Date":"2026-06-16","Name":"Athlete 6","Visit":"R1","Pitches":null,"Left_Grip":145,"Right_Grip":149,"Jump_Height":null,"RSI":null,"Left_ER":null,"Right_ER":null,"Left_IR":null,"Right_IR":null,"Left_Shoulder_Flexion":null,"Right_Shoulder_Flexion":null,"Left_Shoulder_Extension":null,"Right_Shoulder_Extension":null,"Left_Shoulder_IR":null,"Right_Shoulder_IR":null,"Left_Shoulder_ER":null,"Right_Shoulder_ER":null,"L_Arc":null,"R_Arc":null,"ER_IR_Ratio":null,"Cervical_Flexion":null,"Cervical_Extension":null,"Left_Cervical_Rotation":null,"Right_Cervical_Rotation":null,"Left_Single_Leg_Balance_Variability":null,"Right_Single_Leg_Balance_Variability":null,"Toe_Touch":null,"Reach_Back":null,"Squat_Ankle_Dorsiflexion":null,"Left_Apley_Overhand":null,"Right_Apley_Overhand":null,"Left_Apley_Underhand":null,"Right_Apley_Underhand":null,"Left_Torso_Rotation":null,"Right_Torso_Rotation":null},{"Date":"2026-06-16","Name":"Athlete 8","Visit":"R1","Pitches":null,"Left_Grip":137,"Right_Grip":134,"Jump_Height":null,"RSI":null,"Left_ER":null,"Right_ER":null,"Left_IR":null,"Right_IR":null,"Left_Shoulder_Flexion":null,"Right_Shoulder_Flexion":null,"Left_Shoulder_Extension":null,"Right_Shoulder_Extension":null,"Left_Shoulder_IR":null,"Right_Shoulder_IR":null,"Left_Shoulder_ER":null,"Right_Shoulder_ER":null,"L_Arc":null,"R_Arc":null,"ER_IR_Ratio":null,"Cervical_Flexion":null,"Cervical_Extension":null,"Left_Cervical_Rotation":null,"Right_Cervical_Rotation":null,"Left_Single_Leg_Balance_Variability":null,"Right_Single_Leg_Balance_Variability":null,"Toe_Touch":null,"Reach_Back":null,"Squat_Ankle_Dorsiflexion":null,"Left_Apley_Overhand":null,"Right_Apley_Overhand":null,"Left_Apley_Underhand":null,"Right_Apley_Underhand":null,"Left_Torso_Rotation":null,"Right_Torso_Rotation":null},{"Date":"2026-06-16","Name":"Athlete 9","Visit":"R1","Pitches":null,"Left_Grip":138,"Right_Grip":121,"Jump_Height":null,"RSI":null,"Left_ER":null,"Right_ER":null,"Left_IR":null,"Right_IR":null,"Left_Shoulder_Flexion":null,"Right_Shoulder_Flexion":null,"Left_Shoulder_Extension":null,"Right_Shoulder_Extension":null,"Left_Shoulder_IR":null,"Right_Shoulder_IR":null,"Left_Shoulder_ER":null,"Right_Shoulder_ER":null,"L_Arc":null,"R_Arc":null,"ER_IR_Ratio":null,"Cervical_Flexion":null,"Cervical_Extension":null,"Left_Cervical_Rotation":null,"Right_Cervical_Rotation":null,"Left_Single_Leg_Balance_Variability":null,"Right_Single_Leg_Balance_Variability":null,"Toe_Touch":null,"Reach_Back":null,"Squat_Ankle_Dorsiflexion":null,"Left_Apley_Overhand":null,"Right_Apley_Overhand":null,"Left_Apley_Underhand":null,"Right_Apley_Underhand":null,"Left_Torso_Rotation":null,"Right_Torso_Rotation":null},{"Date":"2026-06-17","Name":"Athlete 1","Visit":"S3","Pitches":null,"Left_Grip":null,"Right_Grip":null,"Jump_Height":null,"RSI":null,"Left_ER":190,"Right_ER":202,"Left_IR":200,"Right_IR":352,"Left_Shoulder_Flexion":null,"Right_Shoulder_Flexion":null,"Left_Shoulder_Extension":null,"Right_Shoulder_Extension":null,"Left_Shoulder_IR":null,"Right_Shoulder_IR":null,"Left_Shoulder_ER":null,"Right_Shoulder_ER":null,"L_Arc":null,"R_Arc":null,"ER_IR_Ratio":0.95,"Cervical_Flexion":null,"Cervical_Extension":null,"Left_Cervical_Rotation":null,"Right_Cervical_Rotation":null,"Left_Single_Leg_Balance_Variability":null,"Right_Single_Leg_Balance_Variability":null,"Toe_Touch":null,"Reach_Back":null,"Squat_Ankle_Dorsiflexion":null,"Left_Apley_Overhand":null,"Right_Apley_Overhand":null,"Left_Apley_Underhand":null,"Right_Apley_Underhand":null,"Left_Torso_Rotation":null,"Right_Torso_Rotation":null},{"Date":"2026-06-17","Name":"Athlete 10","Visit":"R2","Pitches":null,"Left_Grip":null,"Right_Grip":null,"Jump_Height":null,"RSI":null,"Left_ER":150,"Right_ER":162,"Left_IR":292,"Right_IR":216,"Left_Shoulder_Flexion":null,"Right_Shoulder_Flexion":null,"Left_Shoulder_Extension":null,"Right_Shoulder_Extension":null,"Left_Shoulder_IR":null,"Right_Shoulder_IR":null,"Left_Shoulder_ER":null,"Right_Shoulder_ER":null,"L_Arc":null,"R_Arc":null,"ER_IR_Ratio":0.5137,"Cervical_Flexion":null,"Cervical_Extension":null,"Left_Cervical_Rotation":null,"Right_Cervical_Rotation":null,"Left_Single_Leg_Balance_Variability":null,"Right_Single_Leg_Balance_Variability":null,"Toe_Touch":null,"Reach_Back":null,"Squat_Ankle_Dorsiflexion":null,"Left_Apley_Overhand":null,"Right_Apley_Overhand":null,"Left_Apley_Underhand":null,"Right_Apley_Underhand":null,"Left_Torso_Rotation":null,"Right_Torso_Rotation":null},{"Date":"2026-06-17","Name":"Athlete 4","Visit":"R2","Pitches":null,"Left_Grip":null,"Right_Grip":null,"Jump_Height":null,"RSI":null,"Left_ER":129,"Right_ER":135,"Left_IR":215,"Right_IR":235,"Left_Shoulder_Flexion":null,"Right_Shoulder_Flexion":null,"Left_Shoulder_Extension":null,"Right_Shoulder_Extension":null,"Left_Shoulder_IR":null,"Right_Shoulder_IR":null,"Left_Shoulder_ER":null,"Right_Shoulder_ER":null,"L_Arc":null,"R_Arc":null,"ER_IR_Ratio":0.6,"Cervical_Flexion":null,"Cervical_Extension":null,"Left_Cervical_Rotation":null,"Right_Cervical_Rotation":null,"Left_Single_Leg_Balance_Variability":null,"Right_Single_Leg_Balance_Variability":null,"Toe_Touch":null,"Reach_Back":null,"Squat_Ankle_Dorsiflexion":null,"Left_Apley_Overhand":null,"Right_Apley_Overhand":null,"Left_Apley_Underhand":null,"Right_Apley_Underhand":null,"Left_Torso_Rotation":null,"Right_Torso_Rotation":null},{"Date":"2026-06-17","Name":"Athlete 6","Visit":"R2","Pitches":null,"Left_Grip":null,"Right_Grip":null,"Jump_Height":null,"RSI":null,"Left_ER":188,"Right_ER":150,"Left_IR":217,"Right_IR":267,"Left_Shoulder_Flexion":null,"Right_Shoulder_Flexion":null,"Left_Shoulder_Extension":null,"Right_Shoulder_Extension":null,"Left_Shoulder_IR":null,"Right_Shoulder_IR":null,"Left_Shoulder_ER":null,"Right_Shoulder_ER":null,"L_Arc":null,"R_Arc":null,"ER_IR_Ratio":0.8664,"Cervical_Flexion":null,"Cervical_Extension":null,"Left_Cervical_Rotation":null,"Right_Cervical_Rotation":null,"Left_Single_Leg_Balance_Variability":null,"Right_Single_Leg_Balance_Variability":null,"Toe_Touch":null,"Reach_Back":null,"Squat_Ankle_Dorsiflexion":null,"Left_Apley_Overhand":null,"Right_Apley_Overhand":null,"Left_Apley_Underhand":null,"Right_Apley_Underhand":null,"Left_Torso_Rotation":null,"Right_Torso_Rotation":null},{"Date":"2026-06-17","Name":"Athlete 7","Visit":"S2","Pitches":null,"Left_Grip":120,"Right_Grip":135,"Jump_Height":null,"RSI":null,"Left_ER":null,"Right_ER":null,"Left_IR":null,"Right_IR":null,"Left_Shoulder_Flexion":null,"Right_Shoulder_Flexion":null,"Left_Shoulder_Extension":null,"Right_Shoulder_Extension":null,"Left_Shoulder_IR":null,"Right_Shoulder_IR":null,"Left_Shoulder_ER":null,"Right_Shoulder_ER":null,"L_Arc":null,"R_Arc":null,"ER_IR_Ratio":null,"Cervical_Flexion":null,"Cervical_Extension":null,"Left_Cervical_Rotation":null,"Right_Cervical_Rotation":null,"Left_Single_Leg_Balance_Variability":null,"Right_Single_Leg_Balance_Variability":null,"Toe_Touch":null,"Reach_Back":null,"Squat_Ankle_Dorsiflexion":null,"Left_Apley_Overhand":null,"Right_Apley_Overhand":null,"Left_Apley_Underhand":null,"Right_Apley_Underhand":null,"Left_Torso_Rotation":null,"Right_Torso_Rotation":null},{"Date":"2026-06-18","Name":"Athlete 10","Visit":"R1","Pitches":null,"Left_Grip":133,"Right_Grip":128,"Jump_Height":null,"RSI":null,"Left_ER":null,"Right_ER":null,"Left_IR":null,"Right_IR":null,"Left_Shoulder_Flexion":null,"Right_Shoulder_Flexion":null,"Left_Shoulder_Extension":null,"Right_Shoulder_Extension":null,"Left_Shoulder_IR":null,"Right_Shoulder_IR":null,"Left_Shoulder_ER":null,"Right_Shoulder_ER":null,"L_Arc":null,"R_Arc":null,"ER_IR_Ratio":null,"Cervical_Flexion":null,"Cervical_Extension":null,"Left_Cervical_Rotation":null,"Right_Cervical_Rotation":null,"Left_Single_Leg_Balance_Variability":null,"Right_Single_Leg_Balance_Variability":null,"Toe_Touch":null,"Reach_Back":null,"Squat_Ankle_Dorsiflexion":null,"Left_Apley_Overhand":null,"Right_Apley_Overhand":null,"Left_Apley_Underhand":null,"Right_Apley_Underhand":null,"Left_Torso_Rotation":null,"Right_Torso_Rotation":null},{"Date":"2026-06-18","Name":"Athlete 4","Visit":"R1","Pitches":null,"Left_Grip":130,"Right_Grip":120,"Jump_Height":null,"RSI":null,"Left_ER":null,"Right_ER":null,"Left_IR":null,"Right_IR":null,"Left_Shoulder_Flexion":null,"Right_Shoulder_Flexion":null,"Left_Shoulder_Extension":null,"Right_Shoulder_Extension":null,"Left_Shoulder_IR":null,"Right_Shoulder_IR":null,"Left_Shoulder_ER":null,"Right_Shoulder_ER":null,"L_Arc":null,"R_Arc":null,"ER_IR_Ratio":null,"Cervical_Flexion":null,"Cervical_Extension":null,"Left_Cervical_Rotation":null,"Right_Cervical_Rotation":null,"Left_Single_Leg_Balance_Variability":null,"Right_Single_Leg_Balance_Variability":null,"Toe_Touch":null,"Reach_Back":null,"Squat_Ankle_Dorsiflexion":null,"Left_Apley_Overhand":null,"Right_Apley_Overhand":null,"Left_Apley_Underhand":null,"Right_Apley_Underhand":null,"Left_Torso_Rotation":null,"Right_Torso_Rotation":null},{"Date":"2026-06-18","Name":"Athlete 7","Visit":"S3","Pitches":null,"Left_Grip":null,"Right_Grip":null,"Jump_Height":null,"RSI":null,"Left_ER":151,"Right_ER":151,"Left_IR":239,"Right_IR":210,"Left_Shoulder_Flexion":null,"Right_Shoulder_Flexion":null,"Left_Shoulder_Extension":null,"Right_Shoulder_Extension":null,"Left_Shoulder_IR":null,"Right_Shoulder_IR":null,"Left_Shoulder_ER":null,"Right_Shoulder_ER":null,"L_Arc":null,"R_Arc":null,"ER_IR_Ratio":0.6318,"Cervical_Flexion":null,"Cervical_Extension":null,"Left_Cervical_Rotation":null,"Right_Cervical_Rotation":null,"Left_Single_Leg_Balance_Variability":null,"Right_Single_Leg_Balance_Variability":null,"Toe_Touch":null,"Reach_Back":null,"Squat_Ankle_Dorsiflexion":null,"Left_Apley_Overhand":null,"Right_Apley_Overhand":null,"Left_Apley_Underhand":null,"Right_Apley_Underhand":null,"Left_Torso_Rotation":null,"Right_Torso_Rotation":null},{"Date":"2026-06-18","Name":"Athlete 8","Visit":"R2","Pitches":null,"Left_Grip":null,"Right_Grip":null,"Jump_Height":null,"RSI":null,"Left_ER":194,"Right_ER":122,"Left_IR":267,"Right_IR":177,"Left_Shoulder_Flexion":null,"Right_Shoulder_Flexion":null,"Left_Shoulder_Extension":null,"Right_Shoulder_Extension":null,"Left_Shoulder_IR":null,"Right_Shoulder_IR":null,"Left_Shoulder_ER":null,"Right_Shoulder_ER":null,"L_Arc":null,"R_Arc":null,"ER_IR_Ratio":0.7266,"Cervical_Flexion":null,"Cervical_Extension":null,"Left_Cervical_Rotation":null,"Right_Cervical_Rotation":null,"Left_Single_Leg_Balance_Variability":null,"Right_Single_Leg_Balance_Variability":null,"Toe_Touch":null,"Reach_Back":null,"Squat_Ankle_Dorsiflexion":null,"Left_Apley_Overhand":null,"Right_Apley_Overhand":null,"Left_Apley_Underhand":null,"Right_Apley_Underhand":null,"Left_Torso_Rotation":null,"Right_Torso_Rotation":null},{"Date":"2026-06-19","Name":"Athlete 2","Visit":"S2","Pitches":null,"Left_Grip":120,"Right_Grip":130,"Jump_Height":null,"RSI":null,"Left_ER":null,"Right_ER":null,"Left_IR":null,"Right_IR":null,"Left_Shoulder_Flexion":null,"Right_Shoulder_Flexion":null,"Left_Shoulder_Extension":null,"Right_Shoulder_Extension":null,"Left_Shoulder_IR":null,"Right_Shoulder_IR":null,"Left_Shoulder_ER":null,"Right_Shoulder_ER":null,"L_Arc":null,"R_Arc":null,"ER_IR_Ratio":null,"Cervical_Flexion":null,"Cervical_Extension":null,"Left_Cervical_Rotation":null,"Right_Cervical_Rotation":null,"Left_Single_Leg_Balance_Variability":null,"Right_Single_Leg_Balance_Variability":null,"Toe_Touch":null,"Reach_Back":null,"Squat_Ankle_Dorsiflexion":null,"Left_Apley_Overhand":null,"Right_Apley_Overhand":null,"Left_Apley_Underhand":null,"Right_Apley_Underhand":null,"Left_Torso_Rotation":null,"Right_Torso_Rotation":null},{"Date":"2026-06-20","Name":"Athlete 11","Visit":"S2","Pitches":null,"Left_Grip":154,"Right_Grip":170,"Jump_Height":null,"RSI":null,"Left_ER":null,"Right_ER":null,"Left_IR":null,"Right_IR":null,"Left_Shoulder_Flexion":null,"Right_Shoulder_Flexion":null,"Left_Shoulder_Extension":null,"Right_Shoulder_Extension":null,"Left_Shoulder_IR":null,"Right_Shoulder_IR":null,"Left_Shoulder_ER":null,"Right_Shoulder_ER":null,"L_Arc":null,"R_Arc":null,"ER_IR_Ratio":null,"Cervical_Flexion":null,"Cervical_Extension":null,"Left_Cervical_Rotation":null,"Right_Cervical_Rotation":null,"Left_Single_Leg_Balance_Variability":null,"Right_Single_Leg_Balance_Variability":null,"Toe_Touch":null,"Reach_Back":null,"Squat_Ankle_Dorsiflexion":null,"Left_Apley_Overhand":null,"Right_Apley_Overhand":null,"Left_Apley_Underhand":null,"Right_Apley_Underhand":null,"Left_Torso_Rotation":null,"Right_Torso_Rotation":null},{"Date":"2026-06-20","Name":"Athlete 12","Visit":"R2","Pitches":null,"Left_Grip":null,"Right_Grip":null,"Jump_Height":null,"RSI":null,"Left_ER":205,"Right_ER":156,"Left_IR":216,"Right_IR":216,"Left_Shoulder_Flexion":null,"Right_Shoulder_Flexion":null,"Left_Shoulder_Extension":null,"Right_Shoulder_Extension":null,"Left_Shoulder_IR":null,"Right_Shoulder_IR":null,"Left_Shoulder_ER":null,"Right_Shoulder_ER":null,"L_Arc":null,"R_Arc":null,"ER_IR_Ratio":0.9491,"Cervical_Flexion":null,"Cervical_Extension":null,"Left_Cervical_Rotation":null,"Right_Cervical_Rotation":null,"Left_Single_Leg_Balance_Variability":null,"Right_Single_Leg_Balance_Variability":null,"Toe_Touch":null,"Reach_Back":null,"Squat_Ankle_Dorsiflexion":null,"Left_Apley_Overhand":null,"Right_Apley_Overhand":null,"Left_Apley_Underhand":null,"Right_Apley_Underhand":null,"Left_Torso_Rotation":null,"Right_Torso_Rotation":null},{"Date":"2026-06-20","Name":"Athlete 2","Visit":"S3","Pitches":null,"Left_Grip":null,"Right_Grip":null,"Jump_Height":null,"RSI":null,"Left_ER":193,"Right_ER":195,"Left_IR":323,"Right_IR":281,"Left_Shoulder_Flexion":null,"Right_Shoulder_Flexion":null,"Left_Shoulder_Extension":null,"Right_Shoulder_Extension":null,"Left_Shoulder_IR":null,"Right_Shoulder_IR":null,"Left_Shoulder_ER":null,"Right_Shoulder_ER":null,"L_Arc":null,"R_Arc":null,"ER_IR_Ratio":0.5975,"Cervical_Flexion":null,"Cervical_Extension":null,"Left_Cervical_Rotation":null,"Right_Cervical_Rotation":null,"Left_Single_Leg_Balance_Variability":null,"Right_Single_Leg_Balance_Variability":null,"Toe_Touch":null,"Reach_Back":null,"Squat_Ankle_Dorsiflexion":null,"Left_Apley_Overhand":null,"Right_Apley_Overhand":null,"Left_Apley_Underhand":null,"Right_Apley_Underhand":null,"Left_Torso_Rotation":null,"Right_Torso_Rotation":null},{"Date":"2026-06-20","Name":"Athlete 9","Visit":"R2","Pitches":null,"Left_Grip":null,"Right_Grip":null,"Jump_Height":null,"RSI":null,"Left_ER":159,"Right_ER":137,"Left_IR":273,"Right_IR":303,"Left_Shoulder_Flexion":null,"Right_Shoulder_Flexion":null,"Left_Shoulder_Extension":null,"Right_Shoulder_Extension":null,"Left_Shoulder_IR":null,"Right_Shoulder_IR":null,"Left_Shoulder_ER":null,"Right_Shoulder_ER":null,"L_Arc":null,"R_Arc":null,"ER_IR_Ratio":0.5824,"Cervical_Flexion":null,"Cervical_Extension":null,"Left_Cervical_Rotation":null,"Right_Cervical_Rotation":null,"Left_Single_Leg_Balance_Variability":null,"Right_Single_Leg_Balance_Variability":null,"Toe_Touch":null,"Reach_Back":null,"Squat_Ankle_Dorsiflexion":null,"Left_Apley_Overhand":null,"Right_Apley_Overhand":null,"Left_Apley_Underhand":null,"Right_Apley_Underhand":null,"Left_Torso_Rotation":null,"Right_Torso_Rotation":null},{"Date":"2026-06-21","Name":"Athlete 11","Visit":"S3","Pitches":null,"Left_Grip":null,"Right_Grip":null,"Jump_Height":null,"RSI":null,"Left_ER":152,"Right_ER":134,"Left_IR":238,"Right_IR":285,"Left_Shoulder_Flexion":null,"Right_Shoulder_Flexion":null,"Left_Shoulder_Extension":null,"Right_Shoulder_Extension":null,"Left_Shoulder_IR":null,"Right_Shoulder_IR":null,"Left_Shoulder_ER":null,"Right_Shoulder_ER":null,"L_Arc":null,"R_Arc":null,"ER_IR_Ratio":0.6387,"Cervical_Flexion":null,"Cervical_Extension":null,"Left_Cervical_Rotation":null,"Right_Cervical_Rotation":null,"Left_Single_Leg_Balance_Variability":null,"Right_Single_Leg_Balance_Variability":null,"Toe_Touch":null,"Reach_Back":null,"Squat_Ankle_Dorsiflexion":null,"Left_Apley_Overhand":null,"Right_Apley_Overhand":null,"Left_Apley_Underhand":null,"Right_Apley_Underhand":null,"Left_Torso_Rotation":null,"Right_Torso_Rotation":null},{"Date":"2026-06-21","Name":"Athlete 13","Visit":"R2","Pitches":null,"Left_Grip":null,"Right_Grip":null,"Jump_Height":null,"RSI":null,"Left_ER":154,"Right_ER":143,"Left_IR":238,"Right_IR":231,"Left_Shoulder_Flexion":null,"Right_Shoulder_Flexion":null,"Left_Shoulder_Extension":null,"Right_Shoulder_Extension":null,"Left_Shoulder_IR":null,"Right_Shoulder_IR":null,"Left_Shoulder_ER":null,"Right_Shoulder_ER":null,"L_Arc":null,"R_Arc":null,"ER_IR_Ratio":0.6471,"Cervical_Flexion":null,"Cervical_Extension":null,"Left_Cervical_Rotation":null,"Right_Cervical_Rotation":null,"Left_Single_Leg_Balance_Variability":null,"Right_Single_Leg_Balance_Variability":null,"Toe_Touch":null,"Reach_Back":null,"Squat_Ankle_Dorsiflexion":null,"Left_Apley_Overhand":null,"Right_Apley_Overhand":null,"Left_Apley_Underhand":null,"Right_Apley_Underhand":null,"Left_Torso_Rotation":null,"Right_Torso_Rotation":null},{"Date":"2026-06-21","Name":"Athlete 3","Visit":"R2","Pitches":null,"Left_Grip":null,"Right_Grip":null,"Jump_Height":null,"RSI":null,"Left_ER":193,"Right_ER":99,"Left_IR":245,"Right_IR":90,"Left_Shoulder_Flexion":null,"Right_Shoulder_Flexion":null,"Left_Shoulder_Extension":null,"Right_Shoulder_Extension":null,"Left_Shoulder_IR":null,"Right_Shoulder_IR":null,"Left_Shoulder_ER":null,"Right_Shoulder_ER":null,"L_Arc":null,"R_Arc":null,"ER_IR_Ratio":0.7878,"Cervical_Flexion":null,"Cervical_Extension":null,"Left_Cervical_Rotation":null,"Right_Cervical_Rotation":null,"Left_Single_Leg_Balance_Variability":null,"Right_Single_Leg_Balance_Variability":null,"Toe_Touch":null,"Reach_Back":null,"Squat_Ankle_Dorsiflexion":null,"Left_Apley_Overhand":null,"Right_Apley_Overhand":null,"Left_Apley_Underhand":null,"Right_Apley_Underhand":null,"Left_Torso_Rotation":null,"Right_Torso_Rotation":null},{"Date":"2026-06-22","Name":"Athlete 4","Visit":"R2","Pitches":null,"Left_Grip":null,"Right_Grip":null,"Jump_Height":null,"RSI":null,"Left_ER":154,"Right_ER":147,"Left_IR":208,"Right_IR":245,"Left_Shoulder_Flexion":null,"Right_Shoulder_Flexion":null,"Left_Shoulder_Extension":null,"Right_Shoulder_Extension":null,"Left_Shoulder_IR":null,"Right_Shoulder_IR":null,"Left_Shoulder_ER":null,"Right_Shoulder_ER":null,"L_Arc":null,"R_Arc":null,"ER_IR_Ratio":0.7404,"Cervical_Flexion":null,"Cervical_Extension":null,"Left_Cervical_Rotation":null,"Right_Cervical_Rotation":null,"Left_Single_Leg_Balance_Variability":null,"Right_Single_Leg_Balance_Variability":null,"Toe_Touch":null,"Reach_Back":null,"Squat_Ankle_Dorsiflexion":null,"Left_Apley_Overhand":null,"Right_Apley_Overhand":null,"Left_Apley_Underhand":null,"Right_Apley_Underhand":null,"Left_Torso_Rotation":null,"Right_Torso_Rotation":null},{"Date":"2026-06-22","Name":"Athlete 8","Visit":"R2","Pitches":null,"Left_Grip":null,"Right_Grip":null,"Jump_Height":null,"RSI":null,"Left_ER":137,"Right_ER":138,"Left_IR":190,"Right_IR":186,"Left_Shoulder_Flexion":null,"Right_Shoulder_Flexion":null,"Left_Shoulder_Extension":null,"Right_Shoulder_Extension":null,"Left_Shoulder_IR":null,"Right_Shoulder_IR":null,"Left_Shoulder_ER":null,"Right_Shoulder_ER":null,"L_Arc":null,"R_Arc":null,"ER_IR_Ratio":0.7211,"Cervical_Flexion":null,"Cervical_Extension":null,"Left_Cervical_Rotation":null,"Right_Cervical_Rotation":null,"Left_Single_Leg_Balance_Variability":null,"Right_Single_Leg_Balance_Variability":null,"Toe_Touch":null,"Reach_Back":null,"Squat_Ankle_Dorsiflexion":null,"Left_Apley_Overhand":null,"Right_Apley_Overhand":null,"Left_Apley_Underhand":null,"Right_Apley_Underhand":null,"Left_Torso_Rotation":null,"Right_Torso_Rotation":null},{"Date":"2026-06-23","Name":"Athlete 1","Visit":"S2","Pitches":null,"Left_Grip":141,"Right_Grip":120,"Jump_Height":null,"RSI":null,"Left_ER":null,"Right_ER":null,"Left_IR":null,"Right_IR":null,"Left_Shoulder_Flexion":null,"Right_Shoulder_Flexion":null,"Left_Shoulder_Extension":null,"Right_Shoulder_Extension":null,"Left_Shoulder_IR":null,"Right_Shoulder_IR":null,"Left_Shoulder_ER":null,"Right_Shoulder_ER":null,"L_Arc":null,"R_Arc":null,"ER_IR_Ratio":null,"Cervical_Flexion":null,"Cervical_Extension":null,"Left_Cervical_Rotation":null,"Right_Cervical_Rotation":null,"Left_Single_Leg_Balance_Variability":null,"Right_Single_Leg_Balance_Variability":null,"Toe_Touch":null,"Reach_Back":null,"Squat_Ankle_Dorsiflexion":null,"Left_Apley_Overhand":null,"Right_Apley_Overhand":null,"Left_Apley_Underhand":null,"Right_Apley_Underhand":null,"Left_Torso_Rotation":null,"Right_Torso_Rotation":null},{"Date":"2026-06-23","Name":"Athlete 13","Visit":"R1","Pitches":null,"Left_Grip":126,"Right_Grip":128,"Jump_Height":null,"RSI":null,"Left_ER":null,"Right_ER":null,"Left_IR":null,"Right_IR":null,"Left_Shoulder_Flexion":null,"Right_Shoulder_Flexion":null,"Left_Shoulder_Extension":null,"Right_Shoulder_Extension":null,"Left_Shoulder_IR":null,"Right_Shoulder_IR":null,"Left_Shoulder_ER":null,"Right_Shoulder_ER":null,"L_Arc":null,"R_Arc":null,"ER_IR_Ratio":null,"Cervical_Flexion":null,"Cervical_Extension":null,"Left_Cervical_Rotation":null,"Right_Cervical_Rotation":null,"Left_Single_Leg_Balance_Variability":null,"Right_Single_Leg_Balance_Variability":null,"Toe_Touch":null,"Reach_Back":null,"Squat_Ankle_Dorsiflexion":null,"Left_Apley_Overhand":null,"Right_Apley_Overhand":null,"Left_Apley_Underhand":null,"Right_Apley_Underhand":null,"Left_Torso_Rotation":null,"Right_Torso_Rotation":null},{"Date":"2026-06-23","Name":"Athlete 5","Visit":"S2/3","Pitches":null,"Left_Grip":154,"Right_Grip":147,"Jump_Height":null,"RSI":null,"Left_ER":109,"Right_ER":104,"Left_IR":178,"Right_IR":196,"Left_Shoulder_Flexion":null,"Right_Shoulder_Flexion":null,"Left_Shoulder_Extension":null,"Right_Shoulder_Extension":null,"Left_Shoulder_IR":null,"Right_Shoulder_IR":null,"Left_Shoulder_ER":null,"Right_Shoulder_ER":null,"L_Arc":null,"R_Arc":null,"ER_IR_Ratio":0.6124,"Cervical_Flexion":null,"Cervical_Extension":null,"Left_Cervical_Rotation":null,"Right_Cervical_Rotation":null,"Left_Single_Leg_Balance_Variability":null,"Right_Single_Leg_Balance_Variability":null,"Toe_Touch":null,"Reach_Back":null,"Squat_Ankle_Dorsiflexion":null,"Left_Apley_Overhand":null,"Right_Apley_Overhand":null,"Left_Apley_Underhand":null,"Right_Apley_Underhand":null,"Left_Torso_Rotation":null,"Right_Torso_Rotation":null},{"Date":"2026-06-23","Name":"Athlete 9","Visit":"R1","Pitches":null,"Left_Grip":136,"Right_Grip":110,"Jump_Height":null,"RSI":null,"Left_ER":null,"Right_ER":null,"Left_IR":null,"Right_IR":null,"Left_Shoulder_Flexion":null,"Right_Shoulder_Flexion":null,"Left_Shoulder_Extension":null,"Right_Shoulder_Extension":null,"Left_Shoulder_IR":null,"Right_Shoulder_IR":null,"Left_Shoulder_ER":null,"Right_Shoulder_ER":null,"L_Arc":null,"R_Arc":null,"ER_IR_Ratio":null,"Cervical_Flexion":null,"Cervical_Extension":null,"Left_Cervical_Rotation":null,"Right_Cervical_Rotation":null,"Left_Single_Leg_Balance_Variability":null,"Right_Single_Leg_Balance_Variability":null,"Toe_Touch":null,"Reach_Back":null,"Squat_Ankle_Dorsiflexion":null,"Left_Apley_Overhand":null,"Right_Apley_Overhand":null,"Left_Apley_Underhand":null,"Right_Apley_Underhand":null,"Left_Torso_Rotation":null,"Right_Torso_Rotation":null},{"Date":"2026-06-24","Name":"Athlete 13","Visit":"R2","Pitches":null,"Left_Grip":null,"Right_Grip":null,"Jump_Height":null,"RSI":null,"Left_ER":146,"Right_ER":159,"Left_IR":240,"Right_IR":172,"Left_Shoulder_Flexion":null,"Right_Shoulder_Flexion":null,"Left_Shoulder_Extension":null,"Right_Shoulder_Extension":null,"Left_Shoulder_IR":null,"Right_Shoulder_IR":null,"Left_Shoulder_ER":null,"Right_Shoulder_ER":null,"L_Arc":null,"R_Arc":null,"ER_IR_Ratio":0.6083,"Cervical_Flexion":null,"Cervical_Extension":null,"Left_Cervical_Rotation":null,"Right_Cervical_Rotation":null,"Left_Single_Leg_Balance_Variability":null,"Right_Single_Leg_Balance_Variability":null,"Toe_Touch":null,"Reach_Back":null,"Squat_Ankle_Dorsiflexion":null,"Left_Apley_Overhand":null,"Right_Apley_Overhand":null,"Left_Apley_Underhand":null,"Right_Apley_Underhand":null,"Left_Torso_Rotation":null,"Right_Torso_Rotation":null},{"Date":"2026-06-24","Name":"Athlete 6","Visit":"R2","Pitches":null,"Left_Grip":null,"Right_Grip":null,"Jump_Height":null,"RSI":null,"Left_ER":186,"Right_ER":137,"Left_IR":263,"Right_IR":195,"Left_Shoulder_Flexion":null,"Right_Shoulder_Flexion":null,"Left_Shoulder_Extension":null,"Right_Shoulder_Extension":null,"Left_Shoulder_IR":null,"Right_Shoulder_IR":null,"Left_Shoulder_ER":null,"Right_Shoulder_ER":null,"L_Arc":null,"R_Arc":null,"ER_IR_Ratio":0.7072,"Cervical_Flexion":null,"Cervical_Extension":null,"Left_Cervical_Rotation":null,"Right_Cervical_Rotation":null,"Left_Single_Leg_Balance_Variability":null,"Right_Single_Leg_Balance_Variability":null,"Toe_Touch":null,"Reach_Back":null,"Squat_Ankle_Dorsiflexion":null,"Left_Apley_Overhand":null,"Right_Apley_Overhand":null,"Left_Apley_Underhand":null,"Right_Apley_Underhand":null,"Left_Torso_Rotation":null,"Right_Torso_Rotation":null}];
+const SCHEDULE = [{"Date":"2026-06-04","Name":"Athlete 2","Avg_Velo":88,"Max_Velo":89.4,"Disp":17.2569},{"Date":"2026-06-04","Name":"Athlete 7","Avg_Velo":87.4,"Max_Velo":89.5,"Disp":22.8178},{"Date":"2026-06-04","Name":"Athlete 9","Avg_Velo":86.8,"Max_Velo":88.7,"Disp":20.0142},{"Date":"2026-06-05","Name":"Athlete 3","Avg_Velo":90.4,"Max_Velo":94.7,"Disp":21.1681},{"Date":"2026-06-05","Name":"Athlete 5","Avg_Velo":89.6,"Max_Velo":91.5,"Disp":20.5292},{"Date":"2026-06-05","Name":"Athlete 8","Avg_Velo":97.4,"Max_Velo":90.5,"Disp":21.6696},{"Date":"2026-06-06","Name":"Athlete 12","Avg_Velo":91.5,"Max_Velo":94.1,"Disp":15.742},{"Date":"2026-06-06","Name":"Athlete 4","Avg_Velo":87.3,"Max_Velo":87.3,"Disp":20.3199},{"Date":"2026-06-08","Name":"Athlete 1","Avg_Velo":90.4,"Max_Velo":94.7,"Disp":21.1681},{"Date":"2026-06-08","Name":"Athlete 7","Avg_Velo":87.4,"Max_Velo":89.5,"Disp":22.8178},{"Date":"2026-06-08","Name":"Athlete 9","Avg_Velo":86.8,"Max_Velo":88.7,"Disp":20.0142},{"Date":"2026-06-09","Name":"Athlete 2","Avg_Velo":88,"Max_Velo":89.4,"Disp":17.2569},{"Date":"2026-06-09","Name":"Athlete 3","Avg_Velo":90.4,"Max_Velo":94.7,"Disp":21.1681},{"Date":"2026-06-09","Name":"Athlete 8","Avg_Velo":97.4,"Max_Velo":90.5,"Disp":21.6696},{"Date":"2026-06-11","Name":"Athlete 12","Avg_Velo":86.9,"Max_Velo":88.9,"Disp":20.4185},{"Date":"2026-06-11","Name":"Athlete 13","Avg_Velo":88.3,"Max_Velo":89.8,"Disp":17.8356},{"Date":"2026-06-11","Name":"Athlete 4","Avg_Velo":87.3,"Max_Velo":87.3,"Disp":20.3199},{"Date":"2026-06-11","Name":"Athlete 5","Avg_Velo":89.6,"Max_Velo":91.5,"Disp":20.5292},{"Date":"2026-06-11","Name":"Athlete 6","Avg_Velo":87.8,"Max_Velo":89.9,"Disp":21.9422},{"Date":"2026-06-12","Name":"Athlete 11","Avg_Velo":90.1,"Max_Velo":94.4,"Disp":21.3827},{"Date":"2026-06-12","Name":"Athlete 13","Avg_Velo":89.2,"Max_Velo":91.2,"Disp":20.7411},{"Date":"2026-06-13","Name":"Athlete 1","Avg_Velo":96.8,"Max_Velo":90.8,"Disp":21.5043},{"Date":"2026-06-13","Name":"Athlete 12","Avg_Velo":91.2,"Max_Velo":93.8,"Disp":15.9642},{"Date":"2026-06-13","Name":"Athlete 8","Avg_Velo":87.1,"Max_Velo":87,"Disp":20.1265},{"Date":"2026-06-14","Name":"Athlete 3","Avg_Velo":88.1,"Max_Velo":89.2,"Disp":17.4984},{"Date":"2026-06-14","Name":"Athlete 6","Avg_Velo":97.1,"Max_Velo":90.2,"Disp":21.7815},{"Date":"2026-06-14","Name":"Athlete 7","Avg_Velo":87.6,"Max_Velo":89.7,"Disp":22.6048},{"Date":"2026-06-14","Name":"Athlete 9","Avg_Velo":86.5,"Max_Velo":88.4,"Disp":19.8222},{"Date":"2026-06-16","Name":"Athlete 10","Avg_Velo":87.4,"Max_Velo":89.5,"Disp":22.8178},{"Date":"2026-06-16","Name":"Athlete 2","Avg_Velo":90,"Max_Velo":94.5,"Disp":21.0933},{"Date":"2026-06-16","Name":"Athlete 4","Avg_Velo":89.4,"Max_Velo":91.3,"Disp":20.6746},{"Date":"2026-06-16","Name":"Athlete 6","Avg_Velo":87,"Max_Velo":87.1,"Disp":20.4513},{"Date":"2026-06-17","Name":"Athlete 11","Avg_Velo":86.8,"Max_Velo":88.7,"Disp":20.0142},{"Date":"2026-06-17","Name":"Athlete 8","Avg_Velo":88,"Max_Velo":89.4,"Disp":17.2569},{"Date":"2026-06-19","Name":"Athlete 12","Avg_Velo":97.4,"Max_Velo":90.5,"Disp":21.6696},{"Date":"2026-06-19","Name":"Athlete 13","Avg_Velo":87.3,"Max_Velo":87.3,"Disp":20.3199},{"Date":"2026-06-19","Name":"Athlete 5","Avg_Velo":89.6,"Max_Velo":91.5,"Disp":20.5292},{"Date":"2026-06-19","Name":"Athlete 9","Avg_Velo":90.4,"Max_Velo":94.7,"Disp":21.1681},{"Date":"2026-06-20","Name":"Athlete 1","Avg_Velo":91.5,"Max_Velo":94.1,"Disp":15.742},{"Date":"2026-06-20","Name":"Athlete 10","Avg_Velo":90.4,"Max_Velo":94.7,"Disp":21.1681},{"Date":"2026-06-20","Name":"Athlete 13","Avg_Velo":87.4,"Max_Velo":89.5,"Disp":22.8178},{"Date":"2026-06-20","Name":"Athlete 3","Avg_Velo":86.8,"Max_Velo":88.7,"Disp":20.0142},{"Date":"2026-06-21","Name":"Athlete 4","Avg_Velo":97.4,"Max_Velo":90.5,"Disp":21.6696},{"Date":"2026-06-21","Name":"Athlete 6","Avg_Velo":89.6,"Max_Velo":91.5,"Disp":20.5292},{"Date":"2026-06-21","Name":"Athlete 7","Avg_Velo":88,"Max_Velo":89.4,"Disp":17.2569},{"Date":"2026-06-21","Name":"Athlete 8","Avg_Velo":90.4,"Max_Velo":94.7,"Disp":21.1681},{"Date":"2026-06-23","Name":"Athlete 12","Avg_Velo":87.8,"Max_Velo":89.9,"Disp":21.9422},{"Date":"2026-06-23","Name":"Athlete 13","Avg_Velo":86.9,"Max_Velo":88.9,"Disp":20.4185},{"Date":"2026-06-23","Name":"Athlete 2","Avg_Velo":87.3,"Max_Velo":87.3,"Disp":20.3199}];
+const THRESH_OK = 5;
+const THRESH_WARN = 10;
+
+const C_GREEN = "#006A52";
+const C_GOLD = "#FBD872";
+const C_GREEN_DARK = "#1e7d40";
+const C_GOLD_DARK = "#c97000";
+const C_BLUE = "#0f2d52";
+const C_RED = "#C0392B";
+const C_AMBER = "#C97000";
+const C_GRAY = "#8A8F98";
+const C_BLACK = "#111111";
+const C_GRID = "rgba(0,0,0,0.07)";
+
+const ATHLETE_HANDEDNESS = {
+  "Athlete 1": "L",
+  "Athlete 5": "L",
+  "Athlete 10": "L"
+};
+
+Chart.defaults.font.family = "-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif";
+Chart.defaults.font.size = 12;
+Chart.defaults.color = "#000000";
+
+let activeMonthDate = null;
+let activeAthRom = null;
+let activeRomMetric = "arc";
+let activeStrAth = null;
+let activeStrMetric = "er";
+let activeSnapMetric = "left_er";
+let activeGripJumpMetric = "grip";
+let activeShoulderMetric = "flexext";
+let activeCervicalMetric = "flexext";
+let activeBalanceMetric = "balance";
+let activeApleyMetric = "apley";
+
+let arcChart, irErChart, romTlChart, strTlChart, gripTlChart, veloTlChart;
+let shoulderMobilityChart, cervicalChart, balanceMobilityChart, apleyTorsoChart, snapChart;
+
+const monthDates = [...new Set((MONTHLY || []).map(r => r.Date))].sort();
+const monthAths = [...new Set((MONTHLY || []).map(r => r.Name))].sort();
+const weekAths = [...new Set((WEEKLY || []).map(r => r.Name))].sort();
+const scheduleAths = [...new Set((SCHEDULE || []).map(r => r.Name))].sort();
+
+function byMonthDate(d) { return (MONTHLY || []).filter(r => r.Date === d); }
+function byMonthAth(n) { return (MONTHLY || []).filter(r => r.Name === n).sort((a,b) => a.Date.localeCompare(b.Date)); }
+function byWeekAth(n) { return (WEEKLY || []).filter(r => r.Name === n).sort((a,b) => a.Date.localeCompare(b.Date)); }
+function byScheduleAth(n) { return (SCHEDULE || []).filter(r => r.Name === n).sort((a,b) => a.Date.localeCompare(b.Date)); }
+
+function getHandedness(name) {
+  return ATHLETE_HANDEDNESS[name] || "R";
+}
+
+function getDominantSide(name) {
+  return getHandedness(name) === "L" ? "L" : "R";
+}
+
+function getDominantDatasetStyles(name, sideLabel) {
+  const dominant = getDominantSide(name);
+  const isDominant = dominant === sideLabel;
+  return {
+    color: isDominant ? C_GREEN : C_GOLD,
+    dash: isDominant ? [] : [0, 6],
+    cap: isDominant ? "butt" : "round"
+  };
+}
+
+function diffCls(d) {
+  const a = Math.abs(d);
+  return a < THRESH_OK ? "diff-ok" : a < THRESH_WARN ? "diff-warn" : "diff-bad";
+}
+
+function cellCls(v) {
+  return v < THRESH_OK ? "cell-good" : v < THRESH_WARN ? "cell-warn" : "cell-bad";
+}
+
+function sign(v) { return v >= 0 ? "+" : ""; }
+
+function setEmptyNote(id, text) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = text;
+}
+
+function makePitchLinePlugin(pluginId, allDates, pitchSet) {
+  return {
+    id: pluginId,
+    beforeDatasetsDraw(chart) {
+      const { ctx, chartArea, scales } = chart;
+      if (!chartArea || !scales.x || !allDates.length) return;
+      ctx.save();
+      ctx.strokeStyle = C_GRAY;
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([5,5]);
+      allDates.forEach((date, idx) => {
+        if (!pitchSet.has(date)) return;
+        const x = scales.x.getPixelForTick(idx);
+        if (!isFinite(x)) return;
+        ctx.beginPath();
+        ctx.moveTo(x, chartArea.top);
+        ctx.lineTo(x, chartArea.bottom);
+        ctx.stroke();
+      });
+      ctx.restore();
+    }
+  };
+}
+
+function compact(values) {
+  return (values || []).filter(v => v != null && Number.isFinite(v));
+}
+
+function firstNonNull(values) {
+  return (values || []).find(v => v != null && Number.isFinite(v));
+}
+
+function seriesMax(values) {
+  const vals = compact(values);
+  return vals.length ? Math.max(...vals) : null;
+}
+
+function seriesMin(values) {
+  const vals = compact(values);
+  return vals.length ? Math.min(...vals) : null;
+}
+
+function flaggedDropFromMax(values, thresholdPct) {
+  const ref = seriesMax(values);
+  return (values || []).map(v => {
+    if (v == null || ref == null || ref === 0) return false;
+    return ((ref - v) / ref) >= thresholdPct;
+  });
+}
+
+function flaggedDropFromBaseline(values, thresholdPct) {
+  const ref = firstNonNull(values);
+  return (values || []).map(v => {
+    if (v == null || ref == null || ref === 0) return false;
+    return ((ref - v) / ref) >= thresholdPct;
+  });
+}
+
+function flaggedIncreaseFromMin(values, thresholdPct) {
+  const ref = seriesMin(values);
+  return (values || []).map(v => {
+    if (v == null || ref == null) return false;
+    if (ref === 0) return v > 0;
+    return ((v - ref) / ref) >= thresholdPct;
+  });
+}
+
+function pointColorArray(values, baseColor, flags) {
+  return (values || []).map((v, i) => v == null ? baseColor : (flags[i] ? C_RED : baseColor));
+}
+
+function pointRadiusArray(values, baseRadius, flags) {
+  return (values || []).map((v, i) => v == null ? 0 : (flags[i] ? baseRadius + 1 : baseRadius));
+}
+
+function applyPointFlags(dataset, values, flags, baseColor, baseRadius) {
+  dataset.pointBackgroundColor = pointColorArray(values, baseColor, flags);
+  dataset.pointBorderColor = pointColorArray(values, baseColor, flags);
+  dataset.pointRadius = pointRadiusArray(values, baseRadius, flags);
+  dataset.pointHoverRadius = pointRadiusArray(values, baseRadius + 2, flags);
+  return dataset;
+}
+
+function initSelectors() {
+  const dSel = document.getElementById("sel-date");
+  monthDates.forEach(d => {
+    const o = document.createElement("option");
+    o.value = o.textContent = d;
+    dSel.appendChild(o);
+  });
+  activeMonthDate = monthDates.length ? monthDates[monthDates.length - 1] : null;
+  if (activeMonthDate) dSel.value = activeMonthDate;
+  dSel.addEventListener("change", e => {
+    activeMonthDate = e.target.value;
+    renderMonthly();
+  });
+
+  const aSel = document.getElementById("sel-athlete-rom-inline");
+  monthAths.forEach(a => {
+    const o = document.createElement("option");
+    o.value = o.textContent = a;
+    aSel.appendChild(o);
+  });
+  activeAthRom = monthAths.length ? monthAths[0] : null;
+  if (activeAthRom) aSel.value = activeAthRom;
+  aSel.addEventListener("change", e => {
+    activeAthRom = e.target.value;
+    renderRomTimeline();
+  });
+
+  const saSel = document.getElementById("sel-athlete-str");
+  const athletePool = [...new Set([...weekAths, ...scheduleAths])].sort();
+  athletePool.forEach(a => {
+    const o = document.createElement("option");
+    o.value = o.textContent = a;
+    saSel.appendChild(o);
+  });
+  activeStrAth = athletePool.length ? athletePool[0] : null;
+  if (activeStrAth) saSel.value = activeStrAth;
+  saSel.addEventListener("change", e => {
+    activeStrAth = e.target.value;
+    renderStrTimeline();
+    renderGripTimeline();
+    renderVeloTimeline();
+    renderShoulderMobilityTimeline();
+    renderCervicalTimeline();
+    renderBalanceMobilityTimeline();
+    renderApleyTorsoTimeline();
+  });
+}
+
+function buildArcChart(rows) {
+  if (!rows.length) return;
+  const lbl = rows.map(r => r.Name);
+  const bgT = rows.map(r => Math.abs(r.Arc_Diff) > THRESH_WARN ? C_RED : C_GREEN);
+  const bgN = rows.map(r => Math.abs(r.Arc_Diff) > THRESH_WARN ? C_RED : C_GOLD);
+
+  if (arcChart) arcChart.destroy();
+  arcChart = new Chart(document.getElementById("arcBarChart"), {
+    type:"bar",
+    data:{
+      labels:lbl,
+      datasets:[
+        { label:"Throwing Arm", data:rows.map(r => r.Arc_Throw), backgroundColor:bgT, borderColor:bgT, borderWidth:1, borderRadius:4 },
+        { label:"Non-Throwing Arm", data:rows.map(r => r.Arc_NonThrow), backgroundColor:bgN, borderColor:bgN, borderWidth:1, borderRadius:4 }
+      ]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{
+        legend:{ position:"top", labels:{ boxWidth:12, padding:14, color:"#000000" } },
+        tooltip:{ callbacks:{ label:c => ` ${c.dataset.label}: ${c.parsed.y}°` } }
+      },
+      scales:{
+        x:{ grid:{ display:false }, ticks:{ color:"#000000" } },
+        y:{ grid:{ color:C_GRID }, min:100, max:220, title:{ display:true, text:"Total Arc (°)", color:"#000000" }, ticks:{ color:"#000000", callback:v => v + "°" } }
+      }
+    }
+  });
+}
+
+function buildIrErChart(rows) {
+  if (!rows.length) return;
+  const lbl = rows.map(r => r.Name);
+
+  if (irErChart) irErChart.destroy();
+  irErChart = new Chart(document.getElementById("irErChart"), {
+    type:"bar",
+    data:{
+      labels:lbl,
+      datasets:[
+        { label:"IR Throw", data:rows.map(r => r.IR_Throw), backgroundColor:C_GREEN, borderColor:C_GREEN, borderWidth:1, borderRadius:3 },
+        { label:"ER Throw", data:rows.map(r => r.ER_Throw), backgroundColor:C_GREEN_DARK, borderColor:C_GREEN_DARK, borderWidth:1, borderRadius:3 },
+        { label:"IR Non-Throw", data:rows.map(r => r.IR_NonThrow), backgroundColor:C_GOLD, borderColor:C_GOLD, borderWidth:1, borderRadius:3 },
+        { label:"ER Non-Throw", data:rows.map(r => r.ER_NonThrow), backgroundColor:C_GOLD_DARK, borderColor:C_GOLD_DARK, borderWidth:1, borderRadius:3 }
+      ]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{
+        legend:{ position:"top", labels:{ boxWidth:12, padding:14, color:"#000000" } },
+        tooltip:{ callbacks:{ label:c => ` ${c.dataset.label}: ${c.parsed.y}°` } }
+      },
+      scales:{
+        x:{ grid:{ display:false }, ticks:{ color:"#000000" } },
+        y:{ grid:{ color:C_GRID }, min:0, title:{ display:true, text:"Degrees (°)", color:"#000000" }, ticks:{ color:"#000000", callback:v => v + "°" } }
+      }
+    }
+  });
+}
+
+function buildArcCards(rows) {
+  const el = document.getElementById("arcCards");
+  el.innerHTML = "";
+  if (!rows.length) return;
+
+  const mx = Math.max(...rows.flatMap(r => [r.Arc_Throw, r.Arc_NonThrow]));
+  rows.forEach(r => {
+    const d = r.Arc_NonThrow - r.Arc_Throw;
+    const cls = diffCls(d);
+    const c = document.createElement("div");
+    c.className = "arc-card";
+    c.innerHTML = `
+      <div class="arc-card-name">${r.Name}</div>
+      <div class="arc-bars">
+        <div class="arc-row">
+          <span class="arc-label">T</span>
+          <div class="arc-bar-track">
+            <div class="arc-bar-fill" style="width:${(r.Arc_Throw / mx * 100).toFixed(1)}%;background:${C_GREEN}">
+              <span>${r.Arc_Throw}°</span>
+            </div>
+          </div>
+        </div>
+        <div class="arc-row">
+          <span class="arc-label">NT</span>
+          <div class="arc-bar-track">
+            <div class="arc-bar-fill" style="width:${(r.Arc_NonThrow / mx * 100).toFixed(1)}%;background:${C_GOLD}">
+              <span>${r.Arc_NonThrow}°</span>
+            </div>
+          </div>
+        </div>
+        <div class="arc-row" style="justify-content:flex-end">
+          <span style="font-size:.68rem;color:#6b7694;margin-right:4px">Diff:</span>
+          <span class="arc-diff ${cls}">${d >= 0 ? "+" : ""}${d.toFixed(1)}°</span>
+        </div>
+      </div>`;
+    el.appendChild(c);
+  });
+}
+
+function renderRomTimeline() {
+  if (!activeAthRom) {
+    setEmptyNote("romTimelineNote", "No monthly athlete data found.");
+    return;
+  }
+  const rows = byMonthAth(activeAthRom);
+  const dates = rows.map(r => r.Date);
+
+  const map = {
+    arc:{ t:"Arc_Throw", n:"Arc_NonThrow", lbl:"Total Arc (°)" },
+    ir:{ t:"IR_Throw", n:"IR_NonThrow", lbl:"IR (°)" },
+    er:{ t:"ER_Throw", n:"ER_NonThrow", lbl:"ER (°)" }
+  };
+  const k = map[activeRomMetric];
+  if (!rows.length) {
+    setEmptyNote("romTimelineNote", "No monthly data for this athlete.");
+    return;
+  }
+
+  if (romTlChart) romTlChart.destroy();
+  romTlChart = new Chart(document.getElementById("romTimelineChart"), {
+    type:"line",
+    data:{
+      labels:dates,
+      datasets:[
+        { label:"Throwing Arm", data:rows.map(r => r[k.t]), borderColor:C_GREEN, backgroundColor:C_GREEN+"22", pointRadius:6, pointHoverRadius:8, borderWidth:3, tension:0.3, fill:false, spanGaps:true },
+        { label:"Non-Throwing Arm", data:rows.map(r => r[k.n]), borderColor:C_GOLD, backgroundColor:C_GOLD+"22", pointRadius:6, pointHoverRadius:8, borderWidth:3, borderDash:[6,3], tension:0.3, fill:false, spanGaps:true }
+      ]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{
+        legend:{ position:"top", labels:{ boxWidth:12, padding:14, color:"#000000" } },
+        tooltip:{ callbacks:{ label:c => ` ${c.dataset.label}: ${c.parsed.y}°` } }
+      },
+      scales:{
+        x:{ grid:{ display:false }, title:{ display:true, text:"Assessment Date", color:"#000000" }, ticks:{ color:"#000000" } },
+        y:{ grid:{ color:C_GRID }, title:{ display:true, text:k.lbl, color:"#000000" }, ticks:{ color:"#000000", callback:v => v + "°" } }
+      }
+    }
+  });
+
+  setEmptyNote("romTimelineNote", `${activeAthRom} — ${k.lbl} across ${dates.length} date${dates.length !== 1 ? "s" : ""}.`);
+}
+
+function buildMonthlyTable(rows) {
+  const tb = document.getElementById("monthlyTableBody");
+  tb.innerHTML = "";
+  rows.forEach(r => {
+    const ir = r.IR_NonThrow - r.IR_Throw;
+    const er = r.ER_NonThrow - r.ER_Throw;
+    const arc = r.Arc_NonThrow - r.Arc_Throw;
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td>${r.Name}</td>
+      <td>${r.IR_Throw}</td><td>${r.IR_NonThrow}</td>
+      <td class="${cellCls(Math.abs(ir))}">${sign(ir)}${ir.toFixed(1)}°</td>
+      <td>${r.ER_Throw}</td><td>${r.ER_NonThrow}</td>
+      <td class="${cellCls(Math.abs(er))}">${sign(er)}${er.toFixed(1)}°</td>
+      <td>${r.Arc_Throw}</td><td>${r.Arc_NonThrow}</td>
+      <td class="${cellCls(Math.abs(arc))}">${sign(arc)}${arc.toFixed(1)}°</td>`;
+    tb.appendChild(row);
+  });
+}
+
+function renderStrTimeline() {
+  if (!activeStrAth) {
+    setEmptyNote("strTimelineNote", "No weekly athlete data found.");
+    return;
+  }
+
+  const strengthRows = byWeekAth(activeStrAth);
+  const pitchRows = byScheduleAth(activeStrAth);
+  const strengthDates = strengthRows.map(r => r.Date);
+  const pitchDates = pitchRows.map(r => r.Date);
+  const allDates = [...new Set([...strengthDates, ...pitchDates])].sort();
+
+  const leftStyle = getDominantDatasetStyles(activeStrAth, "L");
+  const rightStyle = getDominantDatasetStyles(activeStrAth, "R");
+
+  const lKey = activeStrMetric === "er" ? "Left_ER" : "Left_IR";
+  const rKey = activeStrMetric === "er" ? "Right_ER" : "Right_IR";
+  const lbl = activeStrMetric === "er" ? "ER Strength" : "IR Strength";
+
+  const strengthMap = {};
+  strengthRows.forEach(r => { strengthMap[r.Date] = r; });
+
+  const pitchSet = new Set(pitchDates);
+  const leftData = allDates.map(d => strengthMap[d]?.[lKey] ?? null);
+  const rightData = allDates.map(d => strengthMap[d]?.[rKey] ?? null);
+
+  if (!allDates.length) {
+    setEmptyNote("strTimelineNote", "No ER/IR or schedule data available for this athlete.");
+    return;
+  }
+
+  const leftFlags = flaggedDropFromMax(leftData, 0.10);
+  const rightFlags = flaggedDropFromMax(rightData, 0.10);
+  const pitchPlugin = makePitchLinePlugin("pitchLinesStrength", allDates, pitchSet);
+
+  const leftDs = applyPointFlags({
+    label:"Left " + activeStrMetric.toUpperCase(),
+    data:leftData,
+    borderColor:leftStyle.color,
+    backgroundColor:leftStyle.color+"22",
+    borderWidth:3,
+    borderDash:leftStyle.dash,
+    borderCapStyle:leftStyle.cap,
+    tension:0.3,
+    fill:false,
+    spanGaps:true
+  }, leftData, leftFlags, leftStyle.color, 6);
+
+  const rightDs = applyPointFlags({
+    label:"Right " + activeStrMetric.toUpperCase(),
+    data:rightData,
+    borderColor:rightStyle.color,
+    backgroundColor:rightStyle.color+"22",
+    borderWidth:3,
+    borderDash:rightStyle.dash,
+    borderCapStyle:rightStyle.cap,
+    tension:0.3,
+    fill:false,
+    spanGaps:true
+  }, rightData, rightFlags, rightStyle.color, 6);
+
+  if (strTlChart) strTlChart.destroy();
+  strTlChart = new Chart(document.getElementById("strTimelineChart"), {
+    type:"line",
+    plugins:[pitchPlugin],
+    data:{
+      labels:allDates,
+      datasets:[
+        leftDs,
+        rightDs,
+        { label:"Pitched", data:allDates.map(() => null), borderColor:C_GRAY, backgroundColor:C_GRAY, borderWidth:2, borderDash:[5,5], pointRadius:0, pointHoverRadius:0 }
+      ]
+    },
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+      plugins:{
+        legend:{ position:"top", labels:{ boxWidth:12, padding:14, color:"#000000" } },
+        tooltip:{
+          callbacks:{
+            label:c => c.dataset.label === "Pitched" ? null : (c.parsed.y == null ? "No data" : ` ${c.dataset.label}: ${c.parsed.y} N`)
+          }
+        }
+      },
+      scales:{
+        x:{ grid:{ display:false }, title:{ display:true, text:"Date", color:"#000000" }, ticks:{ color:"#000000" } },
+        y:{ grid:{ color:C_GRID }, title:{ display:true, text:lbl + " (N)", color:"#000000" }, ticks:{ color:"#000000", callback:v => v + " N" } }
+      }
+    }
+  })
+}
+
+function renderGripTimeline() {
+  if (!activeStrAth) {
+    setEmptyNote("gripTimelineNote", "No weekly athlete data found.");
+    return;
+  }
+
+  const rows = byWeekAth(activeStrAth);
+  const pitchRows = byScheduleAth(activeStrAth);
+  const leftStyle = getDominantDatasetStyles(activeStrAth, "L");
+  const rightStyle = getDominantDatasetStyles(activeStrAth, "R");
+
+  const strengthDates = rows.map(r => r.Date);
+  const pitchDates = pitchRows.map(r => r.Date);
+  const allDates = [...new Set([...strengthDates, ...pitchDates])].sort();
+  const rowMap = {};
+  rows.forEach(r => { rowMap[r.Date] = r; });
+
+  if (!allDates.length) {
+    setEmptyNote("gripTimelineNote", "No grip, jump, RSI, or schedule data available for this athlete.");
+    return;
+  }
+
+  const pitchSet = new Set(pitchDates);
+  const pitchPlugin = makePitchLinePlugin("pitchLinesGripJump", allDates, pitchSet);
+
+  let datasets = [];
+  let noteText = "";
+
+  if (activeGripJumpMetric === "grip") {
+    const leftData = allDates.map(d => rowMap[d]?.Left_Grip ?? null);
+    const rightData = allDates.map(d => rowMap[d]?.Right_Grip ?? null);
+    const leftFlags = flaggedDropFromBaseline(leftData, 0.10);
+    const rightFlags = flaggedDropFromBaseline(rightData, 0.10);
+
+    datasets = [
+      applyPointFlags({
+        label:"Left Grip",
+        data:leftData,
+        borderColor:leftStyle.color,
+        backgroundColor:leftStyle.color+"22",
+        borderDash:leftStyle.dash,
+        borderCapStyle:leftStyle.cap,
+        borderWidth:3,
+        tension:0.3,
+        fill:false,
+        spanGaps:true
+      }, leftData, leftFlags, leftStyle.color, 5),
+      applyPointFlags({
+        label:"Right Grip",
+        data:rightData,
+        borderColor:rightStyle.color,
+        backgroundColor:rightStyle.color+"22",
+        borderDash:rightStyle.dash,
+        borderCapStyle:rightStyle.cap,
+        borderWidth:3,
+        tension:0.3,
+        fill:false,
+        spanGaps:true
+      }, rightData, rightFlags, rightStyle.color, 5),
+      { label:"Pitched", data:allDates.map(() => null), borderColor:C_GRAY, backgroundColor:C_GRAY, borderWidth:2, borderDash:[5,5], pointRadius:0, pointHoverRadius:0 }
+    ]
+  } else {
+    const jumpData = allDates.map(d => rowMap[d]?.Jump_Height ?? null);
+    const rsiData = allDates.map(d => rowMap[d]?.RSI ?? null);
+    const jumpFlags = flaggedDropFromMax(jumpData, 0.10);
+    const rsiFlags = flaggedDropFromMax(rsiData, 0.10);
+
+    datasets = [
+      applyPointFlags({
+        label:"Jump Height",
+        data:jumpData,
+        yAxisID:"y",
+        borderColor:C_GREEN,
+        backgroundColor:C_GREEN+"22",
+        borderWidth:3,
+        tension:0.3,
+        fill:false,
+        spanGaps:true
+      }, jumpData, jumpFlags, C_GREEN, 5),
+      applyPointFlags({
+        label:"RSI",
+        data:rsiData,
+        yAxisID:"y1",
+        borderColor:C_GOLD,
+        backgroundColor:C_GOLD+"22",
+        borderWidth:3,
+        tension:0.3,
+        fill:false,
+        spanGaps:true
+      }, rsiData, rsiFlags, C_GOLD, 5),
+      { label:"Pitched", data:allDates.map(() => null), yAxisID:"y", borderColor:C_GRAY, backgroundColor:C_GRAY, borderWidth:2, borderDash:[5,5], pointRadius:0, pointHoverRadius:0 }
+    ]
+  }
+
+  if (gripTlChart) gripTlChart.destroy();
+  gripTlChart = new Chart(document.getElementById("gripTimelineChart"), {
+    type:"line",
+    plugins:[pitchPlugin],
+    data:{ labels:allDates, datasets },
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+      interaction:{ mode:"index", intersect:false },
+      plugins:{
+        legend:{ position:"top", labels:{ boxWidth:12, padding:14, color:"#000000" } },
+        tooltip:{
+          callbacks:{
+            label:c => {
+              if (c.dataset.label === "Pitched") return null;
+              if (c.parsed.y == null) return "No data";
+              return ` ${c.dataset.label}: ${c.parsed.y}`;
+            }
+          }
+        }
+      },
+      scales: activeGripJumpMetric === "grip" ? {
+        x:{ grid:{ display:false }, title:{ display:true, text:"Date", color:"#000000" }, ticks:{ color:"#000000" } },
+        y:{ type:"linear", display:true, position:"left", grid:{ color:C_GRID }, title:{ display:true, text:"Grip", color:"#000000" }, ticks:{ color:"#000000" } }
+      } : {
+        x:{ grid:{ display:false }, title:{ display:true, text:"Date", color:"#000000" }, ticks:{ color:"#000000" } },
+        y:{ type:"linear", display:true, position:"left", grid:{ color:C_GRID }, title:{ display:true, text:"Jump Height", color:"#000000" }, ticks:{ color:"#000000" } },
+        y1:{ type:"linear", display:true, position:"right", grid:{ drawOnChartArea:false }, title:{ display:true, text:"RSI", color:"#000000" }, ticks:{ color:"#000000" } }
+      }
+    }
+  });
+
+  setEmptyNote("gripTimelineNote", noteText);
+}
+
+function renderVeloTimeline() {
+  if (!activeStrAth) {
+    setEmptyNote("veloTimelineNote", "No schedule athlete data found.");
+    return;
+  }
+
+  const rows = byScheduleAth(activeStrAth);
+  const dates = rows.map(r => r.Date);
+  const pitchSet = new Set(dates);
+
+  if (!dates.length) {
+    setEmptyNote("veloTimelineNote", "No velo/schedule data available for this athlete.");
+    return;
+  }
+
+  const pitchPlugin = makePitchLinePlugin("pitchLinesVelo", dates, pitchSet);
+
+  if (veloTlChart) veloTlChart.destroy();
+  veloTlChart = new Chart(document.getElementById("veloTimelineChart"), {
+    type:"line",
+    plugins:[pitchPlugin],
+    data:{
+      labels:dates,
+      datasets:[
+        { label:"Average Velo", data:rows.map(r => r.Avg_Velo ?? null), yAxisID:"y", borderColor:C_GREEN, backgroundColor:C_GREEN+"22", pointRadius:5, pointHoverRadius:7, borderWidth:3, tension:0.3, fill:false, spanGaps:true },
+        { label:"Max Velo", data:rows.map(r => r.Max_Velo ?? null), yAxisID:"y", borderColor:C_GOLD, backgroundColor:C_GOLD+"22", pointRadius:5, pointHoverRadius:7, borderWidth:3, tension:0.3, fill:false, spanGaps:true },
+        { label:"Disp", data:rows.map(r => r.Disp ?? null), yAxisID:"y1", borderColor:C_BLACK, backgroundColor:C_BLACK+"22", pointRadius:5, pointHoverRadius:7, borderWidth:3, tension:0.3, fill:false, spanGaps:true },
+        { label:"Pitched", data:dates.map(() => null), yAxisID:"y", borderColor:C_GRAY, backgroundColor:C_GRAY, borderWidth:2, borderDash:[5,5], pointRadius:0, pointHoverRadius:0 }
+      ]
+    },
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+      interaction:{ mode:"index", intersect:false },
+      plugins:{
+        legend:{ position:"top", labels:{ boxWidth:12, padding:14, color:"#000000" } },
+        tooltip:{
+          callbacks:{
+            label:c => {
+              if (c.dataset.label === "Pitched") return null;
+              if (c.parsed.y == null) return "No data";
+              if (c.dataset.label === "Average Velo" || c.dataset.label === "Max Velo") return ` ${c.dataset.label}: ${c.parsed.y} mph`;
+              return ` ${c.dataset.label}: ${c.parsed.y}`;
+            }
+          }
+        }
+      },
+      scales:{
+        x:{ grid:{ display:false }, title:{ display:true, text:"Date", color:"#000000" }, ticks:{ color:"#000000" } },
+        y:{ type:"linear", display:true, position:"left", grid:{ color:C_GRID }, title:{ display:true, text:"Velocity (mph)", color:"#000000" }, ticks:{ color:"#000000", callback:v => v + " mph" } },
+        y1:{ type:"linear", display:true, position:"right", grid:{ drawOnChartArea:false }, title:{ display:true, text:"Disp", color:"#000000" }, ticks:{ color:"#000000" } }
+      }
+    }
+  })
+}
+
+function renderShoulderMobilityTimeline() {
+  if (!activeStrAth) {
+    setEmptyNote("shoulderMobilityNote", "No weekly athlete data found.");
+    return;
+  }
+
+  const rows = byWeekAth(activeStrAth);
+  const pitchRows = byScheduleAth(activeStrAth);
+  const datesWeekly = rows.map(r => r.Date);
+  const pitchDates = pitchRows.map(r => r.Date);
+  const allDates = [...new Set([...datesWeekly, ...pitchDates])].sort();
+  const rowMap = {};
+  rows.forEach(r => { rowMap[r.Date] = r; });
+
+  const leftStyle = getDominantDatasetStyles(activeStrAth, "L");
+  const rightStyle = getDominantDatasetStyles(activeStrAth, "R");
+
+  if (!allDates.length) {
+    setEmptyNote("shoulderMobilityNote", "No shoulder mobility or schedule data available for this athlete.");
+    return;
+  }
+
+  const pitchSet = new Set(pitchDates);
+  const pitchPlugin = makePitchLinePlugin("pitchLinesShoulder", allDates, pitchSet);
+
+  let datasets = [];
+  let noteText = "";
+  let scales = {
+    x:{ grid:{ display:false }, ticks:{ color:"#000000" } },
+    y:{ grid:{ color:C_GRID }, title:{ display:true, text:"Shoulder Mobility", color:"#000000" }, ticks:{ color:"#000000" } }
+  };
+
+  if (activeShoulderMetric === "flexext") {
+    const leftFlex = allDates.map(d => rowMap[d]?.Left_Shoulder_Flexion ?? null);
+    const rightFlex = allDates.map(d => rowMap[d]?.Right_Shoulder_Flexion ?? null);
+    const leftExt = allDates.map(d => rowMap[d]?.Left_Shoulder_Extension ?? null);
+    const rightExt = allDates.map(d => rowMap[d]?.Right_Shoulder_Extension ?? null);
+
+    datasets = [
+      applyPointFlags({
+        label:"Left Flexion", data:leftFlex, borderColor:leftStyle.color, backgroundColor:leftStyle.color+"22",
+        borderDash:leftStyle.dash, borderCapStyle:leftStyle.cap, borderWidth:3, tension:0.3, fill:false, spanGaps:true
+      }, leftFlex, flaggedDropFromMax(leftFlex, 0.10), leftStyle.color, 5),
+      applyPointFlags({
+        label:"Right Flexion", data:rightFlex, borderColor:rightStyle.color, backgroundColor:rightStyle.color+"22",
+        borderDash:rightStyle.dash, borderCapStyle:rightStyle.cap, borderWidth:3, tension:0.3, fill:false, spanGaps:true
+      }, rightFlex, flaggedDropFromMax(rightFlex, 0.10), rightStyle.color, 5),
+      applyPointFlags({
+        label:"Left Extension", data:leftExt, borderColor:leftStyle.color, backgroundColor:leftStyle.color+"22",
+        borderDash:leftStyle.dash, borderCapStyle:leftStyle.cap, borderWidth:3, tension:0.3, fill:false, spanGaps:true, pointStyle:"rectRot"
+      }, leftExt, flaggedDropFromMax(leftExt, 0.10), leftStyle.color, 5),
+      applyPointFlags({
+        label:"Right Extension", data:rightExt, borderColor:rightStyle.color, backgroundColor:rightStyle.color+"22",
+        borderDash:rightStyle.dash, borderCapStyle:rightStyle.cap, borderWidth:3, tension:0.3, fill:false, spanGaps:true, pointStyle:"rectRot"
+      }, rightExt, flaggedDropFromMax(rightExt, 0.10), rightStyle.color, 5),
+      { label:"Pitched", data:allDates.map(() => null), borderColor:C_GRAY, backgroundColor:C_GRAY, borderWidth:2, borderDash:[5,5], pointRadius:0, pointHoverRadius:0 }
+    ]
+  } else if (activeShoulderMetric === "irer") {
+    const leftIR = allDates.map(d => rowMap[d]?.Left_Shoulder_IR ?? null);
+    const rightIR = allDates.map(d => rowMap[d]?.Right_Shoulder_IR ?? null);
+    const leftER = allDates.map(d => rowMap[d]?.Left_Shoulder_ER ?? null);
+    const rightER = allDates.map(d => rowMap[d]?.Right_Shoulder_ER ?? null);
+
+    datasets = [
+      applyPointFlags({
+        label:"Left IR", data:leftIR, borderColor:leftStyle.color, backgroundColor:leftStyle.color+"22",
+        borderDash:leftStyle.dash, borderCapStyle:leftStyle.cap, borderWidth:3, tension:0.3, fill:false, spanGaps:true
+      }, leftIR, flaggedDropFromMax(leftIR, 0.10), leftStyle.color, 5),
+      applyPointFlags({
+        label:"Right IR", data:rightIR, borderColor:rightStyle.color, backgroundColor:rightStyle.color+"22",
+        borderDash:rightStyle.dash, borderCapStyle:rightStyle.cap, borderWidth:3, tension:0.3, fill:false, spanGaps:true
+      }, rightIR, flaggedDropFromMax(rightIR, 0.10), rightStyle.color, 5),
+      applyPointFlags({
+        label:"Left ER", data:leftER, borderColor:leftStyle.color, backgroundColor:leftStyle.color+"22",
+        borderDash:leftStyle.dash, borderCapStyle:leftStyle.cap, borderWidth:3, tension:0.3, fill:false, spanGaps:true, pointStyle:"rectRot"
+      }, leftER, flaggedDropFromMax(leftER, 0.10), leftStyle.color, 5),
+      applyPointFlags({
+        label:"Right ER", data:rightER, borderColor:rightStyle.color, backgroundColor:rightStyle.color+"22",
+        borderDash:rightStyle.dash, borderCapStyle:rightStyle.cap, borderWidth:3, tension:0.3, fill:false, spanGaps:true, pointStyle:"rectRot"
+      }, rightER, flaggedDropFromMax(rightER, 0.10), rightStyle.color, 5),
+      { label:"Pitched", data:allDates.map(() => null), borderColor:C_GRAY, backgroundColor:C_GRAY, borderWidth:2, borderDash:[5,5], pointRadius:0, pointHoverRadius:0 }
+    ]
+  } else {
+    const leftArc = allDates.map(d => rowMap[d]?.L_Arc ?? null);
+    const rightArc = allDates.map(d => rowMap[d]?.R_Arc ?? null);
+    const ratio = allDates.map(d => rowMap[d]?.ER_IR_Ratio ?? null);
+
+    datasets = [
+      applyPointFlags({
+        label:"Left Arc", data:leftArc, yAxisID:"y", borderColor:leftStyle.color, backgroundColor:leftStyle.color+"22",
+        borderDash:leftStyle.dash, borderCapStyle:leftStyle.cap, borderWidth:3, tension:0.3, fill:false, spanGaps:true
+      }, leftArc, flaggedDropFromMax(leftArc, 0.10), leftStyle.color, 5),
+      applyPointFlags({
+        label:"Right Arc", data:rightArc, yAxisID:"y", borderColor:rightStyle.color, backgroundColor:rightStyle.color+"22",
+        borderDash:rightStyle.dash, borderCapStyle:rightStyle.cap, borderWidth:3, tension:0.3, fill:false, spanGaps:true
+      }, rightArc, flaggedDropFromMax(rightArc, 0.10), rightStyle.color, 5),
+      applyPointFlags({
+        label:"ER:IR Ratio", data:ratio, yAxisID:"y1", borderColor:C_BLUE, backgroundColor:C_BLUE+"22",
+        borderWidth:3, tension:0.3, fill:false, spanGaps:true
+      }, ratio, flaggedDropFromMax(ratio, 0.10), C_BLUE, 5),
+      { label:"Pitched", data:allDates.map(() => null), yAxisID:"y", borderColor:C_GRAY, backgroundColor:C_GRAY, borderWidth:2, borderDash:[5,5], pointRadius:0, pointHoverRadius:0 }
+    ];
+    scales = {
+      x:{ grid:{ display:false }, ticks:{ color:"#000000" } },
+      y:{ type:"linear", display:true, position:"left", grid:{ color:C_GRID }, title:{ display:true, text:"Arc (°)", color:"#000000" }, ticks:{ color:"#000000", callback:v => v + "°" } },
+      y1:{ type:"linear", display:true, position:"right", grid:{ drawOnChartArea:false }, title:{ display:true, text:"ER:IR Ratio", color:"#000000" }, ticks:{ color:"#000000" } }
+    }
+  }
+
+  if (shoulderMobilityChart) shoulderMobilityChart.destroy();
+  shoulderMobilityChart = new Chart(document.getElementById("shoulderMobilityChart"), {
+    type:"line",
+    plugins:[pitchPlugin],
+    data:{ labels:allDates, datasets },
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+      interaction:{ mode:"index", intersect:false },
+      plugins:{
+        legend:{ position:"top", labels:{ boxWidth:12, padding:12, color:"#000000" } },
+        tooltip:{
+          callbacks:{
+            label:c => {
+              if (c.dataset.label === "Pitched") return null;
+              if (c.parsed.y == null) return "No data";
+              if (c.dataset.label === "ER:IR Ratio") return ` ${c.dataset.label}: ${c.parsed.y}`;
+              return ` ${c.dataset.label}: ${c.parsed.y}°`;
+            }
+          }
+        }
+      },
+      scales
+    }
+  });
+
+  setEmptyNote("shoulderMobilityNote", noteText);
+}
+
+function renderCervicalTimeline() {
+  if (!activeStrAth) {
+    setEmptyNote("cervicalNote", "No weekly athlete data found.");
+    return;
+  }
+
+  const rows = byWeekAth(activeStrAth);
+  const pitchRows = byScheduleAth(activeStrAth);
+  const datesWeekly = rows.map(r => r.Date);
+  const pitchDates = pitchRows.map(r => r.Date);
+  const allDates = [...new Set([...datesWeekly, ...pitchDates])].sort();
+  const rowMap = {};
+  rows.forEach(r => { rowMap[r.Date] = r; });
+
+  const leftStyle = getDominantDatasetStyles(activeStrAth, "L");
+  const rightStyle = getDominantDatasetStyles(activeStrAth, "R");
+
+  if (!allDates.length) {
+    setEmptyNote("cervicalNote", "No cervical or schedule data available for this athlete.");
+    return;
+  }
+
+  const pitchSet = new Set(pitchDates);
+  const pitchPlugin = makePitchLinePlugin("pitchLinesCervical", allDates, pitchSet);
+
+  let datasets = [];
+  let noteText = "";
+
+  if (activeCervicalMetric === "flexext") {
+    const flex = allDates.map(d => rowMap[d]?.Cervical_Flexion ?? null);
+    const ext = allDates.map(d => rowMap[d]?.Cervical_Extension ?? null);
+
+    datasets = [
+      applyPointFlags({
+        label:"Flexion", data:flex, borderColor:C_GREEN, backgroundColor:C_GREEN+"22",
+        borderWidth:3, tension:0.3, fill:false, spanGaps:true
+      }, flex, flaggedDropFromMax(flex, 0.03), C_GREEN, 5),
+      applyPointFlags({
+        label:"Extension", data:ext, borderColor:C_GOLD, backgroundColor:C_GOLD+"22",
+        borderWidth:3, tension:0.3, fill:false, spanGaps:true
+      }, ext, flaggedDropFromMax(ext, 0.03), C_GOLD, 5),
+      { label:"Pitched", data:allDates.map(() => null), borderColor:C_GRAY, backgroundColor:C_GRAY, borderWidth:2, borderDash:[5,5], pointRadius:0, pointHoverRadius:0 }
+    ]
+  } else {
+    const leftRot = allDates.map(d => rowMap[d]?.Left_Cervical_Rotation ?? null);
+    const rightRot = allDates.map(d => rowMap[d]?.Right_Cervical_Rotation ?? null);
+
+    datasets = [
+      applyPointFlags({
+        label:"Left Rotation", data:leftRot, borderColor:leftStyle.color, backgroundColor:leftStyle.color+"22",
+        borderDash:leftStyle.dash, borderCapStyle:leftStyle.cap, borderWidth:3, tension:0.3, fill:false, spanGaps:true
+      }, leftRot, flaggedDropFromMax(leftRot, 0.03), leftStyle.color, 5),
+      applyPointFlags({
+        label:"Right Rotation", data:rightRot, borderColor:rightStyle.color, backgroundColor:rightStyle.color+"22",
+        borderDash:rightStyle.dash, borderCapStyle:rightStyle.cap, borderWidth:3, tension:0.3, fill:false, spanGaps:true
+      }, rightRot, flaggedDropFromMax(rightRot, 0.03), rightStyle.color, 5),
+      { label:"Pitched", data:allDates.map(() => null), borderColor:C_GRAY, backgroundColor:C_GRAY, borderWidth:2, borderDash:[5,5], pointRadius:0, pointHoverRadius:0 }
+    ]
+  }
+
+  if (cervicalChart) cervicalChart.destroy();
+  cervicalChart = new Chart(document.getElementById("cervicalChart"), {
+    type:"line",
+    plugins:[pitchPlugin],
+    data:{ labels:allDates, datasets },
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+      interaction:{ mode:"index", intersect:false },
+      plugins:{
+        legend:{ position:"top", labels:{ boxWidth:12, padding:12, color:"#000000" } },
+        tooltip:{
+          callbacks:{
+            label:c => {
+              if (c.dataset.label === "Pitched") return null;
+              if (c.parsed.y == null) return "No data";
+              return ` ${c.dataset.label}: ${c.parsed.y}`;
+            }
+          }
+        }
+      },
+      scales:{
+        x:{ grid:{ display:false }, ticks:{ color:"#000000" } },
+        y:{ grid:{ color:C_GRID }, title:{ display:true, text:"Cervical Mobility", color:"#000000" }, ticks:{ color:"#000000" } }
+      }
+    }
+  });
+
+  setEmptyNote("cervicalNote", noteText);
+}
+
+function renderBalanceMobilityTimeline() {
+  if (!activeStrAth) {
+    setEmptyNote("balanceMobilityNote", "No weekly athlete data found.");
+    return;
+  }
+
+  const rows = byWeekAth(activeStrAth);
+  const pitchRows = byScheduleAth(activeStrAth);
+  const datesWeekly = rows.map(r => r.Date);
+  const pitchDates = pitchRows.map(r => r.Date);
+  const allDates = [...new Set([...datesWeekly, ...pitchDates])].sort();
+  const rowMap = {};
+  rows.forEach(r => { rowMap[r.Date] = r; });
+
+  const leftStyle = getDominantDatasetStyles(activeStrAth, "L");
+  const rightStyle = getDominantDatasetStyles(activeStrAth, "R");
+
+  if (!allDates.length) {
+    setEmptyNote("balanceMobilityNote", "No balance, mobility, or schedule data available for this athlete.");
+    return;
+  }
+
+  const pitchSet = new Set(pitchDates);
+  const pitchPlugin = makePitchLinePlugin("pitchLinesBalance", allDates, pitchSet);
+
+  let datasets = [];
+  let noteText = "";
+
+  if (activeBalanceMetric === "balance") {
+    const leftVar = allDates.map(d => rowMap[d]?.Left_Single_Leg_Balance_Variability ?? null);
+    const rightVar = allDates.map(d => rowMap[d]?.Right_Single_Leg_Balance_Variability ?? null);
+
+    datasets = [
+      applyPointFlags({
+        label:"Left Variability", data:leftVar, borderColor:leftStyle.color, backgroundColor:leftStyle.color+"22",
+        borderDash:leftStyle.dash, borderCapStyle:leftStyle.cap, borderWidth:3, tension:0.3, fill:false, spanGaps:true
+      }, leftVar, flaggedIncreaseFromMin(leftVar, 0.10), leftStyle.color, 5),
+      applyPointFlags({
+        label:"Right Variability", data:rightVar, borderColor:rightStyle.color, backgroundColor:rightStyle.color+"22",
+        borderDash:rightStyle.dash, borderCapStyle:rightStyle.cap, borderWidth:3, tension:0.3, fill:false, spanGaps:true
+      }, rightVar, flaggedIncreaseFromMin(rightVar, 0.10), rightStyle.color, 5),
+      { label:"Pitched", data:allDates.map(() => null), borderColor:C_GRAY, backgroundColor:C_GRAY, borderWidth:2, borderDash:[5,5], pointRadius:0, pointHoverRadius:0 }
+    ]
+  } else {
+    const toe = allDates.map(d => rowMap[d]?.Toe_Touch ?? null);
+    const reach = allDates.map(d => rowMap[d]?.Reach_Back ?? null);
+    const dorsi = allDates.map(d => rowMap[d]?.Squat_Ankle_Dorsiflexion ?? null);
+
+    datasets = [
+      applyPointFlags({
+        label:"Toe Touch", data:toe, borderColor:C_GREEN, backgroundColor:C_GREEN+"22",
+        borderWidth:3, tension:0.3, fill:false, spanGaps:true
+      }, toe, flaggedDropFromMax(toe, 0.10), C_GREEN, 5),
+      applyPointFlags({
+        label:"Reach Back", data:reach, borderColor:C_GOLD, backgroundColor:C_GOLD+"22",
+        borderWidth:3, tension:0.3, fill:false, spanGaps:true
+      }, reach, flaggedDropFromMax(reach, 0.10), C_GOLD, 5),
+      applyPointFlags({
+        label:"Squat Ankle Dorsiflexion", data:dorsi, borderColor:C_BLACK, backgroundColor:C_BLACK+"22",
+        borderWidth:3, tension:0.3, fill:false, spanGaps:true
+      }, dorsi, flaggedDropFromMax(dorsi, 0.10), C_BLACK, 5),
+      { label:"Pitched", data:allDates.map(() => null), borderColor:C_GRAY, backgroundColor:C_GRAY, borderWidth:2, borderDash:[5,5], pointRadius:0, pointHoverRadius:0 }
+    ]
+  }
+
+  if (balanceMobilityChart) balanceMobilityChart.destroy();
+  balanceMobilityChart = new Chart(document.getElementById("balanceMobilityChart"), {
+    type:"line",
+    plugins:[pitchPlugin],
+    data:{ labels:allDates, datasets },
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+      interaction:{ mode:"index", intersect:false },
+      plugins:{
+        legend:{ position:"top", labels:{ boxWidth:12, padding:12, color:"#000000" } },
+        tooltip:{
+          callbacks:{
+            label:c => {
+              if (c.dataset.label === "Pitched") return null;
+              if (c.parsed.y == null) return "No data";
+              return ` ${c.dataset.label}: ${c.parsed.y}`;
+            }
+          }
+        }
+      },
+      scales:{
+        x:{ grid:{ display:false }, ticks:{ color:"#000000" } },
+        y:{ grid:{ color:C_GRID }, title:{ display:true, text:"Balance / Mobility", color:"#000000" }, ticks:{ color:"#000000" } }
+      }
+    }
+  });
+
+  setEmptyNote("balanceMobilityNote", noteText);
+}
+
+function renderApleyTorsoTimeline() {
+  if (!activeStrAth) {
+    setEmptyNote("apleyTorsoNote", "No weekly athlete data found.");
+    return;
+  }
+
+  const rows = byWeekAth(activeStrAth);
+  const pitchRows = byScheduleAth(activeStrAth);
+  const datesWeekly = rows.map(r => r.Date);
+  const pitchDates = pitchRows.map(r => r.Date);
+  const allDates = [...new Set([...datesWeekly, ...pitchDates])].sort();
+  const rowMap = {};
+  rows.forEach(r => { rowMap[r.Date] = r; });
+
+  const leftStyle = getDominantDatasetStyles(activeStrAth, "L");
+  const rightStyle = getDominantDatasetStyles(activeStrAth, "R");
+
+  if (!allDates.length) {
+    setEmptyNote("apleyTorsoNote", "No Apley, torso, or schedule data available for this athlete.");
+    return;
+  }
+
+  const pitchSet = new Set(pitchDates);
+  const pitchPlugin = makePitchLinePlugin("pitchLinesApleyTorso", allDates, pitchSet);
+
+  let datasets = [];
+  let noteText = "";
+
+  if (activeApleyMetric === "apley") {
+    const lo = allDates.map(d => rowMap[d]?.Left_Apley_Overhand ?? null);
+    const ro = allDates.map(d => rowMap[d]?.Right_Apley_Overhand ?? null);
+    const lu = allDates.map(d => rowMap[d]?.Left_Apley_Underhand ?? null);
+    const ru = allDates.map(d => rowMap[d]?.Right_Apley_Underhand ?? null);
+
+    datasets = [
+      applyPointFlags({
+        label:"Left Apley Overhand", data:lo, borderColor:leftStyle.color, backgroundColor:leftStyle.color+"22",
+        borderDash:leftStyle.dash, borderCapStyle:leftStyle.cap, borderWidth:3, tension:0.3, fill:false, spanGaps:true
+      }, lo, flaggedDropFromMax(lo, 0.12), leftStyle.color, 5),
+      applyPointFlags({
+        label:"Right Apley Overhand", data:ro, borderColor:rightStyle.color, backgroundColor:rightStyle.color+"22",
+        borderDash:rightStyle.dash, borderCapStyle:rightStyle.cap, borderWidth:3, tension:0.3, fill:false, spanGaps:true
+      }, ro, flaggedDropFromMax(ro, 0.12), rightStyle.color, 5),
+      applyPointFlags({
+        label:"Left Apley Underhand", data:lu, borderColor:leftStyle.color, backgroundColor:leftStyle.color+"22",
+        borderDash:leftStyle.dash, borderCapStyle:leftStyle.cap, borderWidth:3, tension:0.3, fill:false, spanGaps:true, pointStyle:"rectRot"
+      }, lu, flaggedDropFromMax(lu, 0.12), leftStyle.color, 5),
+      applyPointFlags({
+        label:"Right Apley Underhand", data:ru, borderColor:rightStyle.color, backgroundColor:rightStyle.color+"22",
+        borderDash:rightStyle.dash, borderCapStyle:rightStyle.cap, borderWidth:3, tension:0.3, fill:false, spanGaps:true, pointStyle:"rectRot"
+      }, ru, flaggedDropFromMax(ru, 0.12), rightStyle.color, 5),
+      { label:"Pitched", data:allDates.map(() => null), borderColor:C_GRAY, backgroundColor:C_GRAY, borderWidth:2, borderDash:[5,5], pointRadius:0, pointHoverRadius:0 }
+    ]
+  } else {
+    const lt = allDates.map(d => rowMap[d]?.Left_Torso_Rotation ?? null);
+    const rt = allDates.map(d => rowMap[d]?.Right_Torso_Rotation ?? null);
+
+    datasets = [
+      applyPointFlags({
+        label:"Left Torso Rotation", data:lt, borderColor:leftStyle.color, backgroundColor:leftStyle.color+"22",
+        borderDash:leftStyle.dash, borderCapStyle:leftStyle.cap, borderWidth:3, tension:0.3, fill:false, spanGaps:true
+      }, lt, flaggedDropFromMax(lt, 0.10), leftStyle.color, 5),
+      applyPointFlags({
+        label:"Right Torso Rotation", data:rt, borderColor:rightStyle.color, backgroundColor:rightStyle.color+"22",
+        borderDash:rightStyle.dash, borderCapStyle:rightStyle.cap, borderWidth:3, tension:0.3, fill:false, spanGaps:true
+      }, rt, flaggedDropFromMax(rt, 0.10), rightStyle.color, 5),
+      { label:"Pitched", data:allDates.map(() => null), borderColor:C_GRAY, backgroundColor:C_GRAY, borderWidth:2, borderDash:[5,5], pointRadius:0, pointHoverRadius:0 }
+    ]
+  }
+
+  if (apleyTorsoChart) apleyTorsoChart.destroy();
+  apleyTorsoChart = new Chart(document.getElementById("apleyTorsoChart"), {
+    type:"line",
+    plugins:[pitchPlugin],
+    data:{ labels:allDates, datasets },
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+      interaction:{ mode:"index", intersect:false },
+      plugins:{
+        legend:{ position:"top", labels:{ boxWidth:12, padding:12, color:"#000000" } },
+        tooltip:{
+          callbacks:{
+            label:c => {
+              if (c.dataset.label === "Pitched") return null;
+              if (c.parsed.y == null) return "No data";
+              return ` ${c.dataset.label}: ${c.parsed.y}`;
+            }
+          }
+        }
+      },
+      scales:{
+        x:{ grid:{ display:false }, ticks:{ color:"#000000" } },
+        y:{ grid:{ color:C_GRID }, title:{ display:true, text:"Apley / Torso Rotation", color:"#000000" }, ticks:{ color:"#000000" } }
+      }
+    }
+  });
+
+  setEmptyNote("apleyTorsoNote", noteText);
+}
+
+function getMetricInfo(metric) {
+  const map = {
+    left_er:{ key:"Left_ER", label:"Left ER", color:C_GREEN },
+    right_er:{ key:"Right_ER", label:"Right ER", color:C_GOLD },
+    left_ir:{ key:"Left_IR", label:"Left IR", color:C_GREEN },
+    right_ir:{ key:"Right_IR", label:"Right IR", color:C_GOLD },
+    left_grip:{ key:"Left_Grip", label:"Left Grip", color:C_GREEN },
+    right_grip:{ key:"Right_Grip", label:"Right Grip", color:C_GOLD },
+    jump_height:{ key:"Jump_Height", label:"Jump Height", color:C_GREEN },
+    rsi:{ key:"RSI", label:"RSI", color:C_GOLD }
+  };
+  return map[metric];
+}
+
+function buildSnapChart() {
+  const info = getMetricInfo(activeSnapMetric);
+  const peaks = {};
+  (WEEKLY || []).forEach(r => {
+    const v = r[info.key];
+    if (v == null) return;
+    if (!(r.Name in peaks) || v > peaks[r.Name]) peaks[r.Name] = v;
+  });
+
+  const sorted = Object.entries(peaks).map(([name, value]) => ({ name, value })).sort((a,b) => b.value - a.value);
+  const labels = sorted.map(d => d.name);
+  const values = sorted.map(d => d.value);
+
+  if (snapChart) snapChart.destroy();
+  snapChart = new Chart(document.getElementById("snapBarChart"), {
+    type:"bar",
+    data:{
+      labels,
+      datasets:[
+        { label:info.label, data:values, backgroundColor:info.color, borderColor:info.color, borderWidth:1, borderRadius:4 }
+      ]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{
+        legend:{ position:"top", labels:{ boxWidth:12, padding:14, color:"#000000" } },
+        tooltip:{ callbacks:{ label:c => ` ${c.dataset.label}: ${c.parsed.y}` } }
+      },
+      scales:{
+        x:{ grid:{ display:false }, ticks:{ color:"#000000" } },
+        y:{ grid:{ color:C_GRID }, title:{ display:true, text:info.label, color:"#000000" }, ticks:{ color:"#000000" } }
+      }
+    }
+  });
+}
+
+function buildStrengthCards() {
+  const el = document.getElementById("strengthCards");
+  el.innerHTML = "";
+
+  const peaks = {};
+  (WEEKLY || []).forEach(r => {
+    if (!peaks[r.Name]) peaks[r.Name] = {
+      Left_Grip:null, Right_Grip:null,
+      Left_ER:null, Right_ER:null,
+      Left_IR:null, Right_IR:null,
+      Jump_Height:null, RSI:null
+    };
+    ["Left_Grip","Right_Grip","Left_ER","Right_ER","Left_IR","Right_IR","Jump_Height","RSI"].forEach(k => {
+      if (r[k] != null && (peaks[r.Name][k] == null || r[k] > peaks[r.Name][k])) peaks[r.Name][k] = r[k];
+    });
+  });
+
+  const athletes = Object.keys(peaks).sort();
+  const allVals = athletes.flatMap(n => Object.values(peaks[n])).filter(v => v != null);
+  const mx = allVals.length ? Math.max(...allVals) : 300;
+
+  function bar(val, clr) {
+    if (val == null) return `<div class="s-track"><div class="s-fill" style="width:0%"></div></div>`;
+    return `<div class="s-track"><div class="s-fill" style="width:${(val / mx * 100).toFixed(1)}%;background:${clr}"><span>${val}</span></div></div>`;
+  }
+
+  athletes.forEach(name => {
+    const r = peaks[name];
+    const c = document.createElement("div");
+    c.className = "strength-card";
+    c.innerHTML = `
+      <div class="strength-card-name">${name}</div>
+      <div class="strength-metric">Grip Peak</div>
+      <div class="strength-bars">
+        <div class="s-row"><span class="s-lbl">Left</span>${bar(r.Left_Grip, C_GREEN)}</div>
+        <div class="s-row"><span class="s-lbl">Right</span>${bar(r.Right_Grip, C_GOLD)}</div>
+      </div>
+      <hr style="border:none;border-top:1px solid #dde3ed;margin:8px 0">
+      <div class="strength-metric">ER Peak</div>
+      <div class="strength-bars">
+        <div class="s-row"><span class="s-lbl">Left</span>${bar(r.Left_ER, C_GREEN)}</div>
+        <div class="s-row"><span class="s-lbl">Right</span>${bar(r.Right_ER, C_GOLD)}</div>
+      </div>
+      <hr style="border:none;border-top:1px solid #dde3ed;margin:8px 0">
+      <div class="strength-metric">IR Peak</div>
+      <div class="strength-bars">
+        <div class="s-row"><span class="s-lbl">Left</span>${bar(r.Left_IR, C_GREEN)}</div>
+        <div class="s-row"><span class="s-lbl">Right</span>${bar(r.Right_IR, C_GOLD)}</div>
+      </div>
+      <hr style="border:none;border-top:1px solid #dde3ed;margin:8px 0">
+      <div class="strength-metric">Jump Height / RSI Peak</div>
+      <div class="strength-bars">
+        <div class="s-row"><span class="s-lbl">Jump</span>${bar(r.Jump_Height, C_GREEN)}</div>
+        <div class="s-row"><span class="s-lbl">RSI</span>${bar(r.RSI, C_GOLD)}</div>
+      </div>`;
+    el.appendChild(c);
+  });
+}
+
+function renderMonthly() {
+  if (!activeMonthDate) return;
+  const rows = byMonthDate(activeMonthDate);
+  buildArcChart(rows);
+  buildIrErChart(rows);
+  buildArcCards(rows);
+  buildMonthlyTable(rows);
+}
+
+document.getElementById("romTabs").addEventListener("click", e => {
+  const b = e.target.closest(".tab");
+  if (!b) return;
+  document.querySelectorAll("#romTabs .tab").forEach(t => t.classList.remove("active"));
+  b.classList.add("active");
+  activeRomMetric = b.dataset.metric;
+  renderRomTimeline();
+});
+
+document.getElementById("strTabs").addEventListener("click", e => {
+  const b = e.target.closest(".tab");
+  if (!b) return;
+  document.querySelectorAll("#strTabs .tab").forEach(t => t.classList.remove("active"));
+  b.classList.add("active");
+  activeStrMetric = b.dataset.metric;
+  renderStrTimeline();
+});
+
+document.getElementById("gripJumpTabs").addEventListener("click", e => {
+  const b = e.target.closest(".tab");
+  if (!b) return;
+  document.querySelectorAll("#gripJumpTabs .tab").forEach(t => t.classList.remove("active"));
+  b.classList.add("active");
+  activeGripJumpMetric = b.dataset.metric;
+  renderGripTimeline();
+});
+
+document.getElementById("shoulderTabs").addEventListener("click", e => {
+  const b = e.target.closest(".tab");
+  if (!b) return;
+  document.querySelectorAll("#shoulderTabs .tab").forEach(t => t.classList.remove("active"));
+  b.classList.add("active");
+  activeShoulderMetric = b.dataset.metric;
+  renderShoulderMobilityTimeline();
+});
+
+document.getElementById("cervicalTabs").addEventListener("click", e => {
+  const b = e.target.closest(".tab");
+  if (!b) return;
+  document.querySelectorAll("#cervicalTabs .tab").forEach(t => t.classList.remove("active"));
+  b.classList.add("active");
+  activeCervicalMetric = b.dataset.metric;
+  renderCervicalTimeline();
+});
+
+document.getElementById("balanceTabs").addEventListener("click", e => {
+  const b = e.target.closest(".tab");
+  if (!b) return;
+  document.querySelectorAll("#balanceTabs .tab").forEach(t => t.classList.remove("active"));
+  b.classList.add("active");
+  activeBalanceMetric = b.dataset.metric;
+  renderBalanceMobilityTimeline();
+});
+
+document.getElementById("apleyTabs").addEventListener("click", e => {
+  const b = e.target.closest(".tab");
+  if (!b) return;
+  document.querySelectorAll("#apleyTabs .tab").forEach(t => t.classList.remove("active"));
+  b.classList.add("active");
+  activeApleyMetric = b.dataset.metric;
+  renderApleyTorsoTimeline();
+});
+
+document.getElementById("snapTabs").addEventListener("click", e => {
+  const b = e.target.closest(".tab");
+  if (!b) return;
+  document.querySelectorAll("#snapTabs .tab").forEach(t => t.classList.remove("active"));
+  b.classList.add("active");
+  activeSnapMetric = b.dataset.metric;
+  buildSnapChart();
+});
+
+initSelectors();
+renderMonthly();
+renderRomTimeline();
+renderStrTimeline();
+renderGripTimeline();
+renderVeloTimeline();
+renderShoulderMobilityTimeline();
+renderCervicalTimeline();
+renderBalanceMobilityTimeline();
+renderApleyTorsoTimeline();
+buildSnapChart();
+buildStrengthCards();
+</script>
+</body>
+</html>

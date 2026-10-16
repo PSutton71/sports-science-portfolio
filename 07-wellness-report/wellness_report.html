@@ -1,0 +1,589 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wellness &amp; Load Report</title>
+<style>
+:root{
+  --page:#f9f9f7; --surface:#fcfcfb; --card:#ffffff; --border:#e4e3df; --grid:#ecebe7;
+  --ink:#0b0b0b; --ink-2:#52514e; --muted:#898781;
+  --series:#2a78d6; --series-soft:#cde2fb;
+  --good:#0ca30c; --warn:#fab219; --crit:#d03b3b; --none:#b4b2ab;
+  --good-bg:#e7f6e7; --warn-bg:#fff4dc; --crit-bg:#fbe9e9; --none-bg:#efeeea;
+  --good-ink:#076b07; --warn-ink:#7a5200; --crit-ink:#a82727; --none-ink:#5f5e59;
+  --shadow:0 1px 2px rgba(0,0,0,.04),0 2px 8px rgba(0,0,0,.04);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --page:#0d0d0d; --surface:#1a1a19; --card:#1a1a19; --border:#2e2e2b; --grid:#2a2a28;
+    --ink:#f0efec; --ink-2:#c3c2b7; --muted:#898781;
+    --series:#3987e5; --series-soft:#1c3a5e;
+    --good-bg:#12301a; --warn-bg:#3a2d0c; --crit-bg:#3d1717; --none-bg:#2a2a28;
+    --good-ink:#7fd67f; --warn-ink:#f5c860; --crit-ink:#f19a9a; --none-ink:#c3c2b7;
+    --shadow:none;
+  }
+}
+:root[data-theme="dark"]{
+  --page:#0d0d0d; --surface:#1a1a19; --card:#1a1a19; --border:#2e2e2b; --grid:#2a2a28;
+  --ink:#f0efec; --ink-2:#c3c2b7; --muted:#898781;
+  --series:#3987e5; --series-soft:#1c3a5e;
+  --good-bg:#12301a; --warn-bg:#3a2d0c; --crit-bg:#3d1717; --none-bg:#2a2a28;
+  --good-ink:#7fd67f; --warn-ink:#f5c860; --crit-ink:#f19a9a; --none-ink:#c3c2b7;
+  --shadow:none;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--page);color:var(--ink);
+  font:14px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+.wrap{max-width:1180px;margin:0 auto;padding:24px 16px 64px}
+header{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end;justify-content:space-between;margin-bottom:20px}
+h1{font-size:24px;line-height:1.2;margin:0 0 4px;letter-spacing:-.01em}
+h2{font-size:16px;margin:0}
+.sub{color:var(--ink-2);font-size:13px}
+.demo{display:inline-block;margin-left:6px;padding:1px 8px;border-radius:999px;background:var(--warn-bg);color:var(--warn-ink);font-weight:600;font-size:12px}
+.controls{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end}
+label.ctl{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--ink-2);font-weight:500}
+select{font:inherit;color:var(--ink);background:var(--card);border:1px solid var(--border);border-radius:8px;padding:7px 30px 7px 10px;min-width:180px;
+  appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);
+  background-position:calc(100% - 15px) 52%,calc(100% - 10px) 52%;background-size:5px 5px;background-repeat:no-repeat}
+select:focus-visible,button:focus-visible{outline:2px solid var(--series);outline-offset:2px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:16px}
+.kpi{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 14px;box-shadow:var(--shadow)}
+.kpi .k{font-size:12px;color:var(--ink-2)}
+.kpi .v{font-size:26px;font-weight:650;letter-spacing:-.02em;font-variant-numeric:tabular-nums;margin-top:2px}
+.kpi .v small{font-size:13px;color:var(--muted);font-weight:500;margin-left:3px}
+.kpi .rag{display:flex;gap:10px;margin-top:6px;font-size:13px;font-weight:600}
+.panel{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:16px;box-shadow:var(--shadow)}
+.panel-h{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:baseline;justify-content:space-between;margin-bottom:10px}
+.panel-h p{margin:2px 0 0;color:var(--ink-2);font-size:13px}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12px;color:var(--ink-2)}
+.legend span{display:inline-flex;align-items:center;gap:5px}
+.sw{width:10px;height:10px;border-radius:3px;display:inline-block}
+.tick-sw{width:2px;height:12px;background:var(--ink);display:inline-block}
+.chart{width:100%;position:relative}
+.chart svg{display:block;width:100%;overflow:visible}
+.chart text{fill:var(--ink-2);font-size:12px}
+.chart .nm{fill:var(--ink);font-size:13px}
+.chart .val{fill:var(--ink);font-size:12px;font-weight:600;font-variant-numeric:tabular-nums}
+.chart .ax{fill:var(--muted);font-size:11px}
+.chart .gl{stroke:var(--grid);stroke-width:1}
+.chart .hit{fill:transparent;cursor:default}
+.chart .hit:hover{fill:var(--ink);fill-opacity:.04}
+.missing{margin-top:8px;font-size:12px;color:var(--ink-2)}
+.missing b{color:var(--ink)}
+.tip{position:fixed;pointer-events:none;z-index:10;background:var(--card);color:var(--ink);border:1px solid var(--border);
+  border-radius:8px;padding:8px 10px;font-size:12px;line-height:1.5;box-shadow:0 4px 16px rgba(0,0,0,.12);opacity:0;transition:opacity .08s;max-width:260px}
+.tip b{font-weight:650}
+.tip .m{color:var(--ink-2)}
+.pill{display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:2px 9px 2px 7px;font-size:12px;font-weight:650;white-space:nowrap}
+.pill.green{background:var(--good-bg);color:var(--good-ink)}
+.pill.yellow{background:var(--warn-bg);color:var(--warn-ink)}
+.pill.red{background:var(--crit-bg);color:var(--crit-ink)}
+.pill.incomplete{background:var(--none-bg);color:var(--none-ink)}
+.ico{width:12px;height:12px;flex:none}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+.card{border:1px solid var(--border);border-radius:12px;padding:14px;background:var(--surface);border-top:4px solid var(--none)}
+.card.green{border-top-color:var(--good)} .card.yellow{border-top-color:var(--warn)} .card.red{border-top-color:var(--crit)}
+.card-h{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.card-h .nm{font-weight:650;font-size:15px}
+.score{display:flex;align-items:baseline;gap:6px;margin:8px 0 2px}
+.score .big{font-size:30px;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.score .of{color:var(--muted);font-size:13px}
+.base{font-size:12px;color:var(--ink-2);min-height:18px}
+.items{margin:10px 0 0;padding:0;list-style:none;display:grid;gap:6px}
+.items li{display:grid;grid-template-columns:86px 1fr 34px;align-items:center;gap:8px;font-size:12px;color:var(--ink-2)}
+.items .bar{height:8px;border-radius:4px;background:var(--grid);overflow:hidden}
+.items .bar i{display:block;height:100%;border-radius:4px;background:var(--series)}
+.items .bar i.low{background:var(--crit)}
+.items .n{text-align:right;color:var(--ink);font-weight:600;font-variant-numeric:tabular-nums}
+.meta{margin-top:10px;padding-top:10px;border-top:1px solid var(--border);display:grid;gap:3px;font-size:12px;color:var(--ink-2)}
+.meta b{color:var(--ink);font-weight:600}
+.card button{margin-top:10px;font:inherit;font-size:12px;color:var(--series);background:none;border:0;padding:0;cursor:pointer;font-weight:600}
+.card button:hover{text-decoration:underline}
+details{margin-top:4px}
+summary{cursor:pointer;font-weight:600}
+.tbl-wrap{overflow-x:auto;margin-top:12px}
+table{border-collapse:collapse;width:100%;font-size:12px;font-variant-numeric:tabular-nums}
+th,td{padding:6px 8px;border-bottom:1px solid var(--border);text-align:right;white-space:nowrap}
+th{color:var(--ink-2);font-weight:600;position:sticky;top:0;background:var(--card)}
+th:first-child,td:first-child,th:nth-child(2),td:nth-child(2){text-align:left}
+.method{font-size:12px;color:var(--ink-2);margin:0}
+.empty{color:var(--muted);font-size:13px;padding:24px 0;text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Wellness &amp; Training Load</h1>
+      <div class="sub" id="sourceLine"></div>
+    </div>
+    <div class="controls">
+      <label class="ctl">Survey date
+        <select id="dateSel" aria-label="Survey date"></select>
+      </label>
+    </div>
+  </header>
+
+  <section class="kpis" id="kpis" aria-label="Summary"></section>
+
+  <section class="panel">
+    <div class="panel-h">
+      <div>
+        <h2>Overall wellness by athlete</h2>
+        <p>Composite = fatigue + muscles + stress + mood + sleep quality (5&ndash;25, higher is better). Colour compares each athlete to their own baseline.</p>
+      </div>
+      <div class="legend" id="ragLegend"></div>
+    </div>
+    <div class="chart" id="wellChart"></div>
+    <div class="missing" id="missing"></div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-h">
+      <div>
+        <h2>Training load &mdash; yesterday's session</h2>
+        <p id="loadSub">sRPE load = RPE &times; 120 min (arbitrary units)</p>
+      </div>
+    </div>
+    <div class="chart" id="loadChart"></div>
+  </section>
+
+  <section class="panel" id="trendPanel">
+    <div class="panel-h">
+      <div>
+        <h2>Trends over time</h2>
+        <p id="trendSub"></p>
+      </div>
+      <label class="ctl">Show
+        <select id="athSel" aria-label="Athlete for trend"></select>
+      </label>
+    </div>
+    <div class="legend" id="trendLegend" style="margin-bottom:8px"></div>
+    <div class="chart" id="trendCombo"></div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-h">
+      <div>
+        <h2>Athlete score cards</h2>
+        <p>Each wellness item on its 1&ndash;5 scale. Items at 2 or below are shown in red.</p>
+      </div>
+    </div>
+    <div class="cards" id="cards"></div>
+  </section>
+
+  <section class="panel">
+    <details>
+      <summary>Data table &amp; method</summary>
+      <p class="method" id="methodText" style="margin-top:10px"></p>
+      <div class="tbl-wrap"><table id="tbl"></table></div>
+    </details>
+  </section>
+</div>
+<div class="tip" id="tip" role="tooltip"></div>
+
+<!-- wellness_report.R replaces the contents of this block with your data -->
+<script id="report-data" type="application/json">
+{"generated":"2026-10-13 09:00","source":"DEMO","settings":{"session_minutes":120,"baseline_days":28,"baseline_min_n":3,"sd_floor":0.5,"z_green":-0.5,"z_red":-1.0,"pct_green":0.75,"pct_red":0.5,"item_max":5,"max_composite":25},"rows":[{"name":"Ava Brooks","date":"2026-09-21","trained":false,"reason":"Rest day","rpe":null,"load":null,"load_date":"2026-09-20","fatigue":3.0,"muscles":3.5,"stress":3.5,"mood":3.0,"sleep_quality":2.5,"sleep_hours":"7-8 hours","composite":15.5,"base_n":0,"base_mean":null,"base_sd":null,"z":null,"pct":0.62,"method":"early","status":"yellow"},{"name":"Ava Brooks","date":"2026-09-22","trained":true,"reason":null,"rpe":7.0,"load":840.0,"load_date":"2026-09-21","fatigue":3.5,"muscles":3.0,"stress":3.0,"mood":4.0,"sleep_quality":3.5,"sleep_hours":"8-9 hours","composite":17.0,"base_n":1,"base_mean":15.5,"base_sd":null,"z":null,"pct":0.68,"method":"early","status":"yellow"},{"name":"Ava Brooks","date":"2026-09-23","trained":true,"reason":null,"rpe":6.0,"load":720.0,"load_date":"2026-09-22","fatigue":3.0,"muscles":3.0,"stress":3.5,"mood":3.5,"sleep_quality":3.5,"sleep_hours":"8-9 hours","composite":16.5,"base_n":2,"base_mean":16.25,"base_sd":1.06,"z":null,"pct":0.66,"method":"early","status":"yellow"},{"name":"Ava Brooks","date":"2026-09-24","trained":true,"reason":null,"rpe":5.0,"load":600.0,"load_date":"2026-09-23","fatigue":2.5,"muscles":3.5,"stress":2.5,"mood":3.5,"sleep_quality":3.5,"sleep_hours":"6-7 hours","composite":15.5,"base_n":3,"base_mean":16.33,"base_sd":0.76,"z":-1.09,"pct":0.62,"method":"baseline","status":"red"},{"name":"Ava Brooks","date":"2026-09-25","trained":true,"reason":null,"rpe":7.0,"load":840.0,"load_date":"2026-09-24","fatigue":4.0,"muscles":3.0,"stress":4.5,"mood":3.5,"sleep_quality":4.0,"sleep_hours":"9-10 hours","composite":19.0,"base_n":4,"base_mean":16.12,"base_sd":0.75,"z":3.83,"pct":0.76,"method":"baseline","status":"green"},{"name":"Ava Brooks","date":"2026-09-26","trained":true,"reason":null,"rpe":7.0,"load":840.0,"load_date":"2026-09-25","fatigue":3.5,"muscles":4.0,"stress":3.0,"mood":4.0,"sleep_quality":4.5,"sleep_hours":"6-7 hours","composite":19.0,"base_n":5,"base_mean":16.7,"base_sd":1.44,"z":1.6,"pct":0.76,"method":"baseline","status":"green"},{"name":"Ava Brooks","date":"2026-09-27","trained":true,"reason":null,"rpe":8.0,"load":960.0,"load_date":"2026-09-26","fatigue":3.5,"muscles":3.5,"stress":3.5,"mood":3.0,"sleep_quality":3.5,"sleep_hours":"6-7 hours","composite":17.0,"base_n":6,"base_mean":17.08,"base_sd":1.59,"z":-0.05,"pct":0.68,"method":"baseline","status":"green"},{"name":"Ava Brooks","date":"2026-09-28","trained":false,"reason":"Rest day","rpe":null,"load":null,"load_date":"2026-09-27","fatigue":3.5,"muscles":3.0,"stress":3.5,"mood":3.5,"sleep_quality":3.5,"sleep_hours":"8-9 hours","composite":17.0,"base_n":7,"base_mean":17.07,"base_sd":1.46,"z":-0.05,"pct":0.68,"method":"baseline","status":"green"},{"name":"Ava Brooks","date":"2026-09-29","trained":true,"reason":null,"rpe":7.0,"load":840.0,"load_date":"2026-09-28","fatigue":3.5,"muscles":3.0,"stress":4.5,"mood":3.5,"sleep_quality":3.5,"sleep_hours":"7-8 hours","composite":18.0,"base_n":8,"base_mean":17.06,"base_sd":1.35,"z":0.7,"pct":0.72,"method":"baseline","status":"green"},{"name":"Ava Brooks","date":"2026-09-30","trained":true,"reason":null,"rpe":6.0,"load":720.0,"load_date":"2026-09-29","fatigue":3.5,"muscles":3.5,"stress":3.0,"mood":3.0,"sleep_quality":3.5,"sleep_hours":"8-9 hours","composite":16.5,"base_n":9,"base_mean":17.17,"base_sd":1.3,"z":-0.51,"pct":0.66,"method":"baseline","status":"yellow"},{"name":"Ava Brooks","date":"2026-10-01","trained":true,"reason":null,"rpe":8.0,"load":960.0,"load_date":"2026-09-30","fatigue":2.5,"muscles":3.5,"stress":3.0,"mood":3.0,"sleep_quality":3.0,"sleep_hours":"9-10 hours","composite":15.0,"base_n":10,"base_mean":17.1,"base_sd":1.24,"z":-1.69,"pct":0.6,"method":"baseline","status":"red"},{"name":"Ava Brooks","date":"2026-10-02","trained":true,"reason":null,"rpe":6.0,"load":720.0,"load_date":"2026-10-01","fatigue":3.5,"muscles":4.0,"stress":3.5,"mood":3.0,"sleep_quality":3.0,"sleep_hours":"8-9 hours","composite":17.0,"base_n":11,"base_mean":16.91,"base_sd":1.34,"z":0.07,"pct":0.68,"method":"baseline","status":"green"},{"name":"Ava Brooks","date":"2026-10-03","trained":true,"reason":null,"rpe":4.0,"load":480.0,"load_date":"2026-10-02","fatigue":3.0,"muscles":2.5,"stress":3.5,"mood":3.5,"sleep_quality":3.0,"sleep_hours":"7-8 hours","composite":15.5,"base_n":12,"base_mean":16.92,"base_sd":1.28,"z":-1.11,"pct":0.62,"method":"baseline","status":"red"},{"name":"Ava Brooks","date":"2026-10-04","trained":true,"reason":null,"rpe":5.0,"load":600.0,"load_date":"2026-10-03","fatigue":3.5,"muscles":3.5,"stress":2.5,"mood":3.5,"sleep_quality":3.5,"sleep_hours":"8-9 hours","composite":16.5,"base_n":13,"base_mean":16.81,"base_sd":1.28,"z":-0.24,"pct":0.66,"method":"baseline","status":"green"},{"name":"Ava Brooks","date":"2026-10-05","trained":false,"reason":"Rest day","rpe":null,"load":null,"load_date":"2026-10-04","fatigue":3.5,"muscles":3.0,"stress":3.0,"mood":3.5,"sleep_quality":4.0,"sleep_hours":"9-10 hours","composite":17.0,"base_n":14,"base_mean":16.79,"base_sd":1.24,"z":0.17,"pct":0.68,"method":"baseline","status":"green"},{"name":"Ava Brooks","date":"2026-10-06","trained":true,"reason":null,"rpe":7.0,"load":840.0,"load_date":"2026-10-05","fatigue":3.0,"muscles":3.5,"stress":3.0,"mood":3.0,"sleep_quality":3.5,"sleep_hours":"9-10 hours","composite":16.0,"base_n":15,"base_mean":16.8,"base_sd":1.19,"z":-0.67,"pct":0.64,"method":"baseline","status":"yellow"},{"name":"Ava Brooks","date":"2026-10-07","trained":false,"reason":"Sick","rpe":null,"load":null,"load_date":"2026-10-06","fatigue":4.0,"muscles":3.0,"stress":3.5,"mood":3.5,"sleep_quality":3.0,"sleep_hours":"9-10 hours","composite":17.0,"base_n":16,"base_mean":16.75,"base_sd":1.17,"z":0.21,"pct":0.68,"method":"baseline","status":"green"},{"name":"Ava Brooks","date":"2026-10-08","trained":true,"reason":null,"rpe":8.0,"load":960.0,"load_date":"2026-10-07","fatigue":3.5,"muscles":3.5,"stress":4.5,"mood":3.5,"sleep_quality":3.5,"sleep_hours":"8-9 hours","composite":18.5,"base_n":17,"base_mean":16.76,"base_sd":1.13,"z":1.53,"pct":0.74,"method":"baseline","status":"green"},{"name":"Ava Brooks","date":"2026-10-10","trained":true,"reason":null,"rpe":7.0,"load":840.0,"load_date":"2026-10-09","fatigue":2.5,"muscles":3.0,"stress":3.0,"mood":3.5,"sleep_quality":3.0,"sleep_hours":"6-7 hours","composite":15.0,"base_n":18,"base_mean":16.86,"base_sd":1.17,"z":-1.59,"pct":0.6,"method":"baseline","status":"red"},{"name":"Ava Brooks","date":"2026-10-11","trained":false,"reason":"Class conflict","rpe":null,"load":null,"load_date":"2026-10-10","fatigue":3.0,"muscles":4.0,"stress":3.0,"mood":3.0,"sleep_quality":3.0,"sleep_hours":"6-7 hours","composite":16.0,"base_n":19,"base_mean":16.76,"base_sd":1.22,"z":-0.63,"pct":0.64,"method":"baseline","status":"yellow"},{"name":"Ava Brooks","date":"2026-10-12","trained":false,"reason":"Rest day","rpe":null,"load":null,"load_date":"2026-10-11","fatigue":4.0,"muscles":3.5,"stress":3.5,"mood":3.0,"sleep_quality":3.0,"sleep_hours":"7-8 hours","composite":17.0,"base_n":20,"base_mean":16.73,"base_sd":1.2,"z":0.23,"pct":0.68,"method":"baseline","status":"green"},{"name":"Ava Brooks","date":"2026-10-13","trained":true,"reason":null,"rpe":8.0,"load":960.0,"load_date":"2026-10-12","fatigue":2.5,"muscles":2.5,"stress":2.5,"mood":3.0,"sleep_quality":3.0,"sleep_hours":"7-8 hours","composite":13.5,"base_n":21,"base_mean":16.74,"base_sd":1.17,"z":-2.77,"pct":0.54,"method":"baseline","status":"red"},{"name":"Chris Adeyemi","date":"2026-09-21","trained":false,"reason":"Rest day","rpe":null,"load":null,"load_date":"2026-09-20","fatigue":3.5,"muscles":4.0,"stress":3.5,"mood":3.5,"sleep_quality":2.5,"sleep_hours":"8-9 hours","composite":17.0,"base_n":0,"base_mean":null,"base_sd":null,"z":null,"pct":0.68,"method":"early","status":"yellow"},{"name":"Chris Adeyemi","date":"2026-09-23","trained":true,"reason":null,"rpe":7.0,"load":840.0,"load_date":"2026-09-22","fatigue":3.0,"muscles":3.5,"stress":3.0,"mood":3.5,"sleep_quality":2.0,"sleep_hours":"9-10 hours","composite":15.0,"base_n":1,"base_mean":17.0,"base_sd":null,"z":null,"pct":0.6,"method":"early","status":"yellow"},{"name":"Chris Adeyemi","date":"2026-09-24","trained":true,"reason":null,"rpe":5.0,"load":600.0,"load_date":"2026-09-23","fatigue":3.5,"muscles":2.5,"stress":3.5,"mood":2.0,"sleep_quality":3.5,"sleep_hours":"8-9 hours","composite":15.0,"base_n":2,"base_mean":16.0,"base_sd":1.41,"z":null,"pct":0.6,"method":"early","status":"yellow"},{"name":"Chris Adeyemi","date":"2026-09-25","trained":true,"reason":null,"rpe":7.0,"load":840.0,"load_date":"2026-09-24","fatigue":3.0,"muscles":3.0,"stress":3.0,"mood":3.5,"sleep_quality":3.5,"sleep_hours":"6-7 hours","composite":16.0,"base_n":3,"base_mean":15.67,"base_sd":1.15,"z":0.29,"pct":0.64,"method":"baseline","status":"green"},{"name":"Chris Adeyemi","date":"2026-09-26","trained":true,"reason":null,"rpe":6.0,"load":720.0,"load_date":"2026-09-25","fatigue":3.5,"muscles":3.0,"stress":3.5,"mood":3.0,"sleep_quality":3.5,"sleep_hours":"6-7 hours","composite":16.5,"base_n":4,"base_mean":15.75,"base_sd":0.96,"z":0.78,"pct":0.66,"method":"baseline","status":"green"},{"name":"Chris Adeyemi","date":"2026-09-27","trained":true,"reason":null,"rpe":7.0,"load":840.0,"load_date":"2026-09-26","fatigue":3.5,"muscles":3.0,"stress":2.5,"mood":3.0,"sleep_quality":4.0,"sleep_hours":"9-10 hours","composite":16.0,"base_n":5,"base_mean":15.9,"base_sd":0.89,"z":0.11,"pct":0.64,"method":"baseline","status":"green"},{"name":"Chris Adeyemi","date":"2026-09-28","trained":false,"reason":"Rest day","rpe":null,"load":null,"load_date":"2026-09-27","fatigue":3.5,"muscles":4.0,"stress":3.0,"mood":3.5,"sleep_quality":2.5,"sleep_hours":"7-8 hours","composite":16.5,"base_n":6,"base_mean":15.92,"base_sd":0.8,"z":0.73,"pct":0.66,"method":"baseline","status":"green"},{"name":"Chris Adeyemi","date":"2026-09-29","trained":true,"reason":null,"rpe":8.0,"load":960.0,"load_date":"2026-09-28","fatigue":3.0,"muscles":3.5,"stress":3.0,"mood":3.0,"sleep_quality":3.0,"sleep_hours":"7-8 hours","composite":15.5,"base_n":7,"base_mean":16.0,"base_sd":0.76,"z":-0.65,"pct":0.62,"method":"baseline","status":"yellow"},{"name":"Chris Adeyemi","date":"2026-09-30","trained":true,"reason":null,"rpe":8.0,"load":960.0,"load_date":"2026-09-29","fatigue":4.0,"muscles":4.0,"stress":3.5,"mood":3.0,"sleep_quality":3.5,"sleep_hours":"8-9 hours","composite":18.0,"base_n":8,"base_mean":15.94,"base_sd":0.73,"z":2.83,"pct":0.72,"method":"baseline","status":"green"},{"name":"Chris Adeyemi","date":"2026-10-01","trained":true,"reason":null,"rpe":7.0,"load":840.0,"load_date":"2026-09-30","fatigue":3.5,"muscles":3.5,"stress":3.5,"mood":3.5,"sleep_quality":3.5,"sleep_hours":"9-10 hours","composite":17.5,"base_n":9,"base_mean":16.17,"base_sd":0.97,"z":1.38,"pct":0.7,"method":"baseline","status":"green"},{"name":"Chris Adeyemi","date":"2026-10-03","trained":true,"reason":null,"rpe":7.0,"load":840.0,"load_date":"2026-10-02","fatigue":4.0,"muscles":4.0,"stress":2.5,"mood":3.0,"sleep_quality":2.5,"sleep_hours":"8-9 hours","composite":16.0,"base_n":10,"base_mean":16.3,"base_sd":1.01,"z":-0.3,"pct":0.64,"method":"baseline","status":"green"},{"name":"Chris Adeyemi","date":"2026-10-04","trained":true,"reason":null,"rpe":9.0,"load":1080.0,"load_date":"2026-10-03","fatigue":3.0,"muscles":3.5,"stress":3.0,"mood":4.0,"sleep_quality":3.0,"sleep_hours":"9-10 hours","composite":16.5,"base_n":11,"base_mean":16.27,"base_sd":0.96,"z":0.24,"pct":0.66,"method":"baseline","status":"green"},{"name":"Chris Adeyemi","date":"2026-10-05","trained":false,"reason":"Rest day","rpe":null,"load":null,"load_date":"2026-10-04","fatigue":3.0,"muscles":3.0,"stress":3.5,"mood":4.0,"sleep_quality":3.5,"sleep_hours":"6-7 hours","composite":17.0,"base_n":12,"base_mean":16.29,"base_sd":0.92,"z":0.77,"pct":0.68,"method":"baseline","status":"green"},{"name":"Chris Adeyemi","date":"2026-10-06","trained":true,"reason":null,"rpe":7.0,"load":840.0,"load_date":"2026-10-05","fatigue":3.5,"muscles":3.0,"stress":3.0,"mood":3.5,"sleep_quality":3.0,"sleep_hours":"8-9 hours","composite":16.0,"base_n":13,"base_mean":16.35,"base_sd":0.9,"z":-0.39,"pct":0.64,"method":"baseline","status":"green"},{"name":"Chris Adeyemi","date":"2026-10-07","trained":false,"reason":"Injured","rpe":null,"load":null,"load_date":"2026-10-06","fatigue":3.5,"muscles":2.5,"stress":4.0,"mood":3.5,"sleep_quality":4.0,"sleep_hours":"6-7 hours","composite":17.5,"base_n":14,"base_mean":16.32,"base_sd":0.87,"z":1.36,"pct":0.7,"method":"baseline","status":"green"},{"name":"Chris Adeyemi","date":"2026-10-08","trained":true,"reason":null,"rpe":5.0,"load":600.0,"load_date":"2026-10-07","fatigue":3.5,"muscles":3.0,"stress":2.5,"mood":3.5,"sleep_quality":4.0,"sleep_hours":"6-7 hours","composite":16.5,"base_n":15,"base_mean":16.4,"base_sd":0.89,"z":0.11,"pct":0.66,"method":"baseline","status":"green"},{"name":"Chris Adeyemi","date":"2026-10-09","trained":true,"reason":null,"rpe":7.0,"load":840.0,"load_date":"2026-10-08","fatigue":3.0,"muscles":3.0,"stress":3.0,"mood":3.5,"sleep_quality":3.0,"sleep_hours":"7-8 hours","composite":15.5,"base_n":16,"base_mean":16.41,"base_sd":0.86,"z":-1.05,"pct":0.62,"method":"baseline","status":"red"},{"name":"Chris Adeyemi","date":"2026-10-10","trained":true,"reason":null,"rpe":8.0,"load":960.0,"load_date":"2026-10-09","fatigue":3.5,"muscles":4.0,"stress":3.5,"mood":3.0,"sleep_quality":2.5,"sleep_hours":"8-9 hours","composite":16.5,"base_n":17,"base_mean":16.35,"base_sd":0.86,"z":0.17,"pct":0.66,"method":"baseline","status":"green"},{"name":"Chris Adeyemi","date":"2026-10-11","trained":true,"reason":null,"rpe":9.0,"load":1080.0,"load_date":"2026-10-10","fatigue":2.5,"muscles":3.0,"stress":3.0,"mood":4.0,"sleep_quality":3.5,"sleep_hours":"7-8 hours","composite":16.0,"base_n":18,"base_mean":16.36,"base_sd":0.84,"z":-0.43,"pct":0.64,"method":"baseline","status":"green"},{"name":"Chris Adeyemi","date":"2026-10-12","trained":false,"reason":"Rest day","rpe":null,"load":null,"load_date":"2026-10-11","fatigue":3.0,"muscles":3.5,"stress":3.5,"mood":2.5,"sleep_quality":4.0,"sleep_hours":"7-8 hours","composite":16.5,"base_n":19,"base_mean":16.34,"base_sd":0.82,"z":0.19,"pct":0.66,"method":"baseline","status":"green"},{"name":"Chris Adeyemi","date":"2026-10-13","trained":true,"reason":null,"rpe":7.0,"load":840.0,"load_date":"2026-10-12","fatigue":3.0,"muscles":3.5,"stress":2.5,"mood":3.5,"sleep_quality":3.0,"sleep_hours":"6-7 hours","composite":15.5,"base_n":20,"base_mean":16.35,"base_sd":0.8,"z":-1.07,"pct":0.62,"method":"baseline","status":"red"},{"name":"Jordan Lee","date":"2026-09-22","trained":true,"reason":null,"rpe":5.0,"load":600.0,"load_date":"2026-09-21","fatigue":3.5,"muscles":3.5,"stress":2.5,"mood":3.0,"sleep_quality":4.5,"sleep_hours":"8-9 hours","composite":17.0,"base_n":0,"base_mean":null,"base_sd":null,"z":null,"pct":0.68,"method":"early","status":"yellow"},{"name":"Jordan Lee","date":"2026-09-23","trained":true,"reason":null,"rpe":8.0,"load":960.0,"load_date":"2026-09-22","fatigue":3.5,"muscles":4.0,"stress":3.5,"mood":3.5,"sleep_quality":4.0,"sleep_hours":"7-8 hours","composite":18.5,"base_n":1,"base_mean":17.0,"base_sd":null,"z":null,"pct":0.74,"method":"early","status":"yellow"},{"name":"Jordan Lee","date":"2026-09-24","trained":true,"reason":null,"rpe":6.0,"load":720.0,"load_date":"2026-09-23","fatigue":3.5,"muscles":4.0,"stress":3.5,"mood":2.5,"sleep_quality":3.5,"sleep_hours":"9-10 hours","composite":17.0,"base_n":2,"base_mean":17.75,"base_sd":1.06,"z":null,"pct":0.68,"method":"early","status":"yellow"},{"name":"Jordan Lee","date":"2026-09-25","trained":true,"reason":null,"rpe":7.0,"load":840.0,"load_date":"2026-09-24","fatigue":3.5,"muscles":3.5,"stress":3.5,"mood":4.5,"sleep_quality":3.0,"sleep_hours":"7-8 hours","composite":18.0,"base_n":3,"base_mean":17.5,"base_sd":0.87,"z":0.58,"pct":0.72,"method":"baseline","status":"green"},{"name":"Jordan Lee","date":"2026-09-27","trained":true,"reason":null,"rpe":9.0,"load":1080.0,"load_date":"2026-09-26","fatigue":3.5,"muscles":4.0,"stress":3.5,"mood":3.5,"sleep_quality":3.0,"sleep_hours":"6-7 hours","composite":17.5,"base_n":4,"base_mean":17.62,"base_sd":0.75,"z":-0.17,"pct":0.7,"method":"baseline","status":"green"},{"name":"Jordan Lee","date":"2026-09-28","trained":false,"reason":"Rest day","rpe":null,"load":null,"load_date":"2026-09-27","fatigue":4.0,"muscles":3.5,"stress":3.5,"mood":2.5,"sleep_quality":3.5,"sleep_hours":"7-8 hours","composite":17.0,"base_n":5,"base_mean":17.6,"base_sd":0.65,"z":-0.92,"pct":0.68,"method":"baseline","status":"yellow"},{"name":"Jordan Lee","date":"2026-09-29","trained":true,"reason":null,"rpe":6.0,"load":720.0,"load_date":"2026-09-28","fatigue":4.0,"muscles":3.5,"stress":4.0,"mood":3.5,"sleep_quality":4.0,"sleep_hours":"9-10 hours","composite":19.0,"base_n":6,"base_mean":17.5,"base_sd":0.63,"z":2.37,"pct":0.76,"method":"baseline","status":"green"},{"name":"Jordan Lee","date":"2026-09-30","trained":true,"reason":null,"rpe":7.0,"load":840.0,"load_date":"2026-09-29","fatigue":4.0,"muscles":4.0,"stress":3.5,"mood":2.5,"sleep_quality":4.0,"sleep_hours":"7-8 hours","composite":18.0,"base_n":7,"base_mean":17.71,"base_sd":0.81,"z":0.35,"pct":0.72,"method":"baseline","status":"green"},{"name":"Jordan Lee","date":"2026-10-01","trained":true,"reason":null,"rpe":8.0,"load":960.0,"load_date":"2026-09-30","fatigue":3.5,"muscles":4.0,"stress":3.5,"mood":3.0,"sleep_quality":4.5,"sleep_hours":"6-7 hours","composite":18.5,"base_n":8,"base_mean":17.75,"base_sd":0.76,"z":0.99,"pct":0.74,"method":"baseline","status":"green"},{"name":"Jordan Lee","date":"2026-10-02","trained":true,"reason":null,"rpe":5.0,"load":600.0,"load_date":"2026-10-01","fatigue":4.0,"muscles":3.5,"stress":4.0,"mood":4.0,"sleep_quality":4.5,"sleep_hours":"7-8 hours","composite":20.0,"base_n":9,"base_mean":17.83,"base_sd":0.75,"z":2.89,"pct":0.8,"method":"baseline","status":"green"},{"name":"Jordan Lee","date":"2026-10-03","trained":true,"reason":null,"rpe":5.0,"load":600.0,"load_date":"2026-10-02","fatigue":4.5,"muscles":3.0,"stress":3.5,"mood":3.0,"sleep_quality":4.0,"sleep_hours":"8-9 hours","composite":18.0,"base_n":10,"base_mean":18.05,"base_sd":0.98,"z":-0.05,"pct":0.72,"method":"baseline","status":"green"},{"name":"Jordan Lee","date":"2026-10-04","trained":true,"reason":null,"rpe":10.0,"load":1200.0,"load_date":"2026-10-03","fatigue":3.5,"muscles":3.0,"stress":4.0,"mood":4.0,"sleep_quality":3.0,"sleep_hours":"9-10 hours","composite":17.5,"base_n":11,"base_mean":18.05,"base_sd":0.93,"z":-0.58,"pct":0.7,"method":"baseline","status":"yellow"},{"name":"Jordan Lee","date":"2026-10-05","trained":false,"reason":"Rest day","rpe":null,"load":null,"load_date":"2026-10-04","fatigue":3.5,"muscles":3.5,"stress":3.5,"mood":3.5,"sleep_quality":3.5,"sleep_hours":"7-8 hours","composite":17.5,"base_n":12,"base_mean":18.0,"base_sd":0.9,"z":-0.55,"pct":0.7,"method":"baseline","status":"yellow"},{"name":"Jordan Lee","date":"2026-10-06","trained":true,"reason":null,"rpe":4.0,"load":480.0,"load_date":"2026-10-05","fatigue":2.5,"muscles":3.0,"stress":3.5,"mood":3.0,"sleep_quality":4.0,"sleep_hours":"9-10 hours","composite":16.0,"base_n":13,"base_mean":17.96,"base_sd":0.88,"z":-2.24,"pct":0.64,"method":"baseline","status":"red"},{"name":"Jordan Lee","date":"2026-10-07","trained":true,"reason":null,"rpe":6.0,"load":720.0,"load_date":"2026-10-06","fatigue":4.0,"muscles":3.5,"stress":3.5,"mood":3.5,"sleep_quality":4.0,"sleep_hours":"6-7 hours","composite":18.5,"base_n":14,"base_mean":17.82,"base_sd":0.99,"z":0.68,"pct":0.74,"method":"baseline","status":"green"},{"name":"Jordan Lee","date":"2026-10-08","trained":true,"reason":null,"rpe":7.0,"load":840.0,"load_date":"2026-10-07","fatigue":3.5,"muscles":3.5,"stress":4.5,"mood":3.5,"sleep_quality":3.5,"sleep_hours":"7-8 hours","composite":18.5,"base_n":15,"base_mean":17.87,"base_sd":0.97,"z":0.65,"pct":0.74,"method":"baseline","status":"green"},{"name":"Jordan Lee","date":"2026-10-09","trained":true,"reason":null,"rpe":7.0,"load":840.0,"load_date":"2026-10-08","fatigue":4.0,"muscles":3.5,"stress":3.0,"mood":3.0,"sleep_quality":4.0,"sleep_hours":"9-10 hours","composite":17.5,"base_n":16,"base_mean":17.91,"base_sd":0.95,"z":-0.43,"pct":0.7,"method":"baseline","status":"green"},{"name":"Jordan Lee","date":"2026-10-10","trained":true,"reason":null,"rpe":6.0,"load":720.0,"load_date":"2026-10-09","fatigue":3.5,"muscles":4.5,"stress":3.0,"mood":4.5,"sleep_quality":4.0,"sleep_hours":"8-9 hours","composite":19.5,"base_n":17,"base_mean":17.88,"base_sd":0.93,"z":1.74,"pct":0.78,"method":"baseline","status":"green"},{"name":"Jordan Lee","date":"2026-10-11","trained":true,"reason":null,"rpe":5.0,"load":600.0,"load_date":"2026-10-10","fatigue":3.5,"muscles":3.5,"stress":4.0,"mood":4.0,"sleep_quality":3.5,"sleep_hours":"8-9 hours","composite":18.5,"base_n":18,"base_mean":17.97,"base_sd":0.98,"z":0.54,"pct":0.74,"method":"baseline","status":"green"},{"name":"Jordan Lee","date":"2026-10-12","trained":false,"reason":"Rest day","rpe":null,"load":null,"load_date":"2026-10-11","fatigue":3.5,"muscles":3.0,"stress":3.5,"mood":3.0,"sleep_quality":3.5,"sleep_hours":"7-8 hours","composite":16.5,"base_n":19,"base_mean":18.0,"base_sd":0.96,"z":-1.57,"pct":0.66,"method":"baseline","status":"red"},{"name":"Jordan Lee","date":"2026-10-13","trained":true,"reason":null,"rpe":10.0,"load":1200.0,"load_date":"2026-10-12","fatigue":2.5,"muscles":4.5,"stress":3.5,"mood":3.0,"sleep_quality":3.5,"sleep_hours":"9-10 hours","composite":17.0,"base_n":20,"base_mean":17.93,"base_sd":0.99,"z":-0.93,"pct":0.68,"method":"baseline","status":"yellow"},{"name":"Lena Fischer","date":"2026-09-21","trained":false,"reason":"Rest day","rpe":null,"load":null,"load_date":"2026-09-20","fatigue":4.0,"muscles":3.0,"stress":4.0,"mood":4.0,"sleep_quality":4.0,"sleep_hours":"7-8 hours","composite":19.0,"base_n":0,"base_mean":null,"base_sd":null,"z":null,"pct":0.76,"method":"early","status":"green"},{"name":"Lena Fischer","date":"2026-09-22","trained":true,"reason":null,"rpe":5.0,"load":600.0,"load_date":"2026-09-21","fatigue":3.5,"muscles":4.0,"stress":3.5,"mood":4.0,"sleep_quality":4.0,"sleep_hours":"6-7 hours","composite":19.0,"base_n":1,"base_mean":19.0,"base_sd":null,"z":null,"pct":0.76,"method":"early","status":"green"},{"name":"Lena Fischer","date":"2026-09-23","trained":true,"reason":null,"rpe":8.0,"load":960.0,"load_date":"2026-09-22","fatigue":3.5,"muscles":4.0,"stress":3.5,"mood":3.0,"sleep_quality":3.0,"sleep_hours":"6-7 hours","composite":17.0,"base_n":2,"base_mean":19.0,"base_sd":0.0,"z":null,"pct":0.68,"method":"early","status":"yellow"},{"name":"Lena Fischer","date":"2026-09-24","trained":true,"reason":null,"rpe":6.0,"load":720.0,"load_date":"2026-09-23","fatigue":3.5,"muscles":3.5,"stress":3.0,"mood":3.0,"sleep_quality":3.5,"sleep_hours":"6-7 hours","composite":16.5,"base_n":3,"base_mean":18.33,"base_sd":1.15,"z":-1.59,"pct":0.66,"method":"baseline","status":"red"},{"name":"Lena Fischer","date":"2026-09-25","trained":true,"reason":null,"rpe":8.0,"load":960.0,"load_date":"2026-09-24","fatigue":3.5,"muscles":3.5,"stress":3.5,"mood":3.5,"sleep_quality":4.0,"sleep_hours":"6-7 hours","composite":18.0,"base_n":4,"base_mean":17.88,"base_sd":1.31,"z":0.1,"pct":0.72,"method":"baseline","status":"green"},{"name":"Lena Fischer","date":"2026-09-26","trained":true,"reason":null,"rpe":7.0,"load":840.0,"load_date":"2026-09-25","fatigue":3.5,"muscles":4.0,"stress":3.5,"mood":3.0,"sleep_quality":5.0,"sleep_hours":"8-9 hours","composite":19.0,"base_n":5,"base_mean":17.9,"base_sd":1.14,"z":0.96,"pct":0.76,"method":"baseline","status":"green"},{"name":"Lena Fischer","date":"2026-09-27","trained":true,"reason":null,"rpe":6.0,"load":720.0,"load_date":"2026-09-26","fatigue":3.5,"muscles":3.5,"stress":3.5,"mood":3.5,"sleep_quality":3.5,"sleep_hours":"8-9 hours","composite":17.5,"base_n":6,"base_mean":18.08,"base_sd":1.11,"z":-0.52,"pct":0.7,"method":"baseline","status":"yellow"},{"name":"Lena Fischer","date":"2026-09-28","trained":false,"reason":"Rest day","rpe":null,"load":null,"load_date":"2026-09-27","fatigue":4.0,"muscles":4.5,"stress":4.0,"mood":3.5,"sleep_quality":4.5,"sleep_hours":"7-8 hours","composite":20.5,"base_n":7,"base_mean":18.0,"base_sd":1.04,"z":2.4,"pct":0.82,"method":"baseline","status":"green"},{"name":"Lena Fischer","date":"2026-09-29","trained":true,"reason":null,"rpe":9.0,"load":1080.0,"load_date":"2026-09-28","fatigue":4.0,"muscles":3.0,"stress":3.5,"mood":3.5,"sleep_quality":3.5,"sleep_hours":"7-8 hours","composite":17.5,"base_n":8,"base_mean":18.31,"base_sd":1.31,"z":-0.62,"pct":0.7,"method":"baseline","status":"yellow"},{"name":"Lena Fischer","date":"2026-09-30","trained":true,"reason":null,"rpe":7.0,"load":840.0,"load_date":"2026-09-29","fatigue":4.0,"muscles":3.0,"stress":4.0,"mood":4.0,"sleep_quality":3.0,"sleep_hours":"6-7 hours","composite":18.0,"base_n":9,"base_mean":18.22,"base_sd":1.25,"z":-0.18,"pct":0.72,"method":"baseline","status":"green"},{"name":"Lena Fischer","date":"2026-10-01","trained":true,"reason":null,"rpe":6.0,"load":720.0,"load_date":"2026-09-30","fatigue":4.0,"muscles":3.0,"stress":3.5,"mood":4.0,"sleep_quality":4.0,"sleep_hours":"6-7 hours","composite":18.5,"base_n":10,"base_mean":18.2,"base_sd":1.18,"z":0.25,"pct":0.74,"method":"baseline","status":"green"},{"name":"Lena Fischer","date":"2026-10-03","trained":true,"reason":null,"rpe":5.0,"load":600.0,"load_date":"2026-10-02","fatigue":3.0,"muscles":3.0,"stress":3.5,"mood":4.5,"sleep_quality":4.0,"sleep_hours":"7-8 hours","composite":18.0,"base_n":11,"base_mean":18.23,"base_sd":1.13,"z":-0.2,"pct":0.72,"method":"baseline","status":"green"},{"name":"Lena Fischer","date":"2026-10-04","trained":false,"reason":"Sick","rpe":null,"load":null,"load_date":"2026-10-03","fatigue":4.0,"muscles":4.0,"stress":3.5,"mood":3.5,"sleep_quality":3.5,"sleep_hours":"6-7 hours","composite":18.5,"base_n":12,"base_mean":18.21,"base_sd":1.08,"z":0.27,"pct":0.74,"method":"baseline","status":"green"},{"name":"Lena Fischer","date":"2026-10-05","trained":false,"reason":"Rest day","rpe":null,"load":null,"load_date":"2026-10-04","fatigue":3.5,"muscles":3.5,"stress":3.5,"mood":3.5,"sleep_quality":3.5,"sleep_hours":"9-10 hours","composite":17.5,"base_n":13,"base_mean":18.23,"base_sd":1.03,"z":-0.71,"pct":0.7,"method":"baseline","status":"yellow"},{"name":"Lena Fischer","date":"2026-10-06","trained":true,"reason":null,"rpe":7.0,"load":840.0,"load_date":"2026-10-05","fatigue":4.0,"muscles":4.0,"stress":3.5,"mood":4.0,"sleep_quality":3.5,"sleep_hours":"7-8 hours","composite":19.0,"base_n":14,"base_mean":18.18,"base_sd":1.01,"z":0.81,"pct":0.76,"method":"baseline","status":"green"},{"name":"Lena Fischer","date":"2026-10-07","trained":true,"reason":null,"rpe":6.0,"load":720.0,"load_date":"2026-10-06","fatigue":3.5,"muscles":4.5,"stress":4.0,"mood":4.0,"sleep_quality":3.0,"sleep_hours":"9-10 hours","composite":19.0,"base_n":15,"base_mean":18.23,"base_sd":1.0,"z":0.77,"pct":0.76,"method":"baseline","status":"green"},{"name":"Lena Fischer","date":"2026-10-08","trained":true,"reason":null,"rpe":5.0,"load":600.0,"load_date":"2026-10-07","fatigue":4.0,"muscles":4.0,"stress":4.0,"mood":4.0,"sleep_quality":3.0,"sleep_hours":"7-8 hours","composite":19.0,"base_n":16,"base_mean":18.28,"base_sd":0.98,"z":0.73,"pct":0.76,"method":"baseline","status":"green"},{"name":"Lena Fischer","date":"2026-10-09","trained":true,"reason":null,"rpe":7.0,"load":840.0,"load_date":"2026-10-08","fatigue":3.5,"muscles":3.0,"stress":4.0,"mood":4.0,"sleep_quality":5.0,"sleep_hours":"8-9 hours","composite":19.5,"base_n":17,"base_mean":18.32,"base_sd":0.97,"z":1.22,"pct":0.78,"method":"baseline","status":"green"},{"name":"Lena Fischer","date":"2026-10-10","trained":true,"reason":null,"rpe":6.0,"load":720.0,"load_date":"2026-10-09","fatigue":3.5,"muscles":3.5,"stress":3.0,"mood":3.5,"sleep_quality":4.0,"sleep_hours":"9-10 hours","composite":17.5,"base_n":18,"base_mean":18.39,"base_sd":0.98,"z":-0.91,"pct":0.7,"method":"baseline","status":"yellow"},{"name":"Lena Fischer","date":"2026-10-11","trained":true,"reason":null,"rpe":8.0,"load":960.0,"load_date":"2026-10-10","fatigue":3.0,"muscles":3.5,"stress":4.0,"mood":3.5,"sleep_quality":4.0,"sleep_hours":"6-7 hours","composite":18.0,"base_n":19,"base_mean":18.34,"base_sd":0.97,"z":-0.35,"pct":0.72,"method":"baseline","status":"green"},{"name":"Lena Fischer","date":"2026-10-12","trained":false,"reason":"Rest day","rpe":null,"load":null,"load_date":"2026-10-11","fatigue":3.5,"muscles":4.5,"stress":3.5,"mood":4.0,"sleep_quality":3.5,"sleep_hours":"6-7 hours","composite":19.0,"base_n":20,"base_mean":18.32,"base_sd":0.95,"z":0.71,"pct":0.76,"method":"baseline","status":"green"},{"name":"Lena Fischer","date":"2026-10-13","trained":true,"reason":null,"rpe":6.0,"load":720.0,"load_date":"2026-10-12","fatigue":3.5,"muscles":3.5,"stress":3.5,"mood":4.0,"sleep_quality":4.5,"sleep_hours":"9-10 hours","composite":19.0,"base_n":21,"base_mean":18.36,"base_sd":0.94,"z":0.69,"pct":0.76,"method":"baseline","status":"green"},{"name":"Maya Patel","date":"2026-09-21","trained":false,"reason":"Rest day","rpe":null,"load":null,"load_date":"2026-09-20","fatigue":3.5,"muscles":3.5,"stress":3.0,"mood":3.5,"sleep_quality":4.0,"sleep_hours":"6-7 hours","composite":17.5,"base_n":0,"base_mean":null,"base_sd":null,"z":null,"pct":0.7,"method":"early","status":"yellow"},{"name":"Maya Patel","date":"2026-09-22","trained":true,"reason":null,"rpe":9.0,"load":1080.0,"load_date":"2026-09-21","fatigue":3.5,"muscles":3.5,"stress":4.0,"mood":3.5,"sleep_quality":3.0,"sleep_hours":"9-10 hours","composite":17.5,"base_n":1,"base_mean":17.5,"base_sd":null,"z":null,"pct":0.7,"method":"early","status":"yellow"},{"name":"Maya Patel","date":"2026-09-23","trained":true,"reason":null,"rpe":8.0,"load":960.0,"load_date":"2026-09-22","fatigue":3.5,"muscles":4.0,"stress":3.0,"mood":3.0,"sleep_quality":4.0,"sleep_hours":"6-7 hours","composite":17.5,"base_n":2,"base_mean":17.5,"base_sd":0.0,"z":null,"pct":0.7,"method":"early","status":"yellow"},{"name":"Maya Patel","date":"2026-09-24","trained":true,"reason":null,"rpe":7.0,"load":840.0,"load_date":"2026-09-23","fatigue":3.5,"muscles":2.5,"stress":3.5,"mood":3.0,"sleep_quality":4.0,"sleep_hours":"7-8 hours","composite":16.5,"base_n":3,"base_mean":17.5,"base_sd":0.0,"z":-2.0,"pct":0.66,"method":"baseline","status":"red"},{"name":"Maya Patel","date":"2026-09-25","trained":true,"reason":null,"rpe":7.0,"load":840.0,"load_date":"2026-09-24","fatigue":3.0,"muscles":3.5,"stress":4.0,"mood":4.0,"sleep_quality":3.5,"sleep_hours":"9-10 hours","composite":18.0,"base_n":4,"base_mean":17.25,"base_sd":0.5,"z":1.5,"pct":0.72,"method":"baseline","status":"green"},{"name":"Maya Patel","date":"2026-09-27","trained":true,"reason":null,"rpe":7.0,"load":840.0,"load_date":"2026-09-26","fatigue":3.5,"muscles":2.5,"stress":3.5,"mood":3.5,"sleep_quality":3.0,"sleep_hours":"6-7 hours","composite":16.0,"base_n":5,"base_mean":17.4,"base_sd":0.55,"z":-2.56,"pct":0.64,"method":"baseline","status":"red"},{"name":"Maya Patel","date":"2026-09-28","trained":false,"reason":"Rest day","rpe":null,"load":null,"load_date":"2026-09-27","fatigue":3.0,"muscles":3.0,"stress":4.0,"mood":3.5,"sleep_quality":3.0,"sleep_hours":"7-8 hours","composite":16.5,"base_n":6,"base_mean":17.17,"base_sd":0.75,"z":-0.89,"pct":0.66,"method":"baseline","status":"yellow"},{"name":"Maya Patel","date":"2026-09-29","trained":true,"reason":null,"rpe":8.0,"load":960.0,"load_date":"2026-09-28","fatigue":3.5,"muscles":3.5,"stress":4.5,"mood":4.0,"sleep_quality":3.5,"sleep_hours":"7-8 hours","composite":19.0,"base_n":7,"base_mean":17.07,"base_sd":0.73,"z":2.63,"pct":0.76,"method":"baseline","status":"green"},{"name":"Maya Patel","date":"2026-09-30","trained":true,"reason":null,"rpe":7.0,"load":840.0,"load_date":"2026-09-29","fatigue":4.5,"muscles":3.5,"stress":3.5,"mood":2.5,"sleep_quality":3.5,"sleep_hours":"9-10 hours","composite":17.5,"base_n":8,"base_mean":17.31,"base_sd":0.96,"z":0.2,"pct":0.7,"method":"baseline","status":"green"},{"name":"Maya Patel","date":"2026-10-01","trained":true,"reason":null,"rpe":6.0,"load":720.0,"load_date":"2026-09-30","fatigue":3.0,"muscles":2.5,"stress":3.5,"mood":3.5,"sleep_quality":3.5,"sleep_hours":"6-7 hours","composite":16.0,"base_n":9,"base_mean":17.33,"base_sd":0.9,"z":-1.48,"pct":0.64,"method":"baseline","status":"red"},{"name":"Maya Patel","date":"2026-10-02","trained":true,"reason":null,"rpe":8.0,"load":960.0,"load_date":"2026-10-01","fatigue":3.5,"muscles":3.5,"stress":3.0,"mood":3.5,"sleep_quality":3.5,"sleep_hours":"9-10 hours","composite":17.0,"base_n":10,"base_mean":17.2,"base_sd":0.95,"z":-0.21,"pct":0.68,"method":"baseline","status":"green"},{"name":"Maya Patel","date":"2026-10-03","trained":true,"reason":null,"rpe":4.0,"load":480.0,"load_date":"2026-10-02","fatigue":4.0,"muscles":3.5,"stress":3.5,"mood":4.0,"sleep_quality":3.5,"sleep_hours":"8-9 hours","composite":18.5,"base_n":11,"base_mean":17.18,"base_sd":0.9,"z":1.46,"pct":0.74,"method":"baseline","status":"green"},{"name":"Maya Patel","date":"2026-10-04","trained":true,"reason":null,"rpe":7.0,"load":840.0,"load_date":"2026-10-03","fatigue":3.5,"muscles":3.5,"stress":3.5,"mood":3.5,"sleep_quality":3.0,"sleep_hours":"8-9 hours","composite":17.0,"base_n":12,"base_mean":17.29,"base_sd":0.94,"z":-0.31,"pct":0.68,"method":"baseline","status":"green"},{"name":"Maya Patel","date":"2026-10-05","trained":false,"reason":"Rest day","rpe":null,"load":null,"load_date":"2026-10-04","fatigue":3.0,"muscles":4.0,"stress":3.5,"mood":3.5,"sleep_quality":3.5,"sleep_hours":"6-7 hours","composite":17.5,"base_n":13,"base_mean":17.27,"base_sd":0.9,"z":0.26,"pct":0.7,"method":"baseline","status":"green"},{"name":"Maya Patel","date":"2026-10-06","trained":true,"reason":null,"rpe":8.0,"load":960.0,"load_date":"2026-10-05","fatigue":4.5,"muscles":3.0,"stress":3.0,"mood":4.0,"sleep_quality":2.5,"sleep_hours":"8-9 hours","composite":17.0,"base_n":14,"base_mean":17.29,"base_sd":0.87,"z":-0.33,"pct":0.68,"method":"baseline","status":"green"},{"name":"Maya Patel","date":"2026-10-07","trained":true,"reason":null,"rpe":9.0,"load":1080.0,"load_date":"2026-10-06","fatigue":3.5,"muscles":4.0,"stress":3.5,"mood":4.0,"sleep_quality":3.0,"sleep_hours":"6-7 hours","composite":18.0,"base_n":15,"base_mean":17.27,"base_sd":0.84,"z":0.87,"pct":0.72,"method":"baseline","status":"green"},{"name":"Maya Patel","date":"2026-10-08","trained":true,"reason":null,"rpe":6.0,"load":720.0,"load_date":"2026-10-07","fatigue":3.0,"muscles":3.5,"stress":3.5,"mood":5.0,"sleep_quality":3.0,"sleep_hours":"7-8 hours","composite":18.0,"base_n":16,"base_mean":17.31,"base_sd":0.83,"z":0.82,"pct":0.72,"method":"baseline","status":"green"},{"name":"Maya Patel","date":"2026-10-09","trained":true,"reason":null,"rpe":5.0,"load":600.0,"load_date":"2026-10-08","fatigue":4.0,"muscles":4.0,"stress":3.5,"mood":3.5,"sleep_quality":3.5,"sleep_hours":"9-10 hours","composite":18.5,"base_n":17,"base_mean":17.35,"base_sd":0.82,"z":1.39,"pct":0.74,"method":"baseline","status":"green"},{"name":"Maya Patel","date":"2026-10-10","trained":true,"reason":null,"rpe":7.0,"load":840.0,"load_date":"2026-10-09","fatigue":3.0,"muscles":4.5,"stress":3.5,"mood":3.0,"sleep_quality":3.0,"sleep_hours":"6-7 hours","composite":17.0,"base_n":18,"base_mean":17.42,"base_sd":0.84,"z":-0.49,"pct":0.68,"method":"baseline","status":"green"},{"name":"Maya Patel","date":"2026-10-11","trained":true,"reason":null,"rpe":7.0,"load":840.0,"load_date":"2026-10-10","fatigue":3.5,"muscles":4.0,"stress":3.5,"mood":3.5,"sleep_quality":3.0,"sleep_hours":"8-9 hours","composite":17.5,"base_n":19,"base_mean":17.39,"base_sd":0.83,"z":0.13,"pct":0.7,"method":"baseline","status":"green"},{"name":"Maya Patel","date":"2026-10-12","trained":false,"reason":"Rest day","rpe":null,"load":null,"load_date":"2026-10-11","fatigue":4.0,"muscles":4.0,"stress":4.0,"mood":3.0,"sleep_quality":4.0,"sleep_hours":"9-10 hours","composite":19.0,"base_n":20,"base_mean":17.4,"base_sd":0.8,"z":1.99,"pct":0.76,"method":"baseline","status":"green"},{"name":"Maya Patel","date":"2026-10-13","trained":true,"reason":null,"rpe":4.0,"load":480.0,"load_date":"2026-10-12","fatigue":3.0,"muscles":3.5,"stress":2.5,"mood":3.5,"sleep_quality":4.0,"sleep_hours":"9-10 hours","composite":16.5,"base_n":21,"base_mean":17.48,"base_sd":0.86,"z":-1.14,"pct":0.66,"method":"baseline","status":"red"},{"name":"Noah Kim","date":"2026-09-21","trained":false,"reason":"Rest day","rpe":null,"load":null,"load_date":"2026-09-20","fatigue":3.5,"muscles":4.0,"stress":3.5,"mood":4.0,"sleep_quality":4.0,"sleep_hours":"7-8 hours","composite":19.0,"base_n":0,"base_mean":null,"base_sd":null,"z":null,"pct":0.76,"method":"early","status":"green"},{"name":"Noah Kim","date":"2026-09-22","trained":true,"reason":null,"rpe":8.0,"load":960.0,"load_date":"2026-09-21","fatigue":4.5,"muscles":4.0,"stress":3.5,"mood":4.5,"sleep_quality":3.5,"sleep_hours":"9-10 hours","composite":20.0,"base_n":1,"base_mean":19.0,"base_sd":null,"z":null,"pct":0.8,"method":"early","status":"green"},{"name":"Noah Kim","date":"2026-09-23","trained":true,"reason":null,"rpe":5.0,"load":600.0,"load_date":"2026-09-22","fatigue":4.5,"muscles":4.5,"stress":3.5,"mood":4.0,"sleep_quality":4.0,"sleep_hours":"7-8 hours","composite":20.5,"base_n":2,"base_mean":19.5,"base_sd":0.71,"z":null,"pct":0.82,"method":"early","status":"green"},{"name":"Noah Kim","date":"2026-09-24","trained":true,"reason":null,"rpe":5.0,"load":600.0,"load_date":"2026-09-23","fatigue":3.5,"muscles":4.0,"stress":4.5,"mood":4.0,"sleep_quality":4.0,"sleep_hours":"9-10 hours","composite":20.0,"base_n":3,"base_mean":19.83,"base_sd":0.76,"z":0.22,"pct":0.8,"method":"baseline","status":"green"},{"name":"Noah Kim","date":"2026-09-25","trained":true,"reason":null,"rpe":8.0,"load":960.0,"load_date":"2026-09-24","fatigue":3.5,"muscles":3.5,"stress":4.0,"mood":3.5,"sleep_quality":4.0,"sleep_hours":"7-8 hours","composite":18.5,"base_n":4,"base_mean":19.88,"base_sd":0.63,"z":-2.19,"pct":0.74,"method":"baseline","status":"red"},{"name":"Noah Kim","date":"2026-09-26","trained":false,"reason":"Injured","rpe":null,"load":null,"load_date":"2026-09-25","fatigue":3.0,"muscles":4.5,"stress":4.5,"mood":4.5,"sleep_quality":3.5,"sleep_hours":"8-9 hours","composite":20.0,"base_n":5,"base_mean":19.6,"base_sd":0.82,"z":0.49,"pct":0.8,"method":"baseline","status":"green"},{"name":"Noah Kim","date":"2026-09-27","trained":true,"reason":null,"rpe":8.0,"load":960.0,"load_date":"2026-09-26","fatigue":3.5,"muscles":4.0,"stress":4.5,"mood":4.0,"sleep_quality":4.5,"sleep_hours":"9-10 hours","composite":20.5,"base_n":6,"base_mean":19.67,"base_sd":0.75,"z":1.11,"pct":0.82,"method":"baseline","status":"green"},{"name":"Noah Kim","date":"2026-09-28","trained":false,"reason":"Rest day","rpe":null,"load":null,"load_date":"2026-09-27","fatigue":4.5,"muscles":4.0,"stress":3.5,"mood":3.5,"sleep_quality":4.0,"sleep_hours":"6-7 hours","composite":19.5,"base_n":7,"base_mean":19.79,"base_sd":0.76,"z":-0.38,"pct":0.78,"method":"baseline","status":"green"},{"name":"Noah Kim","date":"2026-09-29","trained":true,"reason":null,"rpe":5.0,"load":600.0,"load_date":"2026-09-28","fatigue":4.5,"muscles":4.5,"stress":3.0,"mood":4.0,"sleep_quality":4.0,"sleep_hours":"9-10 hours","composite":20.0,"base_n":8,"base_mean":19.75,"base_sd":0.71,"z":0.35,"pct":0.8,"method":"baseline","status":"green"},{"name":"Noah Kim","date":"2026-09-30","trained":true,"reason":null,"rpe":4.0,"load":480.0,"load_date":"2026-09-29","fatigue":3.0,"muscles":4.0,"stress":4.0,"mood":3.0,"sleep_quality":3.5,"sleep_hours":"6-7 hours","composite":17.5,"base_n":9,"base_mean":19.78,"base_sd":0.67,"z":-3.42,"pct":0.7,"method":"baseline","status":"red"},{"name":"Noah Kim","date":"2026-10-01","trained":true,"reason":null,"rpe":7.0,"load":840.0,"load_date":"2026-09-30","fatigue":3.5,"muscles":5.0,"stress":4.0,"mood":3.5,"sleep_quality":4.5,"sleep_hours":"7-8 hours","composite":20.5,"base_n":10,"base_mean":19.55,"base_sd":0.96,"z":0.99,"pct":0.82,"method":"baseline","status":"green"},{"name":"Noah Kim","date":"2026-10-02","trained":false,"reason":"Injured","rpe":null,"load":null,"load_date":"2026-10-01","fatigue":4.0,"muscles":4.0,"stress":3.0,"mood":3.5,"sleep_quality":4.0,"sleep_hours":"8-9 hours","composite":18.5,"base_n":11,"base_mean":19.64,"base_sd":0.95,"z":-1.19,"pct":0.74,"method":"baseline","status":"red"},{"name":"Noah Kim","date":"2026-10-03","trained":false,"reason":"Class conflict","rpe":null,"load":null,"load_date":"2026-10-02","fatigue":3.5,"muscles":3.0,"stress":4.5,"mood":3.0,"sleep_quality":3.5,"sleep_hours":"7-8 hours","composite":17.5,"base_n":12,"base_mean":19.54,"base_sd":0.96,"z":-2.12,"pct":0.7,"method":"baseline","status":"red"},{"name":"Noah Kim","date":"2026-10-04","trained":true,"reason":null,"rpe":8.0,"load":960.0,"load_date":"2026-10-03","fatigue":4.5,"muscles":3.0,"stress":4.0,"mood":4.0,"sleep_quality":4.0,"sleep_hours":"7-8 hours","composite":19.5,"base_n":13,"base_mean":19.38,"base_sd":1.08,"z":0.11,"pct":0.78,"method":"baseline","status":"green"},{"name":"Noah Kim","date":"2026-10-05","trained":false,"reason":"Rest day","rpe":null,"load":null,"load_date":"2026-10-04","fatigue":4.0,"muscles":3.5,"stress":4.0,"mood":4.5,"sleep_quality":4.5,"sleep_hours":"8-9 hours","composite":20.5,"base_n":14,"base_mean":19.39,"base_sd":1.04,"z":1.06,"pct":0.82,"method":"baseline","status":"green"},{"name":"Noah Kim","date":"2026-10-06","trained":true,"reason":null,"rpe":6.0,"load":720.0,"load_date":"2026-10-05","fatigue":3.0,"muscles":3.5,"stress":4.0,"mood":4.0,"sleep_quality":4.0,"sleep_hours":"7-8 hours","composite":18.5,"base_n":15,"base_mean":19.47,"base_sd":1.04,"z":-0.93,"pct":0.74,"method":"baseline","status":"yellow"},{"name":"Noah Kim","date":"2026-10-07","trained":true,"reason":null,"rpe":5.0,"load":600.0,"load_date":"2026-10-06","fatigue":4.0,"muscles":4.5,"stress":3.0,"mood":4.0,"sleep_quality":4.0,"sleep_hours":"6-7 hours","composite":19.5,"base_n":16,"base_mean":19.41,"base_sd":1.04,"z":0.09,"pct":0.78,"method":"baseline","status":"green"},{"name":"Noah Kim","date":"2026-10-08","trained":true,"reason":null,"rpe":6.0,"load":720.0,"load_date":"2026-10-07","fatigue":3.0,"muscles":3.0,"stress":3.5,"mood":3.5,"sleep_quality":4.0,"sleep_hours":"7-8 hours","composite":17.0,"base_n":17,"base_mean":19.41,"base_sd":1.0,"z":-2.4,"pct":0.68,"method":"baseline","status":"red"},{"name":"Noah Kim","date":"2026-10-09","trained":true,"reason":null,"rpe":6.0,"load":720.0,"load_date":"2026-10-08","fatigue":3.5,"muscles":3.5,"stress":4.5,"mood":5.0,"sleep_quality":3.5,"sleep_hours":"9-10 hours","composite":20.0,"base_n":18,"base_mean":19.28,"base_sd":1.13,"z":0.64,"pct":0.8,"method":"baseline","status":"green"},{"name":"Noah Kim","date":"2026-10-10","trained":true,"reason":null,"rpe":7.0,"load":840.0,"load_date":"2026-10-09","fatigue":4.0,"muscles":4.5,"stress":4.0,"mood":4.0,"sleep_quality":4.5,"sleep_hours":"9-10 hours","composite":21.0,"base_n":19,"base_mean":19.32,"base_sd":1.11,"z":1.52,"pct":0.84,"method":"baseline","status":"green"},{"name":"Noah Kim","date":"2026-10-11","trained":true,"reason":null,"rpe":6.0,"load":720.0,"load_date":"2026-10-10","fatigue":4.0,"muscles":4.0,"stress":4.0,"mood":4.0,"sleep_quality":3.0,"sleep_hours":"6-7 hours","composite":19.0,"base_n":20,"base_mean":19.4,"base_sd":1.14,"z":-0.35,"pct":0.76,"method":"baseline","status":"green"},{"name":"Noah Kim","date":"2026-10-12","trained":false,"reason":"Rest day","rpe":null,"load":null,"load_date":"2026-10-11","fatigue":2.5,"muscles":3.0,"stress":3.0,"mood":2.5,"sleep_quality":3.5,"sleep_hours":"6-7 hours","composite":14.5,"base_n":21,"base_mean":19.38,"base_sd":1.12,"z":-4.37,"pct":0.58,"method":"baseline","status":"red"},{"name":"Noah Kim","date":"2026-10-13","trained":true,"reason":null,"rpe":5.0,"load":600.0,"load_date":"2026-10-12","fatigue":3.5,"muscles":4.5,"stress":3.5,"mood":3.0,"sleep_quality":3.5,"sleep_hours":"7-8 hours","composite":18.0,"base_n":22,"base_mean":19.16,"base_sd":1.51,"z":-0.77,"pct":0.72,"method":"baseline","status":"yellow"},{"name":"Riley Morgan","date":"2026-09-21","trained":false,"reason":"Rest day","rpe":null,"load":null,"load_date":"2026-09-20","fatigue":3.5,"muscles":4.5,"stress":3.0,"mood":3.0,"sleep_quality":4.0,"sleep_hours":"6-7 hours","composite":18.0,"base_n":0,"base_mean":null,"base_sd":null,"z":null,"pct":0.72,"method":"early","status":"yellow"},{"name":"Riley Morgan","date":"2026-09-22","trained":true,"reason":null,"rpe":6.0,"load":720.0,"load_date":"2026-09-21","fatigue":4.0,"muscles":3.5,"stress":4.5,"mood":4.5,"sleep_quality":3.5,"sleep_hours":"9-10 hours","composite":20.0,"base_n":1,"base_mean":18.0,"base_sd":null,"z":null,"pct":0.8,"method":"early","status":"green"},{"name":"Riley Morgan","date":"2026-09-23","trained":true,"reason":null,"rpe":7.0,"load":840.0,"load_date":"2026-09-22","fatigue":4.0,"muscles":4.5,"stress":4.5,"mood":4.0,"sleep_quality":3.5,"sleep_hours":"9-10 hours","composite":20.5,"base_n":2,"base_mean":19.0,"base_sd":1.41,"z":null,"pct":0.82,"method":"early","status":"green"},{"name":"Riley Morgan","date":"2026-09-24","trained":true,"reason":null,"rpe":7.0,"load":840.0,"load_date":"2026-09-23","fatigue":4.5,"muscles":3.5,"stress":4.0,"mood":3.5,"sleep_quality":3.5,"sleep_hours":"7-8 hours","composite":19.0,"base_n":3,"base_mean":19.5,"base_sd":1.32,"z":-0.38,"pct":0.76,"method":"baseline","status":"green"},{"name":"Riley Morgan","date":"2026-09-25","trained":true,"reason":null,"rpe":5.0,"load":600.0,"load_date":"2026-09-24","fatigue":3.5,"muscles":3.0,"stress":4.0,"mood":3.5,"sleep_quality":4.5,"sleep_hours":"8-9 hours","composite":18.5,"base_n":4,"base_mean":19.38,"base_sd":1.11,"z":-0.79,"pct":0.74,"method":"baseline","status":"yellow"},{"name":"Riley Morgan","date":"2026-09-26","trained":true,"reason":null,"rpe":8.0,"load":960.0,"load_date":"2026-09-25","fatigue":4.5,"muscles":3.5,"stress":4.5,"mood":5.0,"sleep_quality":4.5,"sleep_hours":"7-8 hours","composite":22.0,"base_n":5,"base_mean":19.2,"base_sd":1.04,"z":2.7,"pct":0.88,"method":"baseline","status":"green"},{"name":"Riley Morgan","date":"2026-09-27","trained":true,"reason":null,"rpe":10.0,"load":1200.0,"load_date":"2026-09-26","fatigue":4.0,"muscles":4.0,"stress":4.0,"mood":3.0,"sleep_quality":4.0,"sleep_hours":"9-10 hours","composite":19.0,"base_n":6,"base_mean":19.67,"base_sd":1.47,"z":-0.45,"pct":0.76,"method":"baseline","status":"green"},{"name":"Riley Morgan","date":"2026-09-28","trained":false,"reason":"Rest day","rpe":null,"load":null,"load_date":"2026-09-27","fatigue":4.0,"muscles":4.0,"stress":3.0,"mood":4.0,"sleep_quality":4.0,"sleep_hours":"7-8 hours","composite":19.0,"base_n":7,"base_mean":19.57,"base_sd":1.37,"z":-0.42,"pct":0.76,"method":"baseline","status":"green"},{"name":"Riley Morgan","date":"2026-09-29","trained":true,"reason":null,"rpe":6.0,"load":720.0,"load_date":"2026-09-28","fatigue":3.5,"muscles":4.0,"stress":4.5,"mood":3.5,"sleep_quality":3.5,"sleep_hours":"6-7 hours","composite":19.0,"base_n":8,"base_mean":19.5,"base_sd":1.28,"z":-0.39,"pct":0.76,"method":"baseline","status":"green"},{"name":"Riley Morgan","date":"2026-09-30","trained":true,"reason":null,"rpe":7.0,"load":840.0,"load_date":"2026-09-29","fatigue":4.0,"muscles":4.5,"stress":4.5,"mood":4.0,"sleep_quality":4.0,"sleep_hours":"8-9 hours","composite":21.0,"base_n":9,"base_mean":19.44,"base_sd":1.21,"z":1.29,"pct":0.84,"method":"baseline","status":"green"},{"name":"Riley Morgan","date":"2026-10-01","trained":true,"reason":null,"rpe":4.0,"load":480.0,"load_date":"2026-09-30","fatigue":4.0,"muscles":3.0,"stress":3.5,"mood":4.0,"sleep_quality":3.0,"sleep_hours":"8-9 hours","composite":17.5,"base_n":10,"base_mean":19.6,"base_sd":1.24,"z":-1.69,"pct":0.7,"method":"baseline","status":"red"},{"name":"Riley Morgan","date":"2026-10-02","trained":true,"reason":null,"rpe":5.0,"load":600.0,"load_date":"2026-10-01","fatigue":4.0,"muscles":4.0,"stress":4.5,"mood":3.5,"sleep_quality":3.5,"sleep_hours":"8-9 hours","composite":19.5,"base_n":11,"base_mean":19.41,"base_sd":1.34,"z":0.07,"pct":0.78,"method":"baseline","status":"green"},{"name":"Riley Morgan","date":"2026-10-03","trained":true,"reason":null,"rpe":5.0,"load":600.0,"load_date":"2026-10-02","fatigue":3.5,"muscles":3.5,"stress":4.0,"mood":3.0,"sleep_quality":4.0,"sleep_hours":"9-10 hours","composite":18.0,"base_n":12,"base_mean":19.42,"base_sd":1.28,"z":-1.11,"pct":0.72,"method":"baseline","status":"red"},{"name":"Riley Morgan","date":"2026-10-04","trained":true,"reason":null,"rpe":7.0,"load":840.0,"load_date":"2026-10-03","fatigue":4.0,"muscles":3.5,"stress":4.0,"mood":4.0,"sleep_quality":4.5,"sleep_hours":"6-7 hours","composite":20.0,"base_n":13,"base_mean":19.31,"base_sd":1.28,"z":0.54,"pct":0.8,"method":"baseline","status":"green"},{"name":"Riley Morgan","date":"2026-10-05","trained":false,"reason":"Rest day","rpe":null,"load":null,"load_date":"2026-10-04","fatigue":3.5,"muscles":3.0,"stress":3.5,"mood":3.5,"sleep_quality":3.5,"sleep_hours":"7-8 hours","composite":17.0,"base_n":14,"base_mean":19.36,"base_sd":1.25,"z":-1.89,"pct":0.68,"method":"baseline","status":"red"},{"name":"Riley Morgan","date":"2026-10-06","trained":true,"reason":null,"rpe":5.0,"load":600.0,"load_date":"2026-10-05","fatigue":3.5,"muscles":4.0,"stress":4.0,"mood":4.0,"sleep_quality":4.0,"sleep_hours":"6-7 hours","composite":19.5,"base_n":15,"base_mean":19.2,"base_sd":1.35,"z":0.22,"pct":0.78,"method":"baseline","status":"green"},{"name":"Riley Morgan","date":"2026-10-07","trained":true,"reason":null,"rpe":8.0,"load":960.0,"load_date":"2026-10-06","fatigue":4.5,"muscles":4.0,"stress":3.5,"mood":3.0,"sleep_quality":4.0,"sleep_hours":"7-8 hours","composite":19.0,"base_n":16,"base_mean":19.22,"base_sd":1.3,"z":-0.17,"pct":0.76,"method":"baseline","status":"green"},{"name":"Riley Morgan","date":"2026-10-08","trained":true,"reason":null,"rpe":7.0,"load":840.0,"load_date":"2026-10-07","fatigue":4.0,"muscles":4.0,"stress":4.5,"mood":4.5,"sleep_quality":3.5,"sleep_hours":"6-7 hours","composite":20.5,"base_n":17,"base_mean":19.21,"base_sd":1.26,"z":1.02,"pct":0.82,"method":"baseline","status":"green"},{"name":"Riley Morgan","date":"2026-10-09","trained":true,"reason":null,"rpe":6.0,"load":720.0,"load_date":"2026-10-08","fatigue":4.5,"muscles":4.5,"stress":4.0,"mood":3.5,"sleep_quality":4.0,"sleep_hours":"8-9 hours","composite":20.5,"base_n":18,"base_mean":19.28,"base_sd":1.26,"z":0.97,"pct":0.82,"method":"baseline","status":"green"},{"name":"Riley Morgan","date":"2026-10-10","trained":true,"reason":null,"rpe":4.0,"load":480.0,"load_date":"2026-10-09","fatigue":4.0,"muscles":4.0,"stress":4.5,"mood":4.0,"sleep_quality":4.0,"sleep_hours":"8-9 hours","composite":20.5,"base_n":19,"base_mean":19.34,"base_sd":1.26,"z":0.92,"pct":0.82,"method":"baseline","status":"green"},{"name":"Riley Morgan","date":"2026-10-11","trained":true,"reason":null,"rpe":9.0,"load":1080.0,"load_date":"2026-10-10","fatigue":4.0,"muscles":4.0,"stress":4.0,"mood":4.5,"sleep_quality":4.0,"sleep_hours":"6-7 hours","composite":20.5,"base_n":20,"base_mean":19.4,"base_sd":1.25,"z":0.88,"pct":0.82,"method":"baseline","status":"green"},{"name":"Riley Morgan","date":"2026-10-12","trained":false,"reason":"Rest day","rpe":null,"load":null,"load_date":"2026-10-11","fatigue":4.0,"muscles":3.5,"stress":4.0,"mood":4.0,"sleep_quality":3.0,"sleep_hours":"6-7 hours","composite":18.5,"base_n":21,"base_mean":19.45,"base_sd":1.24,"z":-0.77,"pct":0.74,"method":"baseline","status":"yellow"},{"name":"Riley Morgan","date":"2026-10-13","trained":true,"reason":null,"rpe":6.0,"load":720.0,"load_date":"2026-10-12","fatigue":4.0,"muscles":3.5,"stress":4.5,"mood":3.0,"sleep_quality":4.0,"sleep_hours":"6-7 hours","composite":19.0,"base_n":22,"base_mean":19.41,"base_sd":1.23,"z":-0.33,"pct":0.76,"method":"baseline","status":"green"},{"name":"Sam Ortiz","date":"2026-09-21","trained":false,"reason":"Rest day","rpe":null,"load":null,"load_date":"2026-09-20","fatigue":4.5,"muscles":4.0,"stress":3.5,"mood":4.0,"sleep_quality":4.0,"sleep_hours":"8-9 hours","composite":20.0,"base_n":0,"base_mean":null,"base_sd":null,"z":null,"pct":0.8,"method":"early","status":"green"},{"name":"Sam Ortiz","date":"2026-09-22","trained":true,"reason":null,"rpe":7.0,"load":840.0,"load_date":"2026-09-21","fatigue":4.5,"muscles":3.5,"stress":2.5,"mood":4.0,"sleep_quality":3.5,"sleep_hours":"7-8 hours","composite":18.0,"base_n":1,"base_mean":20.0,"base_sd":null,"z":null,"pct":0.72,"method":"early","status":"yellow"},{"name":"Sam Ortiz","date":"2026-09-23","trained":true,"reason":null,"rpe":6.0,"load":720.0,"load_date":"2026-09-22","fatigue":4.0,"muscles":3.5,"stress":4.0,"mood":3.5,"sleep_quality":3.5,"sleep_hours":"7-8 hours","composite":18.5,"base_n":2,"base_mean":19.0,"base_sd":1.41,"z":null,"pct":0.74,"method":"early","status":"yellow"},{"name":"Sam Ortiz","date":"2026-09-25","trained":true,"reason":null,"rpe":6.0,"load":720.0,"load_date":"2026-09-24","fatigue":4.0,"muscles":4.0,"stress":4.0,"mood":3.5,"sleep_quality":4.5,"sleep_hours":"6-7 hours","composite":20.0,"base_n":3,"base_mean":18.83,"base_sd":1.04,"z":1.12,"pct":0.8,"method":"baseline","status":"green"},{"name":"Sam Ortiz","date":"2026-09-26","trained":true,"reason":null,"rpe":6.0,"load":720.0,"load_date":"2026-09-25","fatigue":4.0,"muscles":3.5,"stress":3.5,"mood":3.5,"sleep_quality":3.5,"sleep_hours":"9-10 hours","composite":18.0,"base_n":4,"base_mean":19.12,"base_sd":1.03,"z":-1.09,"pct":0.72,"method":"baseline","status":"red"},{"name":"Sam Ortiz","date":"2026-09-27","trained":true,"reason":null,"rpe":10.0,"load":1200.0,"load_date":"2026-09-26","fatigue":3.5,"muscles":4.0,"stress":4.0,"mood":4.5,"sleep_quality":4.5,"sleep_hours":"6-7 hours","composite":20.5,"base_n":5,"base_mean":18.9,"base_sd":1.02,"z":1.56,"pct":0.82,"method":"baseline","status":"green"},{"name":"Sam Ortiz","date":"2026-09-29","trained":true,"reason":null,"rpe":7.0,"load":840.0,"load_date":"2026-09-28","fatigue":4.5,"muscles":3.5,"stress":4.5,"mood":4.0,"sleep_quality":4.0,"sleep_hours":"9-10 hours","composite":20.5,"base_n":6,"base_mean":19.17,"base_sd":1.13,"z":1.18,"pct":0.82,"method":"baseline","status":"green"},{"name":"Sam Ortiz","date":"2026-09-30","trained":true,"reason":null,"rpe":5.0,"load":600.0,"load_date":"2026-09-29","fatigue":4.0,"muscles":3.5,"stress":3.5,"mood":3.5,"sleep_quality":4.5,"sleep_hours":"6-7 hours","composite":19.0,"base_n":7,"base_mean":19.36,"base_sd":1.14,"z":-0.31,"pct":0.76,"method":"baseline","status":"green"},{"name":"Sam Ortiz","date":"2026-10-01","trained":true,"reason":null,"rpe":6.0,"load":720.0,"load_date":"2026-09-30","fatigue":5.0,"muscles":4.0,"stress":4.5,"mood":4.0,"sleep_quality":4.5,"sleep_hours":"6-7 hours","composite":22.0,"base_n":8,"base_mean":19.31,"base_sd":1.07,"z":2.52,"pct":0.88,"method":"baseline","status":"green"},{"name":"Sam Ortiz","date":"2026-10-02","trained":true,"reason":null,"rpe":5.0,"load":600.0,"load_date":"2026-10-01","fatigue":4.0,"muscles":4.0,"stress":4.0,"mood":4.5,"sleep_quality":4.0,"sleep_hours":"6-7 hours","composite":20.5,"base_n":9,"base_mean":19.61,"base_sd":1.34,"z":0.66,"pct":0.82,"method":"baseline","status":"green"},{"name":"Sam Ortiz","date":"2026-10-03","trained":true,"reason":null,"rpe":8.0,"load":960.0,"load_date":"2026-10-02","fatigue":4.0,"muscles":4.0,"stress":4.0,"mood":3.5,"sleep_quality":3.5,"sleep_hours":"7-8 hours","composite":19.0,"base_n":10,"base_mean":19.7,"base_sd":1.3,"z":-0.54,"pct":0.76,"method":"baseline","status":"yellow"},{"name":"Sam Ortiz","date":"2026-10-04","trained":true,"reason":null,"rpe":9.0,"load":1080.0,"load_date":"2026-10-03","fatigue":4.0,"muscles":4.0,"stress":4.0,"mood":5.0,"sleep_quality":3.0,"sleep_hours":"6-7 hours","composite":20.0,"base_n":11,"base_mean":19.64,"base_sd":1.25,"z":0.29,"pct":0.8,"method":"baseline","status":"green"},{"name":"Sam Ortiz","date":"2026-10-06","trained":true,"reason":null,"rpe":5.0,"load":600.0,"load_date":"2026-10-05","fatigue":4.0,"muscles":3.5,"stress":5.0,"mood":4.0,"sleep_quality":4.0,"sleep_hours":"6-7 hours","composite":20.5,"base_n":12,"base_mean":19.67,"base_sd":1.19,"z":0.7,"pct":0.82,"method":"baseline","status":"green"},{"name":"Sam Ortiz","date":"2026-10-07","trained":false,"reason":"Injured","rpe":null,"load":null,"load_date":"2026-10-06","fatigue":4.0,"muscles":3.5,"stress":4.0,"mood":4.0,"sleep_quality":4.0,"sleep_hours":"8-9 hours","composite":19.5,"base_n":13,"base_mean":19.73,"base_sd":1.17,"z":-0.2,"pct":0.78,"method":"baseline","status":"green"},{"name":"Sam Ortiz","date":"2026-10-08","trained":true,"reason":null,"rpe":4.0,"load":480.0,"load_date":"2026-10-07","fatigue":5.0,"muscles":4.0,"stress":4.5,"mood":4.5,"sleep_quality":4.5,"sleep_hours":"8-9 hours","composite":22.5,"base_n":14,"base_mean":19.71,"base_sd":1.12,"z":2.48,"pct":0.9,"method":"baseline","status":"green"},{"name":"Sam Ortiz","date":"2026-10-10","trained":true,"reason":null,"rpe":7.0,"load":840.0,"load_date":"2026-10-09","fatigue":4.5,"muscles":4.5,"stress":3.5,"mood":4.5,"sleep_quality":5.0,"sleep_hours":"6-7 hours","composite":22.0,"base_n":15,"base_mean":19.9,"base_sd":1.3,"z":1.62,"pct":0.88,"method":"baseline","status":"green"},{"name":"Sam Ortiz","date":"2026-10-11","trained":true,"reason":null,"rpe":9.0,"load":1080.0,"load_date":"2026-10-10","fatigue":4.0,"muscles":4.0,"stress":3.0,"mood":4.0,"sleep_quality":4.0,"sleep_hours":"8-9 hours","composite":19.0,"base_n":16,"base_mean":20.03,"base_sd":1.36,"z":-0.76,"pct":0.76,"method":"baseline","status":"yellow"},{"name":"Sam Ortiz","date":"2026-10-12","trained":false,"reason":"Rest day","rpe":null,"load":null,"load_date":"2026-10-11","fatigue":4.0,"muscles":4.0,"stress":4.0,"mood":4.5,"sleep_quality":3.5,"sleep_hours":"6-7 hours","composite":20.0,"base_n":17,"base_mean":19.97,"base_sd":1.34,"z":0.02,"pct":0.8,"method":"baseline","status":"green"},{"name":"Sam Ortiz","date":"2026-10-13","trained":true,"reason":null,"rpe":6.0,"load":720.0,"load_date":"2026-10-12","fatigue":3.0,"muscles":2.0,"stress":2.0,"mood":2.5,"sleep_quality":2.5,"sleep_hours":"6-7 hours","composite":12.0,"base_n":18,"base_mean":19.97,"base_sd":1.3,"z":-6.13,"pct":0.48,"method":"baseline","status":"red"}]}
+</script>
+
+<script>
+(function(){
+  const P = JSON.parse(document.getElementById('report-data').textContent);
+  const S = Object.assign({session_minutes:120,baseline_days:28,baseline_min_n:3,sd_floor:.5,z_green:-.5,z_red:-1,
+                           pct_green:.75,pct_red:.5,item_max:5,max_composite:25}, P.settings||{});
+  const rows = P.rows || [];
+  const ITEMS = [["fatigue","Fatigue"],["muscles","Muscles"],["stress","Stress"],["mood","Mood"],["sleep_quality","Sleep quality"]];
+  const ST = {
+    red:{label:"Red",css:"--crit",order:0,desc:"well below baseline"},
+    yellow:{label:"Yellow",css:"--warn",order:1,desc:"below baseline"},
+    green:{label:"Green",css:"--good",order:2,desc:"at or above baseline"},
+    incomplete:{label:"Incomplete",css:"--none",order:3,desc:"missing an item"}
+  };
+  const NS = "http://www.w3.org/2000/svg";
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  const fmt = (v,d=1) => v==null||isNaN(v) ? "–" : (+v).toFixed(d).replace(/\.0+$/,"");
+  const fmtInt = v => v==null ? "–" : Math.round(v).toLocaleString();
+  const cssv = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  const DOW = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+  const pd = s => { const [y,m,d] = s.split("-").map(Number); return new Date(Date.UTC(y,m-1,d)); };
+  const dLong = s => { const d = pd(s); return `${DOW[d.getUTCDay()]} ${MONTHS[d.getUTCMonth()]} ${d.getUTCDate()}, ${d.getUTCFullYear()}`; };
+  const dShort = s => { const d = pd(s); return `${MONTHS[d.getUTCMonth()]} ${d.getUTCDate()}`; };
+
+  function icon(st){
+    const c = `var(${ST[st].css})`;
+    if(st==="green") return `<svg class="ico" viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="6" fill="${c}"/><path d="M3.3 6.2l1.8 1.8 3.6-3.8" stroke="#fff" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+    if(st==="yellow") return `<svg class="ico" viewBox="0 0 12 12" aria-hidden="true"><path d="M6 .6l5.6 10.2H.4z" fill="${c}"/><path d="M6 4.4v3" stroke="#3a2a00" stroke-width="1.5" stroke-linecap="round"/><circle cx="6" cy="9.1" r=".8" fill="#3a2a00"/></svg>`;
+    if(st==="red") return `<svg class="ico" viewBox="0 0 12 12" aria-hidden="true"><rect x=".5" y=".5" width="11" height="11" rx="2.5" fill="${c}"/><path d="M3.8 3.8l4.4 4.4M8.2 3.8L3.8 8.2" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/></svg>`;
+    return `<svg class="ico" viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="5" fill="none" stroke="${c}" stroke-width="2" stroke-dasharray="2.2 1.8"/></svg>`;
+  }
+  const pill = st => `<span class="pill ${st}">${icon(st)}${ST[st].label}</span>`;
+
+  // ---------- tooltip ----------
+  const tip = $("tip");
+  function showTip(html, ev){
+    tip.innerHTML = html; tip.style.opacity = 1;
+    const r = tip.getBoundingClientRect();
+    let x = ev.clientX + 14, y = ev.clientY + 14;
+    if(x + r.width > innerWidth - 8) x = ev.clientX - r.width - 14;
+    if(y + r.height > innerHeight - 8) y = ev.clientY - r.height - 14;
+    tip.style.left = Math.max(8,x) + "px"; tip.style.top = Math.max(8,y) + "px";
+  }
+  const hideTip = () => tip.style.opacity = 0;
+  function el(tag, attrs, parent){
+    const e = document.createElementNS(NS, tag);
+    for(const k in attrs) e.setAttribute(k, attrs[k]);
+    if(parent) parent.appendChild(e);
+    return e;
+  }
+  function txt(parent, x, y, s, cls, anchor){
+    const t = el("text",{x,y,class:cls||"","text-anchor":anchor||"start","dominant-baseline":"middle"},parent);
+    t.textContent = s; return t;
+  }
+  function hover(node, htmlFn){
+    node.addEventListener("mousemove", ev => showTip(htmlFn(), ev));
+    node.addEventListener("mouseleave", hideTip);
+  }
+  // bar with rounded data-end only
+  function hbar(g, x0, y, w, h, r, fill){
+    if(w <= 0) return;
+    r = Math.min(r, w, h/2);
+    const d = `M${x0},${y}H${x0+w-r}Q${x0+w},${y} ${x0+w},${y+r}V${y+h-r}Q${x0+w},${y+h} ${x0+w-r},${y+h}H${x0}Z`;
+    return el("path",{d,fill},g);
+  }
+  function vbar(g, x, yBase, w, h, r, fill){
+    if(h <= 0) return;
+    r = Math.min(r, h, w/2);
+    const y = yBase - h;
+    const d = `M${x},${yBase}V${y+r}Q${x},${y} ${x+r},${y}H${x+w-r}Q${x+w},${y} ${x+w},${y+r}V${yBase}Z`;
+    return el("path",{d,fill},g);
+  }
+  function niceMax(v){
+    if(v<=0) return 1;
+    const p = Math.pow(10, Math.floor(Math.log10(v))), n = v/p;
+    return (n<=1?1:n<=2?2:n<=2.5?2.5:n<=5?5:10)*p;
+  }
+
+  // ---------- data prep ----------
+  const dates = [...new Set(rows.map(r=>r.date))].sort();
+  const athletes = [...new Set(rows.map(r=>r.name))].sort((a,b)=>a.localeCompare(b));
+  const byDate = d => rows.filter(r=>r.date===d);
+  let curDate = dates[dates.length-1];
+  let curAth = "__team";
+
+  // header
+  const src = P.source==="DEMO"
+    ? `Demo data<span class="demo">Sample</span> &middot; run wellness_report.R on your export to load real data`
+    : `Source: ${esc(P.source)} &middot; generated ${esc(P.generated)}`;
+  $("sourceLine").innerHTML = rows.length ? `${src} &middot; ${athletes.length} athletes, ${dates.length} survey days` : "No data loaded yet &middot; run wellness_report.R";
+  $("loadSub").innerHTML = `sRPE load = RPE &times; ${S.session_minutes} min (arbitrary units, AU). Session date is the day before the survey.`;
+
+  const ds = $("dateSel");
+  dates.slice().reverse().forEach(d => {
+    const o = document.createElement("option"); o.value = d;
+    o.textContent = `${dLong(d)} (${byDate(d).length})`; ds.appendChild(o);
+  });
+  ds.value = curDate;
+  ds.addEventListener("change", () => { curDate = ds.value; renderDay(); });
+
+  const as = $("athSel");
+  [["__team","Team average"], ...athletes.map(a=>[a,a])].forEach(([v,t]) => {
+    const o = document.createElement("option"); o.value = v; o.textContent = t; as.appendChild(o);
+  });
+  as.addEventListener("change", () => { curAth = as.value; renderTrend(); });
+
+  $("ragLegend").innerHTML = ["green","yellow","red","incomplete"].map(s=>`<span>${icon(s)}${ST[s].label}</span>`).join("")
+    + `<span><i class="tick-sw"></i>Baseline</span>`;
+
+  $("methodText").innerHTML =
+    `<b>Composite</b> = sum of 5 items (each 1&ndash;${S.item_max}, max ${S.max_composite}); left blank if any item is missing (shown as Incomplete). ` +
+    `<b>Baseline</b> = the athlete's own mean composite over the previous ${S.baseline_days} days (excluding the day itself). ` +
+    `<b>z</b> = (today &minus; baseline) &divide; SD (SD floor ${S.sd_floor}). ` +
+    `<b>Green</b> z &ge; ${S.z_green}, <b>Yellow</b> ${S.z_red} &le; z &lt; ${S.z_green}, <b>Red</b> z &lt; ${S.z_red}. ` +
+    `Until an athlete has ${S.baseline_min_n} prior entries, status uses % of max instead: green &ge; ${Math.round(S.pct_green*100)}%, yellow ${Math.round(S.pct_red*100)}&ndash;${Math.round(S.pct_green*100)}%, red &lt; ${Math.round(S.pct_red*100)}%. ` +
+    `<b>Training load</b> = RPE &times; ${S.session_minutes}. Duplicate same-day submissions keep the latest.`;
+
+  // ---------- KPIs ----------
+  function renderKpis(day){
+    const n = day.length, cnt = s => day.filter(r=>r.status===s).length;
+    const comps = day.filter(r=>r.composite!=null).map(r=>r.composite);
+    const avg = comps.length ? comps.reduce((a,b)=>a+b,0)/comps.length : null;
+    const loads = day.filter(r=>r.load!=null).map(r=>r.load);
+    const lavg = loads.length ? loads.reduce((a,b)=>a+b,0)/loads.length : null;
+    $("kpis").innerHTML = `
+      <div class="kpi"><div class="k">Responses</div><div class="v">${n}<small>of ${athletes.length}</small></div></div>
+      <div class="kpi"><div class="k">Status</div>
+        <div class="rag"><span class="pill green">${icon("green")}${cnt("green")}</span><span class="pill yellow">${icon("yellow")}${cnt("yellow")}</span><span class="pill red">${icon("red")}${cnt("red")}</span></div></div>
+      <div class="kpi"><div class="k">Team avg composite</div><div class="v">${fmt(avg)}<small>/ ${S.max_composite}</small></div></div>
+      <div class="kpi"><div class="k">Avg training load</div><div class="v">${fmtInt(lavg)}<small>AU &middot; ${loads.length} trained</small></div></div>`;
+  }
+
+  // ---------- wellness bars ----------
+  function renderWell(day){
+    const box = $("wellChart"); box.innerHTML = "";
+    const data = day.slice().sort((a,b)=> ST[a.status].order-ST[b.status].order || (a.composite??99)-(b.composite??99) || a.name.localeCompare(b.name));
+    if(!data.length){ box.innerHTML = `<div class="empty">No responses for this date.</div>`; return; }
+    const W = box.clientWidth || 800, narrow = W < 560;
+    const L = narrow ? 112 : 160, R = narrow ? 34 : 120, rowH = 30, barH = 18, top = 22;
+    const H = top + data.length*rowH + 4;
+    const svg = el("svg",{viewBox:`0 0 ${W} ${H}`,height:H,role:"img","aria-label":"Composite wellness by athlete"},box);
+    const pw = W - L - R, x = v => L + (v/S.max_composite)*pw;
+    for(let t=0;t<=S.max_composite;t+=5){
+      el("line",{x1:x(t),x2:x(t),y1:top-6,y2:H-4,class:"gl"},svg);
+      txt(svg,x(t),top-14,t,"ax","middle");
+    }
+    data.forEach((r,i)=>{
+      const y = top + i*rowH, g = el("g",{},svg);
+      const nm = narrow && r.name.length>14 ? r.name.slice(0,13)+"…" : r.name;
+      txt(g,L-10,y+rowH/2,nm,"nm","end");
+      if(r.composite!=null) hbar(g,L,y+(rowH-barH)/2,x(r.composite)-L,barH,4,cssv(ST[r.status].css));
+      if(r.base_mean!=null && r.method==="baseline"){
+        el("line",{x1:x(r.base_mean),x2:x(r.base_mean),y1:y+3,y2:y+rowH-3,stroke:cssv("--ink"),"stroke-width":2,"stroke-linecap":"round"},g);
+      }
+      if(r.composite!=null){
+        const t = txt(g,x(r.composite)-8,y+rowH/2,fmt(r.composite),"val","end");
+        t.style.fill = r.status==="yellow" ? "#3a2a00" : "#ffffff";
+      } else txt(g,L+8,y+rowH/2,"Incomplete","ax");
+      const fo = el("foreignObject",{x:W-R+10,y:y+3,width:R-10,height:rowH-6},g);
+      fo.innerHTML = `<div xmlns="http://www.w3.org/1999/xhtml" style="height:100%;display:flex;align-items:center" title="${ST[r.status].label}">${narrow ? icon(r.status) : pill(r.status)}</div>`;
+      const hit = el("rect",{x:0,y,width:W,height:rowH,class:"hit",rx:6},g);
+      hover(hit,()=>`<b>${esc(r.name)}</b><br>${pill(r.status)}<br>Composite <b>${fmt(r.composite)}</b> / ${S.max_composite}<br>`+
+        (r.method==="baseline" ? `Baseline ${fmt(r.base_mean)} (SD ${fmt(r.base_sd,2)}, n=${r.base_n})<br>z = <b>${fmt(r.z,2)}</b>` :
+          `<span class="m">Building baseline (${r.base_n} of ${S.baseline_min_n} entries) &mdash; using ${Math.round((r.pct||0)*100)}% of max</span>`));
+    });
+    const missing = athletes.filter(a=>!day.some(r=>r.name===a));
+    $("missing").innerHTML = missing.length ? `<b>No response (${missing.length}):</b> ${missing.map(esc).join(", ")}` : "";
+  }
+
+  // ---------- load bars ----------
+  function renderLoad(day){
+    const box = $("loadChart"); box.innerHTML = "";
+    const data = day.slice().sort((a,b)=>(b.load??-1)-(a.load??-1) || a.name.localeCompare(b.name));
+    if(!data.length){ box.innerHTML = `<div class="empty">No responses for this date.</div>`; return; }
+    const W = box.clientWidth || 800, narrow = W < 560;
+    const L = narrow ? 112 : 160, R = narrow ? 70 : 150, rowH = 28, barH = 16, top = 22;
+    const H = top + data.length*rowH + 4;
+    const svg = el("svg",{viewBox:`0 0 ${W} ${H}`,height:H,role:"img","aria-label":"Training load by athlete"},box);
+    const maxL = niceMax(Math.max(10*S.session_minutes, ...rows.map(r=>r.load||0)));
+    const pw = W - L - R, x = v => L + (v/maxL)*pw;
+    const step = maxL/4;
+    for(let t=0;t<=maxL+1e-9;t+=step){
+      el("line",{x1:x(t),x2:x(t),y1:top-6,y2:H-4,class:"gl"},svg);
+      txt(svg,x(t),top-14,fmtInt(t),"ax","middle");
+    }
+    const seriesC = cssv("--series");
+    data.forEach((r,i)=>{
+      const y = top+i*rowH, g = el("g",{},svg);
+      const nm = narrow && r.name.length>14 ? r.name.slice(0,13)+"…" : r.name;
+      txt(g,L-10,y+rowH/2,nm,"nm","end");
+      if(r.load!=null){
+        hbar(g,L,y+(rowH-barH)/2,x(r.load)-L,barH,4,seriesC);
+        const t = txt(g,x(r.load)+8,y+rowH/2,fmtInt(r.load),"val");
+        if(!narrow){ const s = el("tspan",{class:"ax",dx:6},t); s.textContent = `RPE ${fmt(r.rpe)}`; }
+      } else {
+        txt(g,L+4,y+rowH/2, r.trained ? "Trained — no RPE given" : `Didn't train${r.reason?" — "+r.reason:""}`,"ax");
+      }
+      const hit = el("rect",{x:0,y,width:W,height:rowH,class:"hit",rx:6},g);
+      hover(hit,()=>`<b>${esc(r.name)}</b><br>Session ${dLong(r.load_date)}<br>`+
+        (r.load!=null ? `RPE <b>${fmt(r.rpe)}</b> &times; ${S.session_minutes} = <b>${fmtInt(r.load)}</b> AU` :
+          `<span class="m">${r.trained?"No RPE recorded":"Did not train"}${r.reason?": "+esc(r.reason):""}</span>`));
+    });
+  }
+
+  // ---------- trends: training load (bars) overlaid with wellness (line) ----------
+  const addDays = (s,n) => { const d = pd(s); d.setUTCDate(d.getUTCDate()+n); return d.toISOString().slice(0,10); };
+  const mean = a => a.reduce((x,y)=>x+y,0)/a.length;
+
+  function renderTrend(){
+    const team = curAth==="__team";
+    $("trendSub").textContent = (team
+      ? "Bars: team average training load on each session day. Line: team mean wellness on each survey morning; grey band is the lowest to highest athlete."
+      : `${curAth} — bars: training load on each session day. Line: that morning's wellness, dots coloured by status; grey band is their baseline ± 1 SD.`)
+      + " Load sits on the day it happened, so a spike shows up the day before the wellness response it may cause.";
+    const barSw = `<span><i class="sw" style="background:var(--series);opacity:.75"></i>${team?"Avg training load":"Training load"} (AU)</span>`;
+    const lineSw = `<span><svg width="18" height="8" aria-hidden="true"><line x1="0" y1="4" x2="18" y2="4" stroke="var(--ink)" stroke-width="2"/></svg>${team?"Team mean wellness":"Wellness"}</span>`;
+    const bandSw = `<span><i class="sw" style="background:var(--none);opacity:.45"></i>${team?"Range (min–max)":"Baseline ± 1 SD"}</span>`;
+    $("trendLegend").innerHTML = barSw + lineSw + bandSw +
+      (team ? "" : ["green","yellow","red"].map(s=>`<span>${icon(s)}${ST[s].label}</span>`).join(""));
+
+    const src = team ? rows : rows.filter(r=>r.name===curAth);
+    const box = $("trendCombo");
+    if(!src.length){ box.innerHTML = `<div class="empty">No entries.</div>`; return; }
+
+    // continuous calendar from first session day to last survey day
+    const all = src.flatMap(r=>[r.date, r.load_date]).sort();
+    const days = []; for(let d = all[0]; d <= all[all.length-1]; d = addDays(d,1)) days.push(d);
+
+    const W_ = {}, L_ = {};
+    days.forEach(d=>{
+      const wr = src.filter(r=>r.date===d && r.composite!=null);
+      if(wr.length){
+        if(team){ const v = wr.map(r=>r.composite); W_[d] = {y:mean(v), lo:Math.min(...v), hi:Math.max(...v), n:v.length}; }
+        else { const r = wr[0], sd = r.base_sd!=null ? Math.max(r.base_sd, S.sd_floor) : null;
+          W_[d] = {y:r.composite, r, lo: r.method==="baseline"&&sd!=null ? r.base_mean-sd : null, hi: r.method==="baseline"&&sd!=null ? r.base_mean+sd : null}; }
+      }
+      const lr = src.filter(r=>r.load_date===d);
+      if(lr.length){
+        if(team){ const v = lr.filter(r=>r.load!=null).map(r=>r.load); L_[d] = {y: v.length?mean(v):0, n:v.length, tot:v.reduce((a,b)=>a+b,0), rest: lr.length - v.length}; }
+        else { const r = lr[0]; L_[d] = {y:r.load||0, r}; }
+      }
+    });
+    comboChart(box, days, W_, L_, team);
+  }
+
+  function comboChart(box, days, W_, L_, team){
+    box.innerHTML = "";
+    const W = box.clientWidth || 900, narrow = W < 560, H = narrow ? 280 : 320;
+    const L = 38, R = 50, T = 22, B = 28;
+    const svg = el("svg",{viewBox:`0 0 ${W} ${H}`,height:H,role:"img","aria-label":"Training load and wellness over time"},box);
+    const n = days.length, slot = (W-L-R)/n, bw = Math.max(2, Math.min(22, slot*0.7));
+    const xc = i => L + slot*i + slot/2;
+    const yMin = 5, yMax = S.max_composite;
+    const yW = v => T + (1-(v-yMin)/(yMax-yMin))*(H-T-B);
+    const maxL = Math.max(S.session_minutes*10, ...rows.map(r=>r.load||0));   // same scale for every athlete: RPE 10 at the top
+    const yL = v => T + (1-v/maxL)*(H-T-B);
+
+    // grid + axes (left = wellness, right = load; both use 4 equal steps so gridlines line up)
+    for(let k=0;k<=4;k++){
+      const w = yMin + k*(yMax-yMin)/4, l = k*maxL/4, yy = yW(w);
+      el("line",{x1:L,x2:W-R,y1:yy,y2:yy,class:"gl"},svg);
+      txt(svg,L-6,yy,fmt(w),"ax","end");
+      const t = txt(svg,W-R+6,yy,fmtInt(l),"ax","start"); t.style.fill = cssv("--series");
+    }
+    txt(svg,L-6,T-14,"Wellness","ax","end").style.fill = cssv("--ink");
+    txt(svg,W-R+6,T-14,"Load (AU)","ax","start").style.fill = cssv("--series");
+    const every = Math.max(1, Math.ceil(n/Math.max(2,Math.floor((W-L-R)/58))));
+    xAxisDates(svg, days, xc, H-B, every);
+
+    // load bars (behind)
+    const sc = cssv("--series");
+    days.forEach((d,i)=>{
+      const p = L_[d]; if(!p || p.y<=0) return;
+      const b = vbar(svg, xc(i)-bw/2, yL(0), bw, yL(0)-yL(p.y), Math.min(3, bw/2), sc);
+      if(b) b.setAttribute("fill-opacity", .75);
+    });
+
+    // wellness band (grey), drawn per run of consecutive banded points
+    const grey = cssv("--none");
+    const wIdx = days.map((d,i)=>W_[d] ? i : -1).filter(i=>i>=0);
+    let run = [];
+    const flush = () => {
+      if(run.length>1){
+        const pts = run.map(i=>`${xc(i)},${yW(W_[days[i]].hi)}`).join(" ") + " " +
+                    run.slice().reverse().map(i=>`${xc(i)},${yW(W_[days[i]].lo)}`).join(" ");
+        el("polygon",{points:pts,fill:grey,"fill-opacity":.35},svg);
+      }
+      run = [];
+    };
+    wIdx.forEach(i=>{ W_[days[i]].lo!=null ? run.push(i) : flush(); }); flush();
+    if(!team){
+      const bp = wIdx.filter(i=>W_[days[i]].r.method==="baseline");
+      if(bp.length>1) el("polyline",{points:bp.map(i=>`${xc(i)},${yW(W_[days[i]].r.base_mean)}`).join(" "),
+        fill:"none",stroke:cssv("--muted"),"stroke-width":1,"stroke-dasharray":"3 3"},svg);
+    }
+
+    // wellness line (black) + dots
+    const ink = cssv("--ink"), surf = cssv("--card");
+    if(wIdx.length>1) el("polyline",{points:wIdx.map(i=>`${xc(i)},${yW(W_[days[i]].y)}`).join(" "),
+      fill:"none",stroke:ink,"stroke-width":2,"stroke-linejoin":"round","stroke-linecap":"round"},svg);
+    wIdx.forEach(i=>{
+      const p = W_[days[i]], big = days[i]===curDate;
+      el("circle",{cx:xc(i),cy:yW(p.y),r: team ? (big?4.5:3) : (big?5.5:4.5),
+        fill: team ? ink : cssv(ST[p.r.status].css), stroke:surf,"stroke-width":team?1.5:2},svg);
+    });
+
+    // hover: one slot per day, tooltip shows both measures
+    const cross = el("line",{y1:T,y2:H-B,stroke:cssv("--muted"),"stroke-width":1,opacity:0,"pointer-events":"none"},svg);
+    days.forEach((d,i)=>{
+      const hit = el("rect",{x:L+slot*i,y:T,width:slot,height:H-T-B,fill:"transparent"},svg);
+      hit.addEventListener("mousemove", ev=>{
+        cross.setAttribute("x1",xc(i)); cross.setAttribute("x2",xc(i)); cross.setAttribute("opacity",1);
+        const w = W_[d], l = L_[d];
+        let h = `<b>${dLong(d)}</b>`;
+        if(team){
+          h += `<br>Load: ` + (l ? (l.n ? `<b>${fmtInt(l.y)}</b> AU avg <span class="m">(${l.n} trained)</span>` : `<span class="m">no one trained</span>`) : `<span class="m">–</span>`);
+          h += `<br>Wellness: ` + (w ? `<b>${fmt(w.y)}</b> <span class="m">(range ${fmt(w.lo)}–${fmt(w.hi)}, ${w.n} athletes)</span>` : `<span class="m">no survey</span>`);
+        } else {
+          h += `<br>Load: ` + (l ? (l.r.load!=null ? `RPE ${fmt(l.r.rpe)} &rarr; <b>${fmtInt(l.r.load)}</b> AU`
+                : `<span class="m">${l.r.trained?"No RPE recorded":"Did not train"}${l.r.reason?": "+esc(l.r.reason):""}</span>`) : `<span class="m">–</span>`);
+          h += w ? `<br>Wellness: <b>${fmt(w.y)}</b> ${pill(w.r.status)}` +
+                   (w.r.method==="baseline" ? `<br><span class="m">Baseline ${fmt(w.r.base_mean)} &middot; z ${fmt(w.r.z,2)}</span>` : "")
+                 : `<br>Wellness: <span class="m">no survey</span>`;
+        }
+        showTip(h, ev);
+      });
+      hit.addEventListener("mouseleave",()=>{ cross.setAttribute("opacity",0); hideTip(); });
+    });
+  }
+
+  function xAxisDates(svg, ds, x, yAxis, every){
+    ds.forEach((d,i)=>{ if(i%every===0 || i===ds.length-1 && (ds.length-1)%every>every/2) txt(svg,x(i),yAxis+14,dShort(d),"ax","middle"); });
+  }
+
+  // ---------- cards ----------
+  function renderCards(day){
+    const data = day.slice().sort((a,b)=>ST[a.status].order-ST[b.status].order || (a.composite??99)-(b.composite??99) || a.name.localeCompare(b.name));
+    const box = $("cards");
+    if(!data.length){ box.innerHTML = `<div class="empty">No responses for this date.</div>`; return; }
+    box.innerHTML = data.map(r=>{
+      const base = r.method==="baseline"
+        ? `Baseline ${fmt(r.base_mean)} &middot; ${r.composite!=null && r.base_mean!=null ? ((r.composite-r.base_mean)>=0?"+":"&minus;")+fmt(Math.abs(r.composite-r.base_mean)) : ""} &middot; z ${fmt(r.z,2)}`
+        : `Building baseline (${r.base_n}/${S.baseline_min_n}) &middot; ${r.pct!=null?Math.round(r.pct*100)+"% of max":""}`;
+      const items = ITEMS.map(([k,lab])=>{
+        const v = r[k], low = v!=null && v<=2;
+        return `<li><span>${lab}</span><span class="bar"><i class="${low?"low":""}" style="width:${v==null?0:(v/S.item_max*100)}%"></i></span><span class="n">${v==null?"–":fmt(v)}</span></li>`;
+      }).join("");
+      const train = r.load!=null
+        ? `<div>Yesterday: <b>RPE ${fmt(r.rpe)}</b> &rarr; <b>${fmtInt(r.load)} AU</b></div>`
+        : `<div>Yesterday: <b>${r.trained?"Trained, no RPE":"Didn't train"}</b>${r.reason?" &middot; "+esc(r.reason):""}</div>`;
+      return `<article class="card ${r.status}">
+        <div class="card-h"><div class="nm">${esc(r.name)}</div>${pill(r.status)}</div>
+        <div class="score"><span class="big">${fmt(r.composite)}</span><span class="of">/ ${S.max_composite}</span></div>
+        <div class="base">${base}</div>
+        <ul class="items">${items}</ul>
+        <div class="meta"><div>Sleep: <b>${esc(r.sleep_hours||"–")}</b></div>${train}</div>
+        <button type="button" data-ath="${esc(r.name)}">View trend &rarr;</button>
+      </article>`;
+    }).join("");
+    box.querySelectorAll("button[data-ath]").forEach(b=>b.addEventListener("click",()=>{
+      curAth = b.dataset.ath; as.value = curAth; renderTrend();
+      $("trendPanel").scrollIntoView({behavior:"smooth",block:"start"});
+    }));
+  }
+
+  // ---------- table ----------
+  function renderTable(day){
+    const cols = [["name","Athlete"],["status","Status"],["composite","Composite"],["base_mean","Baseline"],["z","z"],
+      ...ITEMS,["sleep_hours","Sleep"],["rpe","RPE"],["load","Load (AU)"]];
+    const data = day.slice().sort((a,b)=>a.name.localeCompare(b.name));
+    $("tbl").innerHTML = `<thead><tr>${cols.map(c=>`<th>${c[1]}</th>`).join("")}</tr></thead><tbody>` +
+      data.map(r=>`<tr>${cols.map(([k])=>{
+        let v = r[k];
+        if(k==="status") v = ST[v].label;
+        else if(k==="load") v = fmtInt(v);
+        else if(k==="z") v = fmt(v,2);
+        else if(typeof v==="number") v = fmt(v);
+        else if(k==="rpe" && v==null) v = r.trained ? "–" : "No session";
+        return `<td>${esc(v==null?"–":v)}</td>`;
+      }).join("")}</tr>`).join("") + `</tbody>`;
+  }
+
+  function renderDay(){
+    const day = byDate(curDate);
+    renderKpis(day); renderWell(day); renderLoad(day); renderCards(day); renderTable(day); renderTrend();
+  }
+
+  if(!rows.length){
+    document.querySelectorAll(".chart,#cards").forEach(b=>b.innerHTML = `<div class="empty">No data yet &mdash; run wellness_report.R on your export.</div>`);
+    return;
+  }
+  renderDay();
+  let rt; addEventListener("resize",()=>{ clearTimeout(rt); rt = setTimeout(()=>{ renderWell(byDate(curDate)); renderLoad(byDate(curDate)); renderTrend(); },120); });
+  if(window.matchMedia) matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change", renderDay);
+})();
+</script>
+</body>
+</html>

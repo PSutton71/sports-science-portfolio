@@ -1,0 +1,719 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{PAGE_TITLE}}</title>
+<script id="plotly-lib-b64" type="text/plain">{{PLOTLY_JS_B64}}</script>
+<script>
+(function loadEmbeddedPlotly() {
+  try {
+    var holder = document.getElementById('plotly-lib-b64');
+    var code = atob(holder.textContent);
+    var s = document.createElement('script');
+    s.text = code;
+    document.head.appendChild(s);
+  } catch (err) {
+    console.error('Failed to initialize the embedded Plotly library:', err);
+  }
+})();
+</script>
+<style>
+:root{--orange:#FF7300;--black:#151515;--paper:#f2f4f6;--white:#fff;--ink:#202124;--muted:#707780;--line:#dfe3e7;--green:#18824b;--yellow:#e1a400;--red:#c53636;--gray:#aeb4bb;--blue:#2b6cb0}
+*{box-sizing:border-box}
+body{margin:0;background:linear-gradient(145deg,#f7f8f9,#edf0f2);font-family:Inter,Arial,Helvetica,sans-serif;color:var(--ink)}
+.page{max-width:1350px;margin:0 auto;padding:26px}
+.header{background:radial-gradient(circle at top right,#303030,#151515 52%,#080808);border-radius:20px;border-bottom:6px solid var(--orange);box-shadow:0 12px 30px rgba(0,0,0,.15);color:#fff;display:flex;align-items:center;gap:22px;padding:25px 30px}
+.logo{height:94px;width:94px;object-fit:contain}
+.brand{color:var(--orange);font-size:12px;font-weight:800;letter-spacing:1.7px;text-transform:uppercase}
+.header h1{font-size:38px;letter-spacing:-.6px;line-height:1.05;margin:6px 0 8px}
+.profile{color:#d4d4d4;font-size:15px}
+.overall{margin-left:auto;min-width:130px;text-align:center}
+.overall-label{color:#d2d2d2;font-size:11px;font-weight:800;letter-spacing:1.1px;text-transform:uppercase}
+.overall-number{color:var(--orange);font-size:52px;font-weight:900;line-height:.95;margin-top:9px}
+.section{background:rgba(255,255,255,.94);border:1px solid rgba(0,0,0,.045);border-radius:18px;box-shadow:0 7px 22px rgba(24,30,38,.06);margin-top:24px;padding:24px}
+.section-title{font-size:20px;font-weight:850;letter-spacing:-.25px;line-height:1;margin:0 0 18px}
+.score-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:15px}
+.score-card{background:linear-gradient(145deg,#242424,#111);border-bottom:5px solid var(--orange);border-radius:16px;box-shadow:0 7px 16px rgba(0,0,0,.14);min-height:128px;padding:18px 20px}
+.score-label{color:#ddd;font-size:12px;font-weight:800;letter-spacing:1.1px;text-transform:uppercase}
+.score-number{color:var(--orange);font-size:51px;font-weight:900;line-height:1;margin-top:13px}
+.score-note{color:#aeb3b8;font-size:10px;font-weight:700;letter-spacing:.9px;margin-top:6px;text-transform:uppercase}
+.radar-wrap{height:690px;position:relative;width:100%}
+.radar{height:690px;width:100%}
+.phantom{height:215px;left:50%;object-fit:contain;opacity:.15;pointer-events:none;position:absolute;top:50%;transform:translate(-50%,-50%);width:215px;z-index:1}
+.radar-layer{position:relative;z-index:2}
+.notes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin-top:15px}
+.note-card{background:#f8f9fa;border-left:4px solid var(--orange);border-radius:10px;padding:14px 16px}
+.note-title{font-size:11px;font-weight:850;letter-spacing:1px;text-transform:uppercase;color:#505860;margin-bottom:8px}
+.note-card ul{margin:0;padding-left:18px}
+.note-card li{font-size:14px;line-height:1.45;margin:4px 0}
+.readiness-head{align-items:stretch;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin-bottom:18px}
+.ready-card{border-radius:16px;box-shadow:0 7px 16px rgba(0,0,0,.10);min-height:126px;padding:18px 20px}
+.ready-card.upper,.ready-card.lower{background:linear-gradient(145deg,#343434,#1a1a1a);border-bottom:5px solid var(--orange)}
+.ready-label{color:#ddd;font-size:12px;font-weight:800;letter-spacing:1.1px;text-transform:uppercase}
+.ready-number{color:var(--orange);font-size:51px;font-weight:900;line-height:1;margin-top:13px}
+.ready-note{color:#aeb3b8;font-size:10px;font-weight:700;letter-spacing:.9px;margin-top:6px;text-transform:uppercase}
+.readiness-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.radar-panel{border:1px solid var(--line);border-radius:16px;overflow:visible;padding:12px}
+.radar-title{font-size:15px;font-weight:850;margin:4px 7px 0}
+.radar-small{height:520px;width:100%}
+.readiness-note{background:#f8f9fa;border-left:4px solid var(--orange);border-radius:10px;font-size:14px;line-height:1.45;margin-top:18px;padding:14px 16px}
+.team-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.team-panel{border:1px solid var(--line);border-radius:15px;min-height:385px;padding:12px}
+.team-panel.wide{grid-column:1/-1}
+.team-title{font-size:14px;font-weight:850;margin:4px 7px 0}
+.team-plot{height:340px;width:100%}
+.team-plot-wide{height:460px}
+.controls{align-items:center;display:flex;gap:11px;flex-wrap:wrap;margin:0 0 12px}
+.controls label{color:var(--muted);font-size:13px;font-weight:750}
+.controls select{background:#fff;border:1px solid var(--line);border-radius:10px;color:var(--ink);font-size:14px;font-weight:700;outline:none;padding:9px 34px 9px 11px}
+.flag-pill{border-radius:999px;color:#fff;display:inline-block;font-size:12px;font-weight:850;padding:5px 10px}
+.flag-green{background:var(--green)}
+.flag-yellow{background:var(--yellow);color:#2a1a00}
+.flag-red{background:var(--red)}
+.flag-gray{background:var(--gray)}
+.hide{display:none}
+.legend{align-items:center;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:16px;margin-top:16px;padding-top:14px}
+.legend-item{align-items:center;color:var(--muted);display:flex;font-size:12px;font-weight:650;gap:7px}
+.legend-dot{border-radius:50%;display:inline-block;height:11px;width:11px}
+.legend-dot.green{background:var(--green)}
+.legend-dot.yellow{background:var(--yellow)}
+.legend-dot.red{background:var(--red)}
+.legend-dot.gray{background:var(--gray)}
+.legend-dot.blue{background:var(--blue)}
+.legend-dot.orange{background:var(--orange)}
+.legend-dash{border-top:2px dashed var(--gray);display:inline-block;height:0;width:16px}
+.caveat{color:var(--muted);font-size:11px;line-height:1.4;margin-top:18px;padding:0 4px;text-align:center}
+.se-status{font-size:12px;font-weight:850;letter-spacing:.4px;margin:0 0 8px;text-transform:uppercase}
+.se-plot{height:300px;width:100%}
+.se-plot-wide{height:460px}
+.se-note{background:#f8f9fa;border-left:4px solid var(--orange);border-radius:10px;font-size:14px;line-height:1.45;margin-top:18px;padding:14px 16px}
+@media(max-width:850px){.page{padding:13px}.header{flex-wrap:wrap;padding:20px}.header h1{font-size:30px}.overall{margin-left:0}.score-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.notes,.readiness-head,.readiness-grid,.team-grid{grid-template-columns:1fr}.team-panel.wide{grid-column:auto}.radar,.radar-wrap{height:560px}.radar-small{height:490px}.phantom{height:155px;width:155px}.se-plot-wide{height:380px}}
+@media print{body{background:#fff}.page{max-width:none;padding:0}.section,.radar-panel{break-inside:avoid}.header{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+</style>
+</head>
+<body>
+<div class="page" id="athlete-page">
+  <header class="header">
+    <img class="logo" src="{{LOGO_URI}}" alt="OSU Lacrosse">
+    <div>
+      <div class="brand">OSU Lacrosse Performance</div>
+      <h1>{{ATHLETE_NAME}}</h1>
+      <div class="profile">{{POSITION}} &nbsp;|&nbsp; {{HEIGHT}} &nbsp;|&nbsp; {{WEIGHT}}</div>
+    </div>
+    <div class="overall">
+      <div class="overall-label">Overall score</div>
+      <div class="overall-number">{{OVERALL_SCORE}}</div>
+      <div class="score-note">Percentile</div>
+    </div>
+  </header>
+
+  <section class="section">
+    <h2 class="section-title">Performance Scores</h2>
+    <div class="score-grid">
+      <div class="score-card"><div class="score-label">Power</div><div class="score-number">{{POWER_SCORE}}</div><div class="score-note">Percentile</div></div>
+      <div class="score-card"><div class="score-label">Strength</div><div class="score-number">{{STRENGTH_SCORE}}</div><div class="score-note">Percentile</div></div>
+      <div class="score-card"><div class="score-label">Speed</div><div class="score-number">{{SPEED_SCORE}}</div><div class="score-note">Percentile</div></div>
+      <div class="score-card"><div class="score-label">Agility</div><div class="score-number">{{AGILITY_SCORE}}</div><div class="score-note">Percentile</div></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2 class="section-title">Performance Profile</h2>
+    <div class="radar-wrap">
+      <img class="phantom" src="{{PHANTOM_URI}}" alt="">
+      <div id="performance-radar" class="radar radar-layer"></div>
+    </div>
+    <div class="notes">
+      <div class="note-card">
+        <div class="note-title">Strengths</div>
+        <ul><li>{{STRENGTH_NOTE_1}}</li><li>{{STRENGTH_NOTE_2}}</li></ul>
+      </div>
+      <div class="note-card">
+        <div class="note-title">Development Focus</div>
+        <ul><li>{{DEVELOPMENT_NOTE_1}}</li><li>{{DEVELOPMENT_NOTE_2}}</li></ul>
+      </div>
+    </div>
+    <div class="legend">
+      <span class="legend-item"><span class="legend-dash"></span>Grey dashed — minimum / goal threshold</span>
+      <span class="legend-item"><span class="legend-dot orange"></span>Orange — athlete's percentile</span>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2 class="section-title">Strength vs. Explosiveness</h2>
+    <div class="se-status" id="explosiveness-status"></div>
+    <div id="explosiveness-plot" class="se-plot se-plot-wide"></div>
+    <div class="legend">
+      <span class="legend-item"><span class="legend-dot blue"></span>Strength-Dominant quadrant — DSI &lt; 0.70</span>
+      <span class="legend-item"><span class="legend-dot orange"></span>Power-Dominant quadrant — DSI &ge; 0.70</span>
+    </div>
+    <div class="se-note">{{STRENGTH_EXPLOSIVENESS_NOTE}}</div>
+  </section>
+
+  <section class="section">
+    <h2 class="section-title">Readiness</h2>
+    <div class="readiness-head">
+      <div class="ready-card upper"><div class="ready-label">Upper-Body Readiness</div><div class="ready-number">{{UPPER_SCORE}}</div><div class="ready-note">Readiness score</div></div>
+      <div class="ready-card lower"><div class="ready-label">Lower-Body Readiness</div><div class="ready-number">{{LOWER_SCORE}}</div><div class="ready-note">Readiness score</div></div>
+    </div>
+    <div class="readiness-grid">
+      <div class="radar-panel"><div class="radar-title">Upper-Body Readiness</div><div id="upper-radar" class="radar-small"></div></div>
+      <div class="radar-panel"><div class="radar-title">Lower-Body Readiness</div><div id="lower-radar" class="radar-small"></div></div>
+    </div>
+    <div class="legend">
+      <span class="legend-item"><span class="legend-dash"></span>Grey dotted — minimum / goal line</span>
+      <span class="legend-item"><span class="legend-dot green"></span>Green — within target range</span>
+      <span class="legend-item"><span class="legend-dot yellow"></span>Yellow — borderline, worth monitoring</span>
+      <span class="legend-item"><span class="legend-dot red"></span>Red — outside target range, flagged</span>
+      <span class="legend-item"><span class="legend-dot gray"></span>Gray — no data available</span>
+    </div>
+    <div class="readiness-note">{{READINESS_NOTE}}</div>
+  </section>
+
+  <div class="caveat">Percentiles are calculated relative to the current team's tested athletes only. With a small number of athletes completing testing, the highest and lowest percentiles shown may be exaggerated.</div>
+</div>
+
+
+<div class="page hide" id="team-page">
+  <header class="header">
+    <img class="logo" src="{{LOGO_URI}}" alt="OSU Lacrosse">
+    <div><div class="brand">OSU Lacrosse Performance</div><h1>Team Dashboard</h1></div>
+  </header>
+
+  <section class="section">
+    <h2 class="section-title">Percentiles Leaderboard</h2>
+    <div class="team-grid">
+      <div class="team-panel"><div class="team-title">Power</div><div class="team-plot" id="t-power"></div></div>
+      <div class="team-panel"><div class="team-title">Strength</div><div class="team-plot" id="t-strength"></div></div>
+      <div class="team-panel"><div class="team-title">Speed</div><div class="team-plot" id="t-speed"></div></div>
+      <div class="team-panel"><div class="team-title">Agility</div><div class="team-plot" id="t-agility"></div></div>
+      <div class="team-panel wide"><div class="team-title">Readiness</div><div class="team-plot" id="t-readiness"></div></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2 class="section-title">Strength vs. Explosiveness</h2>
+    <div class="team-grid">
+      <div class="team-panel wide"><div class="team-title">Team Power vs. Fatigue Resistance</div><div class="team-plot team-plot-wide" id="t-explosiveness"></div></div>
+    </div>
+    <div class="legend">
+      <span class="legend-item"><span class="legend-dot blue"></span>Strength-Dominant quadrant — DSI &lt; 0.70</span>
+      <span class="legend-item"><span class="legend-dot orange"></span>Power-Dominant quadrant — DSI &ge; 0.70</span>
+    </div>
+    <div class="se-note">Which profile is preferable can depend on position, time of year, and whether the team is in-season or off-season — this chart isn't meant to say one quadrant is universally "better." Strength-dominant athletes can generally work on converting that strength into power; power-dominant athletes may want to consider adding more raw strength work to build a bigger base to re-apply into power.</div>
+  </section>
+
+  <section class="section">
+    <h2 class="section-title">Athlete Readiness</h2>
+    <div class="controls">
+      <label for="staff-athlete">Athlete</label>
+      <select id="staff-athlete"></select>
+      <span id="staff-status"></span>
+    </div>
+    <div class="readiness-grid">
+      <div class="radar-panel"><div class="radar-title">Upper-Body</div><div id="staff-upper" class="radar-small"></div></div>
+      <div class="radar-panel"><div class="radar-title">Lower-Body</div><div id="staff-lower" class="radar-small"></div></div>
+    </div>
+    <div class="legend">
+      <span class="legend-item"><span class="legend-dash"></span>Grey dotted — minimum / goal line</span>
+      <span class="legend-item"><span class="legend-dot green"></span>Green — within target range</span>
+      <span class="legend-item"><span class="legend-dot yellow"></span>Yellow — borderline, worth monitoring</span>
+      <span class="legend-item"><span class="legend-dot red"></span>Red — outside target range, flagged</span>
+      <span class="legend-item"><span class="legend-dot gray"></span>Gray — no data available</span>
+    </div>
+  </section>
+
+  <div class="caveat">Percentiles are calculated relative to the current team's tested athletes only. With a small number of athletes completing testing, the highest and lowest percentiles shown may be exaggerated.</div>
+</div>
+
+<script>
+/*
+  This source file is a template.
+  The R script replaces every {{...}} field before it writes a final report.
+  The script below performs presentation only: it draws interactive Plotly
+  charts from JSON values already calculated and inserted by R.
+*/
+const performanceData = {{PERFORMANCE_RADAR_JSON}};
+const upperData = {{UPPER_RADAR_JSON}};
+const lowerData = {{LOWER_RADAR_JSON}};
+const dsiExplosivenessData = {{DSI_EXPLOSIVENESS_JSON}};
+const teamSummary = {{TEAM_SUMMARY_JSON}};
+const teamUpper = {{TEAM_UPPER_JSON}};
+const teamLower = {{TEAM_LOWER_JSON}};
+
+const orange = '#FF7300';
+const gray = '#AEB4BB';
+const green = '#18824b';
+const yellow = '#e1a400';
+const red = '#c53636';
+const blue = '#2b6cb0';
+
+const dsiStatusColor = status => {
+  if (status === 'Strength Dominant') return blue;
+  if (status === 'Balanced') return green;
+  if (status === 'Power Dominant') return orange;
+  return gray;
+};
+
+// Discrete quadrant colors for the Strength vs. Explosiveness scatter --
+// dominant side keeps the blue/orange from the quadrant-shading legend,
+// "Fades Fast" gets a lighter tint of the same hue so the four quadrants
+// are each visually distinct.
+const quadrantColor = quadrant => {
+  if (quadrant === 'Power-Dominant, Holds Up Well') return '#FF7300';
+  if (quadrant === 'Power-Dominant, Fades Fast') return '#FFB366';
+  if (quadrant === 'Strength-Dominant, Holds Up Well') return '#2b6cb0';
+  if (quadrant === 'Strength-Dominant, Fades Fast') return '#8fb8dd';
+  return gray;
+};
+
+// Last name only, for the small on-chart label above each data point.
+const lastName = fullName => {
+  const parts = String(fullName || '').trim().split(/\s+/);
+  return parts.length ? parts[parts.length - 1] : '';
+};
+
+const statusColor = status => {
+  if (status === 'Green') return green;
+  if (status === 'Yellow') return yellow;
+  if (status === 'Red') return red;
+  return '#9aa1a8';
+};
+
+const asArray = value => Array.isArray(value) ? value : [];
+
+const config = {
+  responsive: true,
+  displayModeBar: false,
+  displaylogo: false,
+  staticPlot: false
+};
+
+const polarBase = {
+  paper_bgcolor: 'rgba(0,0,0,0)',
+  plot_bgcolor: 'rgba(0,0,0,0)',
+  font: {
+    family: 'Inter,Arial,sans-serif',
+    color: '#202124'
+  },
+  margin: {
+    l: 120,
+    r: 120,
+    t: 54,
+    b: 54
+  },
+  showlegend: false,
+  polar: {
+    bgcolor: 'rgba(0,0,0,0)',
+    radialaxis: {
+      visible: true,
+      range: [0, 100],
+      tickvals: [20, 40, 60, 80, 100],
+      tickfont: {
+        size: 10,
+        color: '#77808a'
+      },
+      gridcolor: '#dfe3e7',
+      linecolor: '#dfe3e7',
+      angle: 90
+    },
+    angularaxis: {
+      gridcolor: '#dfe3e7',
+      linecolor: '#dfe3e7',
+      tickfont: {
+        size: 11,
+        color: '#2b3035'
+      }
+    }
+  }
+};
+
+function closeRows(rows) {
+  const safeRows = asArray(rows);
+  return safeRows.length ? [...safeRows, safeRows[0]] : [];
+}
+
+function clearPlot(id) {
+  const element = document.getElementById(id);
+  if (!element) return;
+  if (typeof Plotly === 'undefined') {
+    element.innerHTML = '<p style="padding:18px;color:#c53636;font-weight:700;">Plotly did not load in this report.</p>';
+    return;
+  }
+  Plotly.newPlot(id, [], polarBase, config);
+}
+
+function drawRadar(id, data, isReadiness) {
+  const element = document.getElementById(id);
+  if (!element) return;
+
+  if (typeof Plotly === 'undefined') {
+    element.innerHTML = '<p style="padding:18px;color:#c53636;font-weight:700;">Plotly did not load in this report.</p>';
+    return;
+  }
+
+  const validRows = asArray(data).filter(row => {
+    return row && row.axis && Number.isFinite(Number(row.score));
+  });
+
+  if (!validRows.length) {
+    clearPlot(id);
+    return;
+  }
+
+  const rows = closeRows(validRows);
+  const theta = rows.map(row => row.axis);
+  const scores = rows.map(row => Number(row.score));
+
+  const targetTrace = {
+    type: 'scatterpolar',
+    r: theta.map(() => 80),
+    theta: theta,
+    mode: 'lines',
+    line: {
+      color: gray,
+      width: 2,
+      dash: 'dot'
+    },
+    hoverinfo: 'skip'
+  };
+
+  const athleteTrace = {
+    type: 'scatterpolar',
+    r: scores,
+    theta: theta,
+    mode: 'lines+markers',
+    fill: 'toself',
+    fillcolor: 'rgba(255,115,0,.23)',
+    line: {
+      color: orange,
+      width: 3
+    },
+    marker: {
+      size: 10,
+      color: isReadiness
+        ? rows.map(row => statusColor(row.status))
+        : orange,
+      line: {
+        color: '#ffffff',
+        width: 1.5
+      }
+    },
+    // Readiness hover: score, status, then the raw component value(s)
+    // that produced the score, then the raw metric itself (asymmetry %,
+    // ratio, etc.) as the last line -- built as a single pre-formatted
+    // text block so blank component lines (e.g. Drop Jump has no per-leg
+    // raw force) just collapse rather than leaving an empty line.
+    customdata: isReadiness
+      ? rows.map(row => {
+          const lines = [row.raw1_text, row.raw2_text].filter(Boolean);
+          return [row.status || 'No data', lines.join('<br>'), row.raw_metric_text || ''];
+        })
+      : rows.map(row => [Number(row.score), row.raw_display || '']),
+    hovertemplate: isReadiness
+      ? '<b>%{theta}</b><br>' +
+        'Readiness score: %{r:.0f}<br>' +
+        'Status: %{customdata[0]}<br>' +
+        '%{customdata[1]}<br>' +
+        '%{customdata[2]}' +
+        '<extra></extra>'
+      : '<b>%{theta}</b><br>' +
+        'Percentile: %{r:.0f}<br>' +
+        '%{customdata[1]}' +
+        '<extra></extra>'
+  };
+
+  Plotly.newPlot(id, [targetTrace, athleteTrace], polarBase, config);
+}
+
+// Readiness leaderboard color: <70 red, 70-80 yellow, >80 green -- a fixed
+// numeric banding on the readiness score itself, independent of the
+// per-axis Green/Yellow/Red/Gray flag status used elsewhere.
+function readinessScoreColor(x) {
+  const value = Number(x);
+  if (!Number.isFinite(value)) return gray;
+  if (value < 70) return red;
+  if (value <= 80) return yellow;
+  return green;
+}
+
+function teamBar(id, key, title) {
+  const element = document.getElementById(id);
+  if (!element || typeof Plotly === 'undefined') return;
+
+  const rows = asArray(teamSummary)
+    .filter(row => row && Number.isFinite(Number(row[key])))
+    .sort((a, b) => Number(b[key]) - Number(a[key]));
+
+  const isReadiness = key === 'readiness_score';
+
+  const trace = {
+    type: 'bar',
+    orientation: 'h',
+    x: rows.map(row => Number(row[key])),
+    y: rows.map(row => row.name || 'Unnamed athlete'),
+    marker: {
+      color: rows.map(row => isReadiness ? readinessScoreColor(row[key]) : orange)
+    },
+    customdata: rows.map(row => [row.position || '', row.overall_status || 'No data']),
+    hovertemplate: '<b>%{y}</b><br>' +
+      'Position: %{customdata[0]}<br>' +
+      title + ': %{x:.1f}<br>' +
+      (isReadiness ? 'Readiness: %{customdata[1]}' : '') +
+      '<extra></extra>'
+  };
+
+  const layout = {
+    paper_bgcolor: 'rgba(0,0,0,0)',
+    plot_bgcolor: 'rgba(0,0,0,0)',
+    font: {
+      family: 'Inter,Arial,sans-serif',
+      color: '#202124'
+    },
+    margin: {
+      l: 150,
+      r: 25,
+      t: 12,
+      b: 45
+    },
+    showlegend: false,
+    xaxis: {
+      range: isReadiness ? [0, 100] : [35, 102],
+      gridcolor: '#e4e7ea',
+      title: isReadiness ? 'Overall Readiness Percentile Score' : 'Percentile'
+    },
+    yaxis: {
+      autorange: 'reversed'
+    }
+  };
+
+  Plotly.newPlot(id, [trace], layout, config);
+}
+
+function setStatusText(id, status, colorFn) {
+  const element = document.getElementById(id);
+  if (!element) return;
+  if (!status || status === 'No data') {
+    element.textContent = 'No data';
+    element.style.color = gray;
+    return;
+  }
+  element.textContent = status;
+  element.style.color = colorFn(status);
+}
+
+function drawExplosiveness(id, data, isTeam) {
+  const element = document.getElementById(id);
+  if (!element) return;
+
+  if (typeof Plotly === 'undefined') {
+    element.innerHTML = '<p style="padding:18px;color:#c53636;font-weight:700;">Plotly did not load in this report.</p>';
+    return;
+  }
+
+  const rows = asArray(data).filter(row => {
+    return row && Number.isFinite(Number(row.dsi)) && Number.isFinite(Number(row.fatigue_pct));
+  });
+
+  if (!rows.length) {
+    element.innerHTML = '<p style="padding:18px;color:#77808a;">No IMTP/CMJ or Wingate data available.</p>';
+    return;
+  }
+
+  // X = DSI (a real ratio, not a percentile), split at 0.70 -- the center
+  // of the "Balanced" band -- into power-dominant (right) vs strength-
+  // dominant (left). The range is anchored to sensible DSI bounds but
+  // widens automatically if the team's actual values run outside them, so
+  // no point ever sits clipped right on the plot edge.
+  const dsiValues = rows.map(row => Number(row.dsi));
+  const xMid = 0.70;
+  const xMin = Math.min(0.2, Math.min(...dsiValues) - 0.15);
+  const xMax = Math.max(1.6, Math.max(...dsiValues) + 0.15);
+
+  // Y = Wingate fatigue-resistance percentile, split at the 50th
+  // percentile into holds-up-well (top) vs fades-fast (bottom). Percentiles
+  // here only ever land between 40 and 100 (see percentile_score in the R
+  // script), so padding beyond 0-100 keeps edge points fully on screen.
+  const yMin = -15;
+  const yMax = 115;
+  const yMid = 50;
+
+  const quadrantLine = { color: '#151515', width: 1.5 };
+
+  const shapes = [
+    { type: 'line', x0: xMid, x1: xMid, y0: yMin, y1: yMax, line: quadrantLine },
+    { type: 'line', x0: xMin, x1: xMax, y0: yMid, y1: yMid, line: quadrantLine }
+  ];
+
+  // Shade the athlete's own quadrant -- blue for strength-dominant, orange
+  // for power-dominant -- only meaningful for a single-athlete view; a team
+  // view has many athletes potentially in different quadrants.
+  if (!isTeam && rows.length === 1) {
+    const row = rows[0];
+    const dx = Number(row.dsi);
+    const fy = Number(row.fatigue_pct);
+    const quadFill = dx >= xMid ? 'rgba(255,115,0,.16)' : 'rgba(43,108,176,.16)';
+
+    shapes.push({
+      type: 'rect',
+      x0: dx >= xMid ? xMid : xMin,
+      x1: dx >= xMid ? xMax : xMid,
+      y0: fy >= yMid ? yMid : yMin,
+      y1: fy >= yMid ? yMax : yMid,
+      line: { width: 0 },
+      fillcolor: quadFill,
+      layer: 'below'
+    });
+  }
+
+  const labelColor = '#151515';
+  const annotations = [
+    { x: (xMid + xMax) / 2, y: yMax - 8, text: 'Power-Dominant<br>Holds Up Well', showarrow: false, font: { size: 13, color: labelColor } },
+    { x: (xMid + xMax) / 2, y: yMin + 8, text: 'Power-Dominant<br>Fades Fast', showarrow: false, font: { size: 13, color: labelColor } },
+    { x: (xMin + xMid) / 2, y: yMax - 8, text: 'Strength-Dominant<br>Holds Up Well', showarrow: false, font: { size: 13, color: labelColor } },
+    { x: (xMin + xMid) / 2, y: yMin + 8, text: 'Strength-Dominant<br>Fades Fast', showarrow: false, font: { size: 13, color: labelColor } }
+  ];
+
+  const trace = {
+    type: 'scatter',
+    mode: 'markers+text',
+    x: dsiValues,
+    y: rows.map(row => Number(row.fatigue_pct)),
+    text: rows.map(row => lastName(row.name)),
+    textposition: 'top center',
+    textfont: { size: 9, color: '#151515' },
+    hovertext: rows.map(row => row.name || ''),
+    customdata: rows.map(row => [
+      row.dsi_status || 'No data',
+      row.quadrant || 'No data',
+      Number.isFinite(Number(row.wingate_peak_power)) ? Number(row.wingate_peak_power).toFixed(1) : '—',
+      Number.isFinite(Number(row.fatigue_decline)) ? Number(row.fatigue_decline).toFixed(1) : '—'
+    ]),
+    marker: {
+      size: isTeam ? 13 : 18,
+      color: isTeam ? rows.map(row => quadrantColor(row.quadrant)) : '#151515',
+      line: { color: '#ffffff', width: 1.5 }
+    },
+    hovertemplate: '<b>%{hovertext}</b><br>' +
+      'DSI: %{x:.2f} (%{customdata[0]})<br>' +
+      'Wingate Peak Power: %{customdata[2]} W/kg<br>' +
+      'Fatigue Decline: %{customdata[3]}%<br>' +
+      '%{customdata[1]}' +
+      '<extra></extra>'
+  };
+
+  const layout = {
+    paper_bgcolor: 'rgba(0,0,0,0)',
+    plot_bgcolor: 'rgba(0,0,0,0)',
+    font: { family: 'Inter,Arial,sans-serif', color: '#202124' },
+    margin: { l: 20, r: 20, t: 20, b: 20 },
+    showlegend: false,
+    shapes: shapes,
+    annotations: annotations,
+    xaxis: { range: [xMin, xMax], showticklabels: false, showgrid: false, zeroline: false, title: '' },
+    yaxis: { range: [yMin, yMax], showticklabels: false, showgrid: false, zeroline: false, title: '' }
+  };
+
+  Plotly.newPlot(id, [trace], layout, config);
+}
+
+function renderAthlete() {
+  drawRadar('performance-radar', performanceData, false);
+  drawRadar('upper-radar', upperData, true);
+  drawRadar('lower-radar', lowerData, true);
+
+  const row = asArray(dsiExplosivenessData)[0];
+  const statusText = row && row.dsi_status && row.dsi_status !== 'No data'
+    ? `DSI ${Number.isFinite(Number(row.dsi)) ? Number(row.dsi).toFixed(2) : '—'} (${row.dsi_status}) — ${row.quadrant || 'No data'}`
+    : 'No data';
+  setStatusText('explosiveness-status', statusText, () => (row ? dsiStatusColor(row.dsi_status) : gray));
+  drawExplosiveness('explosiveness-plot', dsiExplosivenessData, false);
+}
+
+function renderStaff() {
+  const select = document.getElementById('staff-athlete');
+  const statusElement = document.getElementById('staff-status');
+  if (!select || !statusElement) return;
+
+  const athleteName = select.value;
+  const athlete = asArray(teamSummary).find(row => row.name === athleteName);
+  const status = athlete?.overall_status || 'No data';
+  const statusClass = status === 'Green'
+    ? 'flag-green'
+    : status === 'Yellow'
+      ? 'flag-yellow'
+      : status === 'Red'
+        ? 'flag-red'
+        : 'flag-gray';
+
+  statusElement.innerHTML = `<span class="flag-pill ${statusClass}">${status}</span>`;
+
+  drawRadar(
+    'staff-upper',
+    asArray(teamUpper).filter(row => row.name === athleteName),
+    true
+  );
+
+  drawRadar(
+    'staff-lower',
+    asArray(teamLower).filter(row => row.name === athleteName),
+    true
+  );
+}
+
+function renderTeam() {
+  document.getElementById('athlete-page').classList.add('hide');
+  document.getElementById('team-page').classList.remove('hide');
+
+  teamBar('t-power', 'power_score', 'Power Percentile');
+  teamBar('t-strength', 'strength_score', 'Strength Percentile');
+  teamBar('t-speed', 'speed_score', 'Speed Percentile');
+  teamBar('t-agility', 'agility_score', 'Agility Percentile');
+  teamBar('t-readiness', 'readiness_score', 'Readiness');
+  drawExplosiveness(
+    't-explosiveness',
+    asArray(teamSummary).map(row => ({
+      name: row.name,
+      dsi: row.dsi,
+      fatigue_pct: row.fatigue_pct,
+      dsi_status: row.dsi_status,
+      quadrant: row.explosiveness_quadrant,
+      wingate_peak_power: row.wingate_peak_power_kg,
+      fatigue_decline: row.fatigue_index
+    })),
+    true
+  );
+
+  const select = document.getElementById('staff-athlete');
+  if (!select) return;
+
+  const athleteNames = asArray(teamSummary)
+    .map(row => row.name)
+    .filter(Boolean)
+    .sort((a, b) => a.localeCompare(b));
+
+  select.innerHTML = '';
+
+  athleteNames.forEach(name => {
+    const option = document.createElement('option');
+    option.value = name;
+    option.textContent = name;
+    select.appendChild(option);
+  });
+
+  select.addEventListener('change', renderStaff);
+
+  if (athleteNames.length) {
+    renderStaff();
+  }
+}
+
+if (asArray(teamSummary).length) {
+  renderTeam();
+} else {
+  renderAthlete();
+}
+</script>
+</body>
+</html>
